@@ -1,0 +1,98 @@
+site_name: Triton From First Principles — Under Development
+site_description: Building Production GPU Kernels in OpenAI Triton, One Layer at a Time
+site_author: Oluwaseyi Awoga
+copyright: Copyright &copy; 2026 Oluwaseyi Awoga
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    logo: material/lightning-bolt
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+  - footnotes
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - "Part 0 — Triton Foundations":
+      - "1. Types and the JIT Boundary": part0/01-types-and-the-jit-boundary.md
+      - "2. Kernel Parameterization": part0/02-kernel-parameterization.md
+      - "3. Strides, Pointers, and Memory Layout": part0/03-strides-pointers-memory-layout.md
+      - "4. The Triton Programming Model": part0/04-triton-programming-model.md
+      - "5. Block-Level Vectorization and SPMD": part0/05-block-vectorization-spmd.md
+  - "Part 1 — Kernel–Tensor Interface":
+      - "6. The Pointer+Stride Contract": part1/01-pointer-stride-contract.md
+      - "7. Broadcasting, Alignment, and Block Pointers": part1/02-broadcasting-alignment-block-pointers.md
+      - "8. GPU-Side Construction": part1/03-gpu-side-construction.md
+      - "9. Mask and Structure Kernels": part1/04-mask-and-structure-kernels.md
+      - "10. Targeting Hardware": part1/05-targeting-hardware.md
+      - "11. Shared Memory and the Kernel Cache": part1/06-shared-memory-register-pressure.md
+  - "Part 2 — Core Kernels":
+      - "12. Element-wise Kernels": part2/01-elementwise-kernels.md
+      - "13. The Blocked Matmul Kernel": part2/02-blocked-matmul-kernel.md
+      - "14. Reduction Kernels": part2/03-reduction-kernels.md
+  - "Part 3 — Wiring Into PyTorch's Autograd":
+      - "15. torch.autograd.Function as the Graph Node": part3/01-autograd-function-graph-node.md
+  - "Part 4 — The Backward Kernel":
+      - "16. Writing the Backward Kernel": part4/01-writing-the-backward-kernel.md
+      - "17. How PyTorch's Autograd Engine Chains Custom Ops": part4/02-chaining-custom-ops.md
+  - "Part 5 — GPU Acceleration and Performance":
+      - "18. Autotuning": part5/01-autotuning.md
+      - "19. Benchmarking Correctly": part5/02-benchmarking-correctly.md
+  - "Part 6 — Neural Network Building Blocks":
+      - "20. Fused Kernels for Real Layers": part6/01-fused-kernels-for-real-layers.md
+      - "21. Flash Attention, MoE, and Advanced Features": part6/02-flash-attention-moe-advanced-features.md
+  - "Part 7 — Financial Computing Applications":
+      - "22. Quantitative Finance Examples": part7/01-quantitative-finance-examples.md
+  - Appendix:
+      - "A. Installation & Setup": appendix/installation-setup.md
+      - "B. Practice Quiz": appendix/practice-quiz.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/maximumbeings
