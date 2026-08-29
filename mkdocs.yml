@@ -92,6 +92,7 @@ nav:
       - "A. Installation & Setup": appendix/installation-setup.md
       - "B. Practice Quiz": appendix/practice-quiz.md
       - "C. PyTorch and Triton Integration": appendix/pytorch-triton-integration.md
+      - "D. The Memory Model, Continued": appendix/memory-model-continued.md
 
 extra:
   social:
