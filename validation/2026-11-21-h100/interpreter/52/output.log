@@ -1,0 +1,5 @@
+=== Section 15.1: a raw kernel launch is invisible to autograd ===
+x.requires_grad: True
+y.requires_grad: False
+y.grad_fn: None
+y.sum().backward() -> RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn

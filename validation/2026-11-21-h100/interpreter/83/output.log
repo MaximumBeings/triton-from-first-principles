@@ -1,0 +1,11 @@
+=== Section 22.1: Black-Scholes kernel vs. scipy-based independent oracle ===
+allclose to scipy-based oracle? True
+
+=== Section 22.2: rolling volatility vs. pandas rolling().std() ===
+NaN positions match? True
+valid positions allclose? True
+
+=== Section 22.3: Monte Carlo GBM pricing vs. Black-Scholes closed form ===
+Black-Scholes price: 10.4506   Monte Carlo price: 10.4059 +/- 0.0328
+gap in standard errors: 1.36   within 3 SE? True
+undiscounted gap in standard errors: 14.2   within 3 SE? False

@@ -1,0 +1,6 @@
+=== Section 15.2: wiring the kernel into a real graph node ===
+y.requires_grad: True
+y.grad_fn: <torch.autograd.function.TritonGELUBackward object at 0x73a70238de10>
+x.grad: tensor([-0.0833,  0.8675,  1.0852])
+torch GELU x2.grad: tensor([-0.0833,  0.8675,  1.0852])
+gradients match? True

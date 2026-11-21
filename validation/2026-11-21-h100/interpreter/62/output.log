@@ -1,0 +1,9 @@
+=== Section 17.3: z used once vs. z used twice (same op) ===
+used once  -> grad_output: tensor([1., 1., 1., 1.])
+used twice -> grad_output: tensor([2., 2., 2., 2.])
+number of times backward was called: 1
+x2.grad allclose to oracle? True
+
+=== Section 17.3: z used in two DIFFERENT downstream expressions ===
+grad_output (expect uniformly 5.0): tensor([5., 5., 5., 5.])
+x3.grad allclose to oracle? True

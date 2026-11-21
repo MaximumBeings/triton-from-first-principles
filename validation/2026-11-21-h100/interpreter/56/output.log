@@ -1,0 +1,8 @@
+=== Section 16.1: the backward kernel vs. Chapter 15's plain-PyTorch formula ===
+with grad_output=1.0 (both look correct):
+  correct kernel matches oracle? True
+  buggy kernel matches oracle?   True
+with grad_output=2.0 (the trap is exposed):
+  correct kernel matches oracle? True
+  buggy kernel matches oracle?   False
+  buggy kernel is exactly half?  True

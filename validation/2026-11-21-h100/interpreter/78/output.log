@@ -1,0 +1,8 @@
+=== Section 21.3: top-2 MoE gating vs. torch.topk ===
+indices match torch.topk? True
+weights allclose to oracle? True
+w0+w1 == 1 for all rows? True
+
+=== Section 21.3: forgetting to renormalize ===
+raw (non-renormalized) top-2 weight sums per row: tensor([0.5978, 0.5059, 0.6346, 0.5354, 0.3600, 0.7166])
+mean raw sum (should be 1.0 if renormalized; isn't, here): 0.5583722591400146

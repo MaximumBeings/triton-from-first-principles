@@ -1,0 +1,7 @@
+=== Section 8.3: this environment cannot even construct a CUDA tensor ===
+torch.cuda.is_available(): True
+created cuda tensor: tensor([1., 2.], device='cuda:0')
+
+=== Section 8.3: the interpreter runs a CPU tensor with no complaint ===
+x_cpu.device: cpu
+interpreter ran a plain CPU tensor with no complaint: [2.0, 3.0, 4.0]

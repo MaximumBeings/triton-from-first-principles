@@ -1,0 +1,1262 @@
+[
+  {
+    "page": "docs/part0/01-types-and-the-jit-boundary.md",
+    "name": "01_two_phase_and_constexpr.py",
+    "download": "docs/examples/references/part0/01-types-and-the-jit-boundary/01_two_phase_and_constexpr.py",
+    "sha256": "b8b6b3e2013df34ebc1004d3ec5e759131757d549b63b791763b1cae95cf6aab",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/01-types-and-the-jit-boundary/01_two_phase_and_constexpr.py"
+    ],
+    "started_utc": "2026-11-21T13:20:24.560825+00:00",
+    "finished_utc": "2026-11-21T13:20:25.735700+00:00",
+    "exit_code": 0,
+    "log": "0/output.log",
+    "log_sha256": "555c4b47f772cb0620b0cf2e2dfe8435c9546e84bf3f80f0e10ee52dc5e432cb"
+  },
+  {
+    "page": "docs/part0/01-types-and-the-jit-boundary.md",
+    "name": "02_dtype_promotion_and_precision.py",
+    "download": "docs/examples/references/part0/01-types-and-the-jit-boundary/02_dtype_promotion_and_precision.py",
+    "sha256": "8f76db7e1edbe6fb7b2bbcf1099ee65b106357009fe7e3ed439fe67813901525",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/01-types-and-the-jit-boundary/02_dtype_promotion_and_precision.py"
+    ],
+    "started_utc": "2026-11-21T13:20:24.561128+00:00",
+    "finished_utc": "2026-11-21T13:20:25.753736+00:00",
+    "exit_code": 0,
+    "log": "1/output.log",
+    "log_sha256": "06b85e6c7fc75f146411277fba47d38b7f60e94900244b6c78afd58948c8cf07"
+  },
+  {
+    "page": "docs/part0/01-types-and-the-jit-boundary.md",
+    "name": "03_block_shaped_values.py",
+    "download": "docs/examples/references/part0/01-types-and-the-jit-boundary/03_block_shaped_values.py",
+    "sha256": "46276ca14ad00018644b0927c3038ff6df8763cc7b76708c59654da10fcb83bd",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/01-types-and-the-jit-boundary/03_block_shaped_values.py"
+    ],
+    "started_utc": "2026-11-21T13:20:24.561732+00:00",
+    "finished_utc": "2026-11-21T13:20:25.754308+00:00",
+    "exit_code": 0,
+    "log": "2/output.log",
+    "log_sha256": "808310f881f26318dbdb4db297fb6c689bb5600f8a081e0a7f9253cd5cd8d11d"
+  },
+  {
+    "page": "docs/part0/01-types-and-the-jit-boundary.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part0/01-types-and-the-jit-boundary/04_standalone_complete.py",
+    "sha256": "c915ee8aeaaacd9a1f6a94113fbb0cff16be7a2137cf732c4b80b324e6faa0a6",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/01-types-and-the-jit-boundary/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:24.562119+00:00",
+    "finished_utc": "2026-11-21T13:20:25.751815+00:00",
+    "exit_code": 0,
+    "log": "3/output.log",
+    "log_sha256": "36cc33ff25fdebb2a294b79c8ca71737339aba7a894e99e7e401ca880dacfa00"
+  },
+  {
+    "page": "docs/part0/02-kernel-parameterization.md",
+    "name": "01_constexpr_shape_and_config.py",
+    "download": "docs/examples/references/part0/02-kernel-parameterization/01_constexpr_shape_and_config.py",
+    "sha256": "137cfaed867a63b37dd7dab0cfb8861903267657918c8e13479fd9d692677bc5",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/02-kernel-parameterization/01_constexpr_shape_and_config.py"
+    ],
+    "started_utc": "2026-11-21T13:20:25.735897+00:00",
+    "finished_utc": "2026-11-21T13:20:26.924249+00:00",
+    "exit_code": 0,
+    "log": "4/output.log",
+    "log_sha256": "fa3ada82c9c3f511fc7b5217dc606d80d6d615450eed219bd27d5538979578df"
+  },
+  {
+    "page": "docs/part0/02-kernel-parameterization.md",
+    "name": "02_activation_branches.py",
+    "download": "docs/examples/references/part0/02-kernel-parameterization/02_activation_branches.py",
+    "sha256": "7a4543d60dc6ac9db82750eae3938cbece3c46198ef057e57434ed2f6fc4145c",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/02-kernel-parameterization/02_activation_branches.py"
+    ],
+    "started_utc": "2026-11-21T13:20:25.752140+00:00",
+    "finished_utc": "2026-11-21T13:20:26.924950+00:00",
+    "exit_code": 0,
+    "log": "5/output.log",
+    "log_sha256": "e9b8114bc0864e95cc24e49c0aae558974a844e123c0c0830d190a6ee660f23d"
+  },
+  {
+    "page": "docs/part0/02-kernel-parameterization.md",
+    "name": "03_standalone_complete.py",
+    "download": "docs/examples/references/part0/02-kernel-parameterization/03_standalone_complete.py",
+    "sha256": "64dd7b68377f17e78f7c4aa9f000e61cac8158524268fde69bf4b68bdca50f0e",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/02-kernel-parameterization/03_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:25.753855+00:00",
+    "finished_utc": "2026-11-21T13:20:26.932970+00:00",
+    "exit_code": 0,
+    "log": "6/output.log",
+    "log_sha256": "5d6b604f4d502f80d2c946c4d613960a5d76dd0aa1a44a793e01af0ff43ede38"
+  },
+  {
+    "page": "docs/part0/03-strides-pointers-memory-layout.md",
+    "name": "01_transaction_utilization.py",
+    "download": "docs/examples/references/part0/03-strides-pointers-memory-layout/01_transaction_utilization.py",
+    "sha256": "82498d43edb86ed99930172d6efb15cc4fd8128d688f085526b007f21f413402",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/03-strides-pointers-memory-layout/01_transaction_utilization.py"
+    ],
+    "started_utc": "2026-11-21T13:20:25.754408+00:00",
+    "finished_utc": "2026-11-21T13:20:25.768466+00:00",
+    "exit_code": 0,
+    "log": "7/output.log",
+    "log_sha256": "3f29247a5ff211420ccbb20070c1a9c5665e8226dfa6cd79247ab74560a64d83"
+  },
+  {
+    "page": "docs/part0/03-strides-pointers-memory-layout.md",
+    "name": "02_stride_aware_kernels.py",
+    "download": "docs/examples/references/part0/03-strides-pointers-memory-layout/02_stride_aware_kernels.py",
+    "sha256": "12cb77e1a900a722736dae07934c124131d157725bd60cf91272b2f9fb016f1a",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/03-strides-pointers-memory-layout/02_stride_aware_kernels.py"
+    ],
+    "started_utc": "2026-11-21T13:20:25.768537+00:00",
+    "finished_utc": "2026-11-21T13:20:26.939062+00:00",
+    "exit_code": 0,
+    "log": "8/output.log",
+    "log_sha256": "c01521851c0c8565a07c7f7d927a920b7197bad26d4b7a9141166f6865abace2"
+  },
+  {
+    "page": "docs/part0/03-strides-pointers-memory-layout.md",
+    "name": "03_standalone_complete.py",
+    "download": "docs/examples/references/part0/03-strides-pointers-memory-layout/03_standalone_complete.py",
+    "sha256": "ba61fc8bc9178851d2ff7af49f1f1462555dfc1ad19a166adf86a42a4de30621",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/03-strides-pointers-memory-layout/03_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:26.924389+00:00",
+    "finished_utc": "2026-11-21T13:20:28.123154+00:00",
+    "exit_code": 0,
+    "log": "9/output.log",
+    "log_sha256": "4aba45c6cd3784ef17f2d115f5254344d3d83bef806f168b7185dfe6c8a77265"
+  },
+  {
+    "page": "docs/part0/04-triton-programming-model.md",
+    "name": "01_program_hierarchy_and_grid.py",
+    "download": "docs/examples/references/part0/04-triton-programming-model/01_program_hierarchy_and_grid.py",
+    "sha256": "188694e4c9e078a39e94faa40b6f3d33a84ef8668fb9c63a4beccce0a1a39f95",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/04-triton-programming-model/01_program_hierarchy_and_grid.py"
+    ],
+    "started_utc": "2026-11-21T13:20:26.925069+00:00",
+    "finished_utc": "2026-11-21T13:20:28.115299+00:00",
+    "exit_code": 0,
+    "log": "10/output.log",
+    "log_sha256": "2aaebf540d9021c9ccb76e94f8b98f4bb298625bffd1096693134c21e7af0982"
+  },
+  {
+    "page": "docs/part0/04-triton-programming-model.md",
+    "name": "02_naive_matmul_one_row.py",
+    "download": "docs/examples/references/part0/04-triton-programming-model/02_naive_matmul_one_row.py",
+    "sha256": "cdf046ef8a7d12de8f5f0b09200b8ee4b1bd53a59d9d50df444b392a783b103d",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/04-triton-programming-model/02_naive_matmul_one_row.py"
+    ],
+    "started_utc": "2026-11-21T13:20:26.933075+00:00",
+    "finished_utc": "2026-11-21T13:20:28.144913+00:00",
+    "exit_code": 0,
+    "log": "11/output.log",
+    "log_sha256": "45d7da849af0820ede5f51748482d39a3c35debdbd70d55c2b7997306766fc26"
+  },
+  {
+    "page": "docs/part0/04-triton-programming-model.md",
+    "name": "03_standalone_complete.py",
+    "download": "docs/examples/references/part0/04-triton-programming-model/03_standalone_complete.py",
+    "sha256": "a7978b271b5b936094e5078eeb0fc41e7b72d0b25c66eabbbb146b81ed107d9e",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/04-triton-programming-model/03_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:26.939167+00:00",
+    "finished_utc": "2026-11-21T13:20:28.110759+00:00",
+    "exit_code": 0,
+    "log": "12/output.log",
+    "log_sha256": "08b4c1a0b7dbd1a518a1ac7fd2fa7d0d176fcba3b3d7cca953ee8a67b1d845cf"
+  },
+  {
+    "page": "docs/part0/05-block-vectorization-spmd.md",
+    "name": "01_simd_vs_spmd.py",
+    "download": "docs/examples/references/part0/05-block-vectorization-spmd/01_simd_vs_spmd.py",
+    "sha256": "0861fffc7e29b0bf6e01c5d6ea882e5a19960c52a42dd0f33164fc279ae15260",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/05-block-vectorization-spmd/01_simd_vs_spmd.py"
+    ],
+    "started_utc": "2026-11-21T13:20:28.110902+00:00",
+    "finished_utc": "2026-11-21T13:20:29.267569+00:00",
+    "exit_code": 0,
+    "log": "13/output.log",
+    "log_sha256": "25d61d55fa8024cf3ad9a45180fbef898472727eea69dd30620c5cf433ee7c24"
+  },
+  {
+    "page": "docs/part0/05-block-vectorization-spmd.md",
+    "name": "02_reduction_and_transpose.py",
+    "download": "docs/examples/references/part0/05-block-vectorization-spmd/02_reduction_and_transpose.py",
+    "sha256": "e9ab391dfc4d1036b67fc515efeebf05c141bd034747d4b2598994e482fe288c",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/05-block-vectorization-spmd/02_reduction_and_transpose.py"
+    ],
+    "started_utc": "2026-11-21T13:20:28.115399+00:00",
+    "finished_utc": "2026-11-21T13:20:29.312596+00:00",
+    "exit_code": 0,
+    "log": "14/output.log",
+    "log_sha256": "14c5d1d0da44182d5fef1d5635afc9dd318781c3098d0f31cc9d655adab6cc70"
+  },
+  {
+    "page": "docs/part0/05-block-vectorization-spmd.md",
+    "name": "03_standalone_complete.py",
+    "download": "docs/examples/references/part0/05-block-vectorization-spmd/03_standalone_complete.py",
+    "sha256": "55d627c47099d3143867250e0b4b85bd84d2772e19aecf5479fe190cec8e2cd1",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part0/05-block-vectorization-spmd/03_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:28.123465+00:00",
+    "finished_utc": "2026-11-21T13:20:29.318085+00:00",
+    "exit_code": 0,
+    "log": "15/output.log",
+    "log_sha256": "7cbc7e38db709108abae067aeeb5fbafac7392bd4bdb45168d9eb71866c023ca"
+  },
+  {
+    "page": "docs/part1/01-pointer-stride-contract.md",
+    "name": "01_pointer_boundary.py",
+    "download": "docs/examples/references/part1/01-pointer-stride-contract/01_pointer_boundary.py",
+    "sha256": "a72b13592474dfad207aa719fb8eaca858c8fae49f9c0e6a5b45634a98b6bb74",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/01-pointer-stride-contract/01_pointer_boundary.py"
+    ],
+    "started_utc": "2026-11-21T13:20:28.145033+00:00",
+    "finished_utc": "2026-11-21T13:20:29.309970+00:00",
+    "exit_code": 0,
+    "log": "16/output.log",
+    "log_sha256": "ed562ecbce45c002d508d3c454052429ff6a9d701483db37f52d7b820da37c18"
+  },
+  {
+    "page": "docs/part1/01-pointer-stride-contract.md",
+    "name": "02_shape_stride_promise.py",
+    "download": "docs/examples/references/part1/01-pointer-stride-contract/02_shape_stride_promise.py",
+    "sha256": "ce5ab87b53ccb21ffbabe8acbe855a5edd508fad23583753e039c57e64e542a2",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/01-pointer-stride-contract/02_shape_stride_promise.py"
+    ],
+    "started_utc": "2026-11-21T13:20:29.267703+00:00",
+    "finished_utc": "2026-11-21T13:20:30.435093+00:00",
+    "exit_code": 0,
+    "log": "17/output.log",
+    "log_sha256": "19b2f6947614335f8483f2ff4f170552e5b4a58a6373d0a305dae81a51845957"
+  },
+  {
+    "page": "docs/part1/01-pointer-stride-contract.md",
+    "name": "03_dtype_specialization.py",
+    "download": "docs/examples/references/part1/01-pointer-stride-contract/03_dtype_specialization.py",
+    "sha256": "30829f5b62637a3fada0d038d80293b97876c1527759d8d73b857102ce80b282",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/01-pointer-stride-contract/03_dtype_specialization.py"
+    ],
+    "started_utc": "2026-11-21T13:20:29.310076+00:00",
+    "finished_utc": "2026-11-21T13:20:30.472795+00:00",
+    "exit_code": 0,
+    "log": "18/output.log",
+    "log_sha256": "6a0f354e1020cdb3b00b9fb24a0a8722442ff05d87bfbab117c16be1ec7cb632"
+  },
+  {
+    "page": "docs/part1/01-pointer-stride-contract.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part1/01-pointer-stride-contract/04_standalone_complete.py",
+    "sha256": "9eb719c914274f235efadd700d4e0cd86a0d5553854828290e59df7af71c32d2",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/01-pointer-stride-contract/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:29.312709+00:00",
+    "finished_utc": "2026-11-21T13:20:30.482918+00:00",
+    "exit_code": 0,
+    "log": "19/output.log",
+    "log_sha256": "1c9c727edc345e9ad3fdbaf3427ecfe5f8516bab32f1508ad6e6638c6d909249"
+  },
+  {
+    "page": "docs/part1/02-broadcasting-alignment-block-pointers.md",
+    "name": "01_broadcasting.py",
+    "download": "docs/examples/references/part1/02-broadcasting-alignment-block-pointers/01_broadcasting.py",
+    "sha256": "6d7b1e68487b7a2e7764244d0d00d3b449a208631d51685df15609e1eec7a873",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/02-broadcasting-alignment-block-pointers/01_broadcasting.py"
+    ],
+    "started_utc": "2026-11-21T13:20:29.318209+00:00",
+    "finished_utc": "2026-11-21T13:20:30.510822+00:00",
+    "exit_code": 0,
+    "log": "20/output.log",
+    "log_sha256": "bf17de727a7e8fe5a5078f43a7b52ffb6287bcd17945eb05d2da297cf6503a3c"
+  },
+  {
+    "page": "docs/part1/02-broadcasting-alignment-block-pointers.md",
+    "name": "02_alignment_hints.py",
+    "download": "docs/examples/references/part1/02-broadcasting-alignment-block-pointers/02_alignment_hints.py",
+    "sha256": "c4de41b8b2a163724290f36c8b447df151332bb4474ae82ac5c6190fa34daba6",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/02-broadcasting-alignment-block-pointers/02_alignment_hints.py"
+    ],
+    "started_utc": "2026-11-21T13:20:30.435231+00:00",
+    "finished_utc": "2026-11-21T13:20:31.599227+00:00",
+    "exit_code": 0,
+    "log": "21/output.log",
+    "log_sha256": "544701c35bc4adbb942316c6c27d63f2b21ccb5d60f1398437ebb9f75d7dcd52"
+  },
+  {
+    "page": "docs/part1/02-broadcasting-alignment-block-pointers.md",
+    "name": "03_block_pointers.py",
+    "download": "docs/examples/references/part1/02-broadcasting-alignment-block-pointers/03_block_pointers.py",
+    "sha256": "d066a067bafad6bae915cd2981b697c0b984b16220325d8c6d16b3141c005ce7",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/02-broadcasting-alignment-block-pointers/03_block_pointers.py"
+    ],
+    "started_utc": "2026-11-21T13:20:30.472912+00:00",
+    "finished_utc": "2026-11-21T13:20:31.632748+00:00",
+    "exit_code": 0,
+    "log": "22/output.log",
+    "log_sha256": "c9addf541253ee5ed02a31d462ca8d5ee2798aacd7587d30561f6430dd4862b4"
+  },
+  {
+    "page": "docs/part1/02-broadcasting-alignment-block-pointers.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part1/02-broadcasting-alignment-block-pointers/04_standalone_complete.py",
+    "sha256": "23211e14b63b4ffd57696e192887fbb32f4e431e355bb2fb4ecb8fd332c48010",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/02-broadcasting-alignment-block-pointers/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:30.483040+00:00",
+    "finished_utc": "2026-11-21T13:20:31.671290+00:00",
+    "exit_code": 0,
+    "log": "23/output.log",
+    "log_sha256": "2eda0b450d059a64a86f7c4503070e833c9b901ee007a9b2742c8cfff91640cc"
+  },
+  {
+    "page": "docs/part1/03-gpu-side-construction.md",
+    "name": "01_no_allocation.py",
+    "download": "docs/examples/references/part1/03-gpu-side-construction/01_no_allocation.py",
+    "sha256": "dde02ea1020928a8714b345886c7a378cb00ff4f469542eea6a616b3baa57269",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/03-gpu-side-construction/01_no_allocation.py"
+    ],
+    "started_utc": "2026-11-21T13:20:30.510978+00:00",
+    "finished_utc": "2026-11-21T13:20:31.682310+00:00",
+    "exit_code": 0,
+    "log": "24/output.log",
+    "log_sha256": "84c4e20b153278257838d67b170847e820798eca833f87448017f49dd52f1f28"
+  },
+  {
+    "page": "docs/part1/03-gpu-side-construction.md",
+    "name": "02_factory_wrapper.py",
+    "download": "docs/examples/references/part1/03-gpu-side-construction/02_factory_wrapper.py",
+    "sha256": "52522cad6e7c53d05a380b84d909a502791579461d9bd6e92cf3fb2083eb4f3f",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/03-gpu-side-construction/02_factory_wrapper.py"
+    ],
+    "started_utc": "2026-11-21T13:20:31.599367+00:00",
+    "finished_utc": "2026-11-21T13:20:32.740109+00:00",
+    "exit_code": 0,
+    "log": "25/output.log",
+    "log_sha256": "43c560b9ffd833cc315c02c7ddb9d30acda210ed779227e21ff45c3acfe5ec3b"
+  },
+  {
+    "page": "docs/part1/03-gpu-side-construction.md",
+    "name": "03_device_placement.py",
+    "download": "docs/examples/references/part1/03-gpu-side-construction/03_device_placement.py",
+    "sha256": "bab5d7acee73ecbc89b537c2e1b266132a772541c13f87d3f53b52f6f700123f",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/03-gpu-side-construction/03_device_placement.py"
+    ],
+    "started_utc": "2026-11-21T13:20:31.632878+00:00",
+    "finished_utc": "2026-11-21T13:20:33.498065+00:00",
+    "exit_code": 0,
+    "log": "26/output.log",
+    "log_sha256": "68576169e44a7f886b0edb5980ebfaa86312692acd4dc0ca6c2ab9dcfdb0fbef"
+  },
+  {
+    "page": "docs/part1/03-gpu-side-construction.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part1/03-gpu-side-construction/04_standalone_complete.py",
+    "sha256": "67daa00f01e74ce5c898a15ef1937c1eaad0c23ca22a24cb3f0e57f77216aa9f",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/03-gpu-side-construction/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:31.671410+00:00",
+    "finished_utc": "2026-11-21T13:20:33.323118+00:00",
+    "exit_code": 0,
+    "log": "27/output.log",
+    "log_sha256": "13763706b15e21066507bd6f76d0c00f893874ba36d85a2e5630a92e11d30e92"
+  },
+  {
+    "page": "docs/part1/04-mask-and-structure-kernels.md",
+    "name": "01_triangular_masks.py",
+    "download": "docs/examples/references/part1/04-mask-and-structure-kernels/01_triangular_masks.py",
+    "sha256": "6db95a3b9ded3f014c6a109b1403ea3dc8cd6f677829488c466cbf38e739e28a",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/04-mask-and-structure-kernels/01_triangular_masks.py"
+    ],
+    "started_utc": "2026-11-21T13:20:31.682446+00:00",
+    "finished_utc": "2026-11-21T13:20:32.835986+00:00",
+    "exit_code": 0,
+    "log": "28/output.log",
+    "log_sha256": "310f279b3b56b5911da7f9d2f90c2b7daf974322bbc629d6c4931860c0dde7a7"
+  },
+  {
+    "page": "docs/part1/04-mask-and-structure-kernels.md",
+    "name": "02_block_sparse.py",
+    "download": "docs/examples/references/part1/04-mask-and-structure-kernels/02_block_sparse.py",
+    "sha256": "110da6214c104cc0efa008710696c37d2e5f4800dad3067bffba1e174de38bd2",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/04-mask-and-structure-kernels/02_block_sparse.py"
+    ],
+    "started_utc": "2026-11-21T13:20:32.740243+00:00",
+    "finished_utc": "2026-11-21T13:20:33.898482+00:00",
+    "exit_code": 0,
+    "log": "29/output.log",
+    "log_sha256": "4ee3015ababa3b4e8d95f555f2cea649b5c4efbbd82d189572ba8a97bce648e2"
+  },
+  {
+    "page": "docs/part1/04-mask-and-structure-kernels.md",
+    "name": "03_ragged_batches.py",
+    "download": "docs/examples/references/part1/04-mask-and-structure-kernels/03_ragged_batches.py",
+    "sha256": "83c25cda35b78926aefe9864e4c526dfe1f590da7be8a564ca541a121184d55c",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/04-mask-and-structure-kernels/03_ragged_batches.py"
+    ],
+    "started_utc": "2026-11-21T13:20:32.836112+00:00",
+    "finished_utc": "2026-11-21T13:20:34.013327+00:00",
+    "exit_code": 0,
+    "log": "30/output.log",
+    "log_sha256": "726043759b69abc3888015d5228fb565a70f719a37933a8d538ed836e1cf97c7"
+  },
+  {
+    "page": "docs/part1/04-mask-and-structure-kernels.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part1/04-mask-and-structure-kernels/04_standalone_complete.py",
+    "sha256": "9ca57aa6af4957b5b1cbe6199ca19a142861658dfd4dc8b5aeeb65af28385e85",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/04-mask-and-structure-kernels/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:33.323236+00:00",
+    "finished_utc": "2026-11-21T13:20:34.498755+00:00",
+    "exit_code": 0,
+    "log": "31/output.log",
+    "log_sha256": "7da89a6cb754706a0433546cda2852a85709498508f0fa336803ac20343714ed"
+  },
+  {
+    "page": "docs/part1/05-targeting-hardware.md",
+    "name": "01_hardware_queries.py",
+    "download": "docs/examples/references/part1/05-targeting-hardware/01_hardware_queries.py",
+    "sha256": "6ca36d09f2537d888a3f4a522938a382a18556901a48efa178b42188d5f253b6",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/05-targeting-hardware/01_hardware_queries.py"
+    ],
+    "started_utc": "2026-11-21T13:20:33.498194+00:00",
+    "finished_utc": "2026-11-21T13:20:34.878545+00:00",
+    "exit_code": 0,
+    "log": "32/output.log",
+    "log_sha256": "58cc1f199ba982cb66839e52880941ce7fab651d237f5f57f82ecba150d544c1"
+  },
+  {
+    "page": "docs/part1/05-targeting-hardware.md",
+    "name": "02_warps_and_stages.py",
+    "download": "docs/examples/references/part1/05-targeting-hardware/02_warps_and_stages.py",
+    "sha256": "40c0dd21add1d336e9ce4f6121dcef161e24698e55472231d2b8b538786929e0",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/05-targeting-hardware/02_warps_and_stages.py"
+    ],
+    "started_utc": "2026-11-21T13:20:33.898616+00:00",
+    "finished_utc": "2026-11-21T13:20:35.052177+00:00",
+    "exit_code": 0,
+    "log": "33/output.log",
+    "log_sha256": "d685feb28deb1df5aaa0abe617470677c60fde3997a60fba8ab1cf453036ee6d"
+  },
+  {
+    "page": "docs/part1/05-targeting-hardware.md",
+    "name": "03_constexpr_hw_branch.py",
+    "download": "docs/examples/references/part1/05-targeting-hardware/03_constexpr_hw_branch.py",
+    "sha256": "84dc759ff78a34c903fd0d9b3052b25a4bb8c3ef4cc6dc1a467cf3270de5747f",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/05-targeting-hardware/03_constexpr_hw_branch.py"
+    ],
+    "started_utc": "2026-11-21T13:20:34.013847+00:00",
+    "finished_utc": "2026-11-21T13:20:35.180171+00:00",
+    "exit_code": 0,
+    "log": "34/output.log",
+    "log_sha256": "64a7d8fe608a61a2ecb521a75f0517c76a653868dacf843933cd5112149736f1"
+  },
+  {
+    "page": "docs/part1/05-targeting-hardware.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part1/05-targeting-hardware/04_standalone_complete.py",
+    "sha256": "99f23ed381d866e41823d5824ff49805b7f2e5e0b1b3d3e90062e1a0e4137acc",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/05-targeting-hardware/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:34.498892+00:00",
+    "finished_utc": "2026-11-21T13:20:35.972332+00:00",
+    "exit_code": 0,
+    "log": "35/output.log",
+    "log_sha256": "f9c5b6a977ecb9cdb2fd584ade600b78b3ef78c9db1a9392f8354169f9fde920"
+  },
+  {
+    "page": "docs/part1/06-shared-memory-register-pressure.md",
+    "name": "01_kernel_cache.py",
+    "download": "docs/examples/references/part1/06-shared-memory-register-pressure/01_kernel_cache.py",
+    "sha256": "bd9269aca6d3c9a3fe278ebe9bafc1038ea7b2b1fae069206b1793c893d4f02b",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/06-shared-memory-register-pressure/01_kernel_cache.py"
+    ],
+    "started_utc": "2026-11-21T13:20:34.878697+00:00",
+    "finished_utc": "2026-11-21T13:20:35.004082+00:00",
+    "exit_code": 0,
+    "log": "36/output.log",
+    "log_sha256": "fa468c78b560a68edf3c377191a7bef6da365573981b54659b305cada189c865"
+  },
+  {
+    "page": "docs/part1/06-shared-memory-register-pressure.md",
+    "name": "02_register_pressure.py",
+    "download": "docs/examples/references/part1/06-shared-memory-register-pressure/02_register_pressure.py",
+    "sha256": "fd113fbe8163e09ccfcec8442abf1ee737a946fb252f1f9a591e3984bfacd5f1",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/06-shared-memory-register-pressure/02_register_pressure.py"
+    ],
+    "started_utc": "2026-11-21T13:20:35.004208+00:00",
+    "finished_utc": "2026-11-21T13:20:36.173384+00:00",
+    "exit_code": 0,
+    "log": "37/output.log",
+    "log_sha256": "fc5ea85aa7f9989bbc981ac663d93a04f5dec3d4aa125a265fb08990b3db1881"
+  },
+  {
+    "page": "docs/part1/06-shared-memory-register-pressure.md",
+    "name": "03_shared_memory_dot.py",
+    "download": "docs/examples/references/part1/06-shared-memory-register-pressure/03_shared_memory_dot.py",
+    "sha256": "89c26fe3727840e4ce8015fdd5764b43fe3f0d03f3e44760405e7c0e739712a4",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/06-shared-memory-register-pressure/03_shared_memory_dot.py"
+    ],
+    "started_utc": "2026-11-21T13:20:35.052300+00:00",
+    "finished_utc": "2026-11-21T13:20:36.196136+00:00",
+    "exit_code": 0,
+    "log": "38/output.log",
+    "log_sha256": "6a9901afaff303957ea46a850dd4ce712e7946f7f87c331bf75eddd70e97b095"
+  },
+  {
+    "page": "docs/part1/06-shared-memory-register-pressure.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part1/06-shared-memory-register-pressure/04_standalone_complete.py",
+    "sha256": "9ce490c47da19e6809af7ce0c059f0be66a1b7f67bfa68155315b3ca261848be",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part1/06-shared-memory-register-pressure/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:35.180295+00:00",
+    "finished_utc": "2026-11-21T13:20:36.344235+00:00",
+    "exit_code": 0,
+    "log": "39/output.log",
+    "log_sha256": "b69c2c863fc62cde70bc41a568bec73f41c65ba6d6b3b4a6a8359586ba61035a"
+  },
+  {
+    "page": "docs/part2/01-elementwise-kernels.md",
+    "name": "01_fused_fma_relu.py",
+    "download": "docs/examples/references/part2/01-elementwise-kernels/01_fused_fma_relu.py",
+    "sha256": "1743e8ee8777b4d9ca99e5115e89367cebe215706ff525b2575ab9e86cf42bcb",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/01-elementwise-kernels/01_fused_fma_relu.py"
+    ],
+    "started_utc": "2026-11-21T13:20:35.972910+00:00",
+    "finished_utc": "2026-11-21T13:20:37.183904+00:00",
+    "exit_code": 0,
+    "log": "40/output.log",
+    "log_sha256": "8031427e0b86b5394b65d5cf87d01b7fcec5217ac2b263e3e3b725023505de0e"
+  },
+  {
+    "page": "docs/part2/01-elementwise-kernels.md",
+    "name": "02_memory_pass_counting.py",
+    "download": "docs/examples/references/part2/01-elementwise-kernels/02_memory_pass_counting.py",
+    "sha256": "e8aa19bb088d3e9094eb4282dbb7a685cc67f16641bc4c06ae37784918f0d584",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/01-elementwise-kernels/02_memory_pass_counting.py"
+    ],
+    "started_utc": "2026-11-21T13:20:36.173522+00:00",
+    "finished_utc": "2026-11-21T13:20:37.351258+00:00",
+    "exit_code": 0,
+    "log": "41/output.log",
+    "log_sha256": "f9ee984dd527ec2f66abfda15bef93d4071c87dc73d4fba6066ead3c37b3d6a7"
+  },
+  {
+    "page": "docs/part2/01-elementwise-kernels.md",
+    "name": "03_gelu_oracle_verified.py",
+    "download": "docs/examples/references/part2/01-elementwise-kernels/03_gelu_oracle_verified.py",
+    "sha256": "83d2a8393173f71fab0283c4f703da2dfa1e0caec9381cee380e39684fe2aeca",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/01-elementwise-kernels/03_gelu_oracle_verified.py"
+    ],
+    "started_utc": "2026-11-21T13:20:36.196257+00:00",
+    "finished_utc": "2026-11-21T13:20:37.344971+00:00",
+    "exit_code": 0,
+    "log": "42/output.log",
+    "log_sha256": "fdaa079a110cb3bb9df8d8fa25bd38f4daf7ae5932fc037d2fb50710359f583f"
+  },
+  {
+    "page": "docs/part2/01-elementwise-kernels.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part2/01-elementwise-kernels/04_standalone_complete.py",
+    "sha256": "7366a09b37a091fdb25612f6860143c573411b5f3f2f3cf6b7ce6eda0e050543",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/01-elementwise-kernels/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:36.344366+00:00",
+    "finished_utc": "2026-11-21T13:20:37.501613+00:00",
+    "exit_code": 0,
+    "log": "43/output.log",
+    "log_sha256": "e0961b3fa998877273119ee868ae0fa06986286735f8f50de443ea862e83a4f8"
+  },
+  {
+    "page": "docs/part2/02-blocked-matmul-kernel.md",
+    "name": "01_tiled_matmul.py",
+    "download": "docs/examples/references/part2/02-blocked-matmul-kernel/01_tiled_matmul.py",
+    "sha256": "cc006543b576c0c449246caf218aefe67eb0f3859c85b0496e35d784e8fcfca3",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/02-blocked-matmul-kernel/01_tiled_matmul.py"
+    ],
+    "started_utc": "2026-11-21T13:20:37.184056+00:00",
+    "finished_utc": "2026-11-21T13:20:38.372574+00:00",
+    "exit_code": 0,
+    "log": "44/output.log",
+    "log_sha256": "86f2fd40f1bbd89f49b62e8e52aaa5ee4566fbe58fc19049713e62486e73d685"
+  },
+  {
+    "page": "docs/part2/02-blocked-matmul-kernel.md",
+    "name": "02_three_way_masking.py",
+    "download": "docs/examples/references/part2/02-blocked-matmul-kernel/02_three_way_masking.py",
+    "sha256": "056491c1ab63cc628c468193ed7fb0677e4821b0ed70cf9e4a28b3ea3f8fa3f4",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/02-blocked-matmul-kernel/02_three_way_masking.py"
+    ],
+    "started_utc": "2026-11-21T13:20:37.345105+00:00",
+    "finished_utc": "2026-11-21T13:20:38.521698+00:00",
+    "exit_code": 0,
+    "log": "45/output.log",
+    "log_sha256": "1da58d44f84a1e9f0ad6244815cf3ed29cfd04fe8858dfdfb473bd6b45830504"
+  },
+  {
+    "page": "docs/part2/02-blocked-matmul-kernel.md",
+    "name": "03_accumulation_precision.py",
+    "download": "docs/examples/references/part2/02-blocked-matmul-kernel/03_accumulation_precision.py",
+    "sha256": "1dd95b1f3468e456228803c8434936750436bbb2273fa489baddc47511688daa",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/02-blocked-matmul-kernel/03_accumulation_precision.py"
+    ],
+    "started_utc": "2026-11-21T13:20:37.351370+00:00",
+    "finished_utc": "2026-11-21T13:20:38.909996+00:00",
+    "exit_code": 0,
+    "log": "46/output.log",
+    "log_sha256": "74bd17bce9de7b665e3285724d5b86ee0e494c2abef5060bb1e29c5c3308af86"
+  },
+  {
+    "page": "docs/part2/02-blocked-matmul-kernel.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part2/02-blocked-matmul-kernel/04_standalone_complete.py",
+    "sha256": "a5429c94ea3157119603625001cde91224f91baf9dec567e9e9ce67cdd0dfdbe",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/02-blocked-matmul-kernel/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:37.501770+00:00",
+    "finished_utc": "2026-11-21T13:20:38.895612+00:00",
+    "exit_code": 0,
+    "log": "47/output.log",
+    "log_sha256": "870a26bc0240510208590804715ccea09576fffdd47c790b753b6afbad42b08d"
+  },
+  {
+    "page": "docs/part2/03-reduction-kernels.md",
+    "name": "01_row_reductions.py",
+    "download": "docs/examples/references/part2/03-reduction-kernels/01_row_reductions.py",
+    "sha256": "ed099688beb11cb207e8a8112340c41685db5b02f43904917053701056924968",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/03-reduction-kernels/01_row_reductions.py"
+    ],
+    "started_utc": "2026-11-21T13:20:38.372724+00:00",
+    "finished_utc": "2026-11-21T13:20:39.532378+00:00",
+    "exit_code": 0,
+    "log": "48/output.log",
+    "log_sha256": "b7b844e417ad3b5067d9d404eddfda697142162d8f1cfccfff7e93c9f6ff3358"
+  },
+  {
+    "page": "docs/part2/03-reduction-kernels.md",
+    "name": "02_stable_softmax.py",
+    "download": "docs/examples/references/part2/03-reduction-kernels/02_stable_softmax.py",
+    "sha256": "e939ba0bc850b2ae3c6e97446633670d3b470e3bb9f6192ffee3b93aa8b30825",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/03-reduction-kernels/02_stable_softmax.py"
+    ],
+    "started_utc": "2026-11-21T13:20:38.521832+00:00",
+    "finished_utc": "2026-11-21T13:20:39.695749+00:00",
+    "exit_code": 0,
+    "log": "49/output.log",
+    "log_sha256": "75de301b5ff3766a857ccf74c4dc7658734b88fc16f7b9407aeb2ffd4483a8f0"
+  },
+  {
+    "page": "docs/part2/03-reduction-kernels.md",
+    "name": "03_online_softmax.py",
+    "download": "docs/examples/references/part2/03-reduction-kernels/03_online_softmax.py",
+    "sha256": "f546382b0b8c6ef61e0f20a4521ef2b23d40dcff57e956bae7e53e013d149e3e",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/03-reduction-kernels/03_online_softmax.py"
+    ],
+    "started_utc": "2026-11-21T13:20:38.895751+00:00",
+    "finished_utc": "2026-11-21T13:20:40.077242+00:00",
+    "exit_code": 0,
+    "log": "50/output.log",
+    "log_sha256": "88d1d5d956f790b17a5db56e36078941e2151739e381aefece50fa9986677502"
+  },
+  {
+    "page": "docs/part2/03-reduction-kernels.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part2/03-reduction-kernels/04_standalone_complete.py",
+    "sha256": "2ad47cca5f7484cc7f244b9287cfccb37d4c74b4a16d98b381567f145eb3da44",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part2/03-reduction-kernels/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:38.910098+00:00",
+    "finished_utc": "2026-11-21T13:20:40.105503+00:00",
+    "exit_code": 0,
+    "log": "51/output.log",
+    "log_sha256": "349a843884a428ebc5fc532c7b96216f87d9296f28c3944fcc000138e93b1c98"
+  },
+  {
+    "page": "docs/part3/01-autograd-function-graph-node.md",
+    "name": "01_invisible_to_autograd.py",
+    "download": "docs/examples/references/part3/01-autograd-function-graph-node/01_invisible_to_autograd.py",
+    "sha256": "e81e3eadaa8474d8fa3392af963aa65ff31acc87543d419d377e5c249695fc73",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part3/01-autograd-function-graph-node/01_invisible_to_autograd.py"
+    ],
+    "started_utc": "2026-11-21T13:20:39.532504+00:00",
+    "finished_utc": "2026-11-21T13:20:40.697690+00:00",
+    "exit_code": 0,
+    "log": "52/output.log",
+    "log_sha256": "9640eb5288885e9c506f6b14de48568cf850708b821b1b62bf38e10105fccc01"
+  },
+  {
+    "page": "docs/part3/01-autograd-function-graph-node.md",
+    "name": "02_autograd_function.py",
+    "download": "docs/examples/references/part3/01-autograd-function-graph-node/02_autograd_function.py",
+    "sha256": "adca75370cc9ef994fcd2183c60c962cbc102ac8fad1ff53512a7102f0fdb71a",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part3/01-autograd-function-graph-node/02_autograd_function.py"
+    ],
+    "started_utc": "2026-11-21T13:20:39.695879+00:00",
+    "finished_utc": "2026-11-21T13:20:41.093521+00:00",
+    "exit_code": 0,
+    "log": "53/output.log",
+    "log_sha256": "900c542030dfee084db8b430f2f9b53a00ef19886b1d263839c87d04d3321074"
+  },
+  {
+    "page": "docs/part3/01-autograd-function-graph-node.md",
+    "name": "03_save_for_backward.py",
+    "download": "docs/examples/references/part3/01-autograd-function-graph-node/03_save_for_backward.py",
+    "sha256": "32e57adc7d4951490ecbbc42d26a49f9303089d337e392a3570a7019555b1847",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part3/01-autograd-function-graph-node/03_save_for_backward.py"
+    ],
+    "started_utc": "2026-11-21T13:20:40.077388+00:00",
+    "finished_utc": "2026-11-21T13:20:41.263752+00:00",
+    "exit_code": 0,
+    "log": "54/output.log",
+    "log_sha256": "3baed5d1cbab1eba0e33aac46ddd6f3ca421fa3bdce1d2762c5538f32af4a12d"
+  },
+  {
+    "page": "docs/part3/01-autograd-function-graph-node.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part3/01-autograd-function-graph-node/04_standalone_complete.py",
+    "sha256": "94a6804860de0a1d29742c4a592d04938f58c9987b06af82de3d057fe8eed29e",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part3/01-autograd-function-graph-node/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:40.105586+00:00",
+    "finished_utc": "2026-11-21T13:20:41.338673+00:00",
+    "exit_code": 0,
+    "log": "55/output.log",
+    "log_sha256": "fa4cf3d26820f2dd156cf56cd73cec91e738578a1596eded3a509705cf878d56"
+  },
+  {
+    "page": "docs/part4/01-writing-the-backward-kernel.md",
+    "name": "01_backward_kernel.py",
+    "download": "docs/examples/references/part4/01-writing-the-backward-kernel/01_backward_kernel.py",
+    "sha256": "6ae2c85a546e313fd7762fb1e49afb9f36136823d610aa0841ae0b5f9cf5050e",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part4/01-writing-the-backward-kernel/01_backward_kernel.py"
+    ],
+    "started_utc": "2026-11-21T13:20:40.697817+00:00",
+    "finished_utc": "2026-11-21T13:20:42.428610+00:00",
+    "exit_code": 0,
+    "log": "56/output.log",
+    "log_sha256": "94ec85e6b180d842ad18a2f14ee885f6715ee52399d9122c1ed790120916d701"
+  },
+  {
+    "page": "docs/part4/01-writing-the-backward-kernel.md",
+    "name": "02_masked_multiblock.py",
+    "download": "docs/examples/references/part4/01-writing-the-backward-kernel/02_masked_multiblock.py",
+    "sha256": "07fcefb9411173d49f129bd7bcc9d6ea55dd03dd75f075bb59c664f716a66a13",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part4/01-writing-the-backward-kernel/02_masked_multiblock.py"
+    ],
+    "started_utc": "2026-11-21T13:20:41.094198+00:00",
+    "finished_utc": "2026-11-21T13:20:42.569744+00:00",
+    "exit_code": 0,
+    "log": "57/output.log",
+    "log_sha256": "4763d6224dab0ba4478aab0ad140743595faa90567fa746362857360cdfda528"
+  },
+  {
+    "page": "docs/part4/01-writing-the-backward-kernel.md",
+    "name": "03_wired_tritongelu.py",
+    "download": "docs/examples/references/part4/01-writing-the-backward-kernel/03_wired_tritongelu.py",
+    "sha256": "8e75d2add96d72eb2aa8a82e0487c63b3c7866c7c188fe353f4d73873abd778b",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part4/01-writing-the-backward-kernel/03_wired_tritongelu.py"
+    ],
+    "started_utc": "2026-11-21T13:20:41.263878+00:00",
+    "finished_utc": "2026-11-21T13:20:42.754774+00:00",
+    "exit_code": 0,
+    "log": "58/output.log",
+    "log_sha256": "b64f2fc7b11ef950237ee49858abb30cabdf3dcf06003bba4f0770af3fefb725"
+  },
+  {
+    "page": "docs/part4/01-writing-the-backward-kernel.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part4/01-writing-the-backward-kernel/04_standalone_complete.py",
+    "sha256": "c67b3f98ceb07e09e1cead03a7b301e235edac29972264d615ccc64fe30c83bb",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part4/01-writing-the-backward-kernel/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:41.338791+00:00",
+    "finished_utc": "2026-11-21T13:20:42.911615+00:00",
+    "exit_code": 0,
+    "log": "59/output.log",
+    "log_sha256": "aeaba48f917bde7780a5d31f1d8ba819ee5c94e3a00c99d211550e700899f597"
+  },
+  {
+    "page": "docs/part4/02-chaining-custom-ops.md",
+    "name": "01_chained_expression.py",
+    "download": "docs/examples/references/part4/02-chaining-custom-ops/01_chained_expression.py",
+    "sha256": "0d30499f2a98513a637581e590831cf7aa4a673904134717ef34d427312cc15d",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part4/02-chaining-custom-ops/01_chained_expression.py"
+    ],
+    "started_utc": "2026-11-21T13:20:42.429185+00:00",
+    "finished_utc": "2026-11-21T13:20:43.895856+00:00",
+    "exit_code": 0,
+    "log": "60/output.log",
+    "log_sha256": "e0c18be52085ff16d682046d2d5dbbb7375bef764e6d47a2fed50cc6698b4fa9"
+  },
+  {
+    "page": "docs/part4/02-chaining-custom-ops.md",
+    "name": "02_graph_structure.py",
+    "download": "docs/examples/references/part4/02-chaining-custom-ops/02_graph_structure.py",
+    "sha256": "f981cb295b6c21636d3dda7a2324d2efdc24c42b013d2bb1edcb14af12e46a06",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part4/02-chaining-custom-ops/02_graph_structure.py"
+    ],
+    "started_utc": "2026-11-21T13:20:42.569879+00:00",
+    "finished_utc": "2026-11-21T13:20:43.895413+00:00",
+    "exit_code": 0,
+    "log": "61/output.log",
+    "log_sha256": "af79ebc08508d19a93ffa2e845ab97a65ebff80e79e4471e6abc681271a5c089"
+  },
+  {
+    "page": "docs/part4/02-chaining-custom-ops.md",
+    "name": "03_fan_in.py",
+    "download": "docs/examples/references/part4/02-chaining-custom-ops/03_fan_in.py",
+    "sha256": "36a42ab65ec17abcad5b8ba672899209a9c2b2a48eef2ce16c1874faaf5aa1bb",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part4/02-chaining-custom-ops/03_fan_in.py"
+    ],
+    "started_utc": "2026-11-21T13:20:42.754903+00:00",
+    "finished_utc": "2026-11-21T13:20:43.984096+00:00",
+    "exit_code": 0,
+    "log": "62/output.log",
+    "log_sha256": "8488e2017c2c19fc1f0f9c8071562efe9de3293cd3ea2940ea24f4d21f9cc77b"
+  },
+  {
+    "page": "docs/part4/02-chaining-custom-ops.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part4/02-chaining-custom-ops/04_standalone_complete.py",
+    "sha256": "91fb1301f536e6cc2ae5cb2dffed334c5a739c72c0de99980ea09b635ec59eaa",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part4/02-chaining-custom-ops/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:42.911746+00:00",
+    "finished_utc": "2026-11-21T13:20:44.226759+00:00",
+    "exit_code": 0,
+    "log": "63/output.log",
+    "log_sha256": "a0498393e77e5142151ccd81fc6efa5d0e79b4f03f87751ae07a63b5297a195e"
+  },
+  {
+    "page": "docs/part5/01-autotuning.md",
+    "name": "01_config_space.py",
+    "download": "docs/examples/references/part5/01-autotuning/01_config_space.py",
+    "sha256": "c5aaca0d5bcb49d2e33376e2f585f8fb759bd1eed0f3cb17ad5fdd4f06bf5c22",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part5/01-autotuning/01_config_space.py"
+    ],
+    "started_utc": "2026-11-21T13:20:43.895541+00:00",
+    "finished_utc": "2026-11-21T13:20:45.052032+00:00",
+    "exit_code": 0,
+    "log": "64/output.log",
+    "log_sha256": "9754eb5761b475677286931c587940cf7b831cc51b785fb8bde876adf5496410"
+  },
+  {
+    "page": "docs/part5/01-autotuning.md",
+    "name": "02_autotune_attempt.py",
+    "download": "docs/examples/references/part5/01-autotuning/02_autotune_attempt.py",
+    "sha256": "3cab01b0eecb52b83f30ea5d653f03bc7699c095010d1ffc3ecaeed6e52899be",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part5/01-autotuning/02_autotune_attempt.py"
+    ],
+    "started_utc": "2026-11-21T13:20:43.895995+00:00",
+    "finished_utc": "2026-11-21T13:20:46.001170+00:00",
+    "exit_code": 0,
+    "log": "65/output.log",
+    "log_sha256": "e54c880b0704056c7aa9a1dd16eef31bc802021e13d853e29ca9ddff8f61414e"
+  },
+  {
+    "page": "docs/part5/01-autotuning.md",
+    "name": "03_manual_sweep.py",
+    "download": "docs/examples/references/part5/01-autotuning/03_manual_sweep.py",
+    "sha256": "11902b581c3498b240ed72e0b425efc3f6c71b02502808dfd2e24eda37deab35",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part5/01-autotuning/03_manual_sweep.py"
+    ],
+    "started_utc": "2026-11-21T13:20:43.984229+00:00",
+    "finished_utc": "2026-11-21T13:20:45.171808+00:00",
+    "exit_code": 0,
+    "log": "66/output.log",
+    "log_sha256": "e3d73e62dad1a85bd0cc7f7ccac10736f61caa3252a6fff347742abc47e9bfdf"
+  },
+  {
+    "page": "docs/part5/01-autotuning.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part5/01-autotuning/04_standalone_complete.py",
+    "sha256": "49135886808dcf86a6740ddf1bdd735375ecdf44be473e57dfa8533fcbb61d89",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part5/01-autotuning/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:44.226894+00:00",
+    "finished_utc": "2026-11-21T13:20:46.208628+00:00",
+    "exit_code": 0,
+    "log": "67/output.log",
+    "log_sha256": "ffa4524f4d9c54984b30a0cda9bc6c937bcf8736551eb030688be285ff10e16b"
+  },
+  {
+    "page": "docs/part5/02-benchmarking-correctly.md",
+    "name": "01_do_bench_attempt.py",
+    "download": "docs/examples/references/part5/02-benchmarking-correctly/01_do_bench_attempt.py",
+    "sha256": "fe939d48fa2a2b7d1f0f0917dafb052c94a56cc49d318ce7ad6b444cd711a828",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part5/02-benchmarking-correctly/01_do_bench_attempt.py"
+    ],
+    "started_utc": "2026-11-21T13:20:45.052162+00:00",
+    "finished_utc": "2026-11-21T13:20:46.717135+00:00",
+    "exit_code": 0,
+    "log": "68/output.log",
+    "log_sha256": "09c2dc301191b9db0db052bbe1b8fae0dfada88148081884dcbb112f75939a1a"
+  },
+  {
+    "page": "docs/part5/02-benchmarking-correctly.md",
+    "name": "02_warmup_and_statistics.py",
+    "download": "docs/examples/references/part5/02-benchmarking-correctly/02_warmup_and_statistics.py",
+    "sha256": "4fb9bfc0a5a65d876311e8c9b4d26f210e47b50abb921fb468851f53d7bf7ef4",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part5/02-benchmarking-correctly/02_warmup_and_statistics.py"
+    ],
+    "started_utc": "2026-11-21T13:20:45.171966+00:00",
+    "finished_utc": "2026-11-21T13:20:49.694206+00:00",
+    "exit_code": 0,
+    "log": "69/output.log",
+    "log_sha256": "f5b3403654932f64454209170c435ace64a213408059dabba5199d92100aca84"
+  },
+  {
+    "page": "docs/part5/02-benchmarking-correctly.md",
+    "name": "03_interpreter_timing_trap.py",
+    "download": "docs/examples/references/part5/02-benchmarking-correctly/03_interpreter_timing_trap.py",
+    "sha256": "5339ac1e0c053d103667d9002a33920705562822968574724918c2ceaa443328",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part5/02-benchmarking-correctly/03_interpreter_timing_trap.py"
+    ],
+    "started_utc": "2026-11-21T13:20:46.001902+00:00",
+    "finished_utc": "2026-11-21T13:20:50.746275+00:00",
+    "exit_code": 0,
+    "log": "70/output.log",
+    "log_sha256": "6404f7e057e8ee0a77c6cfa417e3d8d7b6fffe0659ec21fd98f3ec75a2ced470"
+  },
+  {
+    "page": "docs/part5/02-benchmarking-correctly.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part5/02-benchmarking-correctly/04_standalone_complete.py",
+    "sha256": "966e118d415ea3646da2aea9f3b2019c0fddc05a077a116d8fd677397dd85f20",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part5/02-benchmarking-correctly/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:46.208775+00:00",
+    "finished_utc": "2026-11-21T13:20:54.789428+00:00",
+    "exit_code": 0,
+    "log": "71/output.log",
+    "log_sha256": "a5f4fee8ed1389ec0ae3b75588b10abaf69ee67692ee3446024437d5e682e0b4"
+  },
+  {
+    "page": "docs/part6/01-fused-kernels-for-real-layers.md",
+    "name": "01_fused_linear_gelu.py",
+    "download": "docs/examples/references/part6/01-fused-kernels-for-real-layers/01_fused_linear_gelu.py",
+    "sha256": "669eaf2d5cc3806eff6cba0eb1fca1fa7879c014e9d586b249f08d9cf2cf5ac4",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part6/01-fused-kernels-for-real-layers/01_fused_linear_gelu.py"
+    ],
+    "started_utc": "2026-11-21T13:20:46.717268+00:00",
+    "finished_utc": "2026-11-21T13:20:47.964324+00:00",
+    "exit_code": 0,
+    "log": "72/output.log",
+    "log_sha256": "299cdeb5e931a65775b6f6df9f56256997c5e76d4aa4960a4aeae4160b39ed66"
+  },
+  {
+    "page": "docs/part6/01-fused-kernels-for-real-layers.md",
+    "name": "02_row_mean_var.py",
+    "download": "docs/examples/references/part6/01-fused-kernels-for-real-layers/02_row_mean_var.py",
+    "sha256": "a1da1b5d5ae384e8b0ef393fa4a82617fe8f69cd975483c11d900b7741b4dcbc",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part6/01-fused-kernels-for-real-layers/02_row_mean_var.py"
+    ],
+    "started_utc": "2026-11-21T13:20:47.964452+00:00",
+    "finished_utc": "2026-11-21T13:20:49.100074+00:00",
+    "exit_code": 0,
+    "log": "73/output.log",
+    "log_sha256": "ef0776641b892393602545e5cb2f90e9dfdba78d92888dd5a493d113aa0fe60a"
+  },
+  {
+    "page": "docs/part6/01-fused-kernels-for-real-layers.md",
+    "name": "03_fused_layernorm.py",
+    "download": "docs/examples/references/part6/01-fused-kernels-for-real-layers/03_fused_layernorm.py",
+    "sha256": "56775fd63ebba8603edfecef1484ebcc55bc32dbc4903b5dec53645b6237dc0e",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part6/01-fused-kernels-for-real-layers/03_fused_layernorm.py"
+    ],
+    "started_utc": "2026-11-21T13:20:49.100202+00:00",
+    "finished_utc": "2026-11-21T13:20:50.285167+00:00",
+    "exit_code": 0,
+    "log": "74/output.log",
+    "log_sha256": "4d15a559edd9ac4c502e1f34cbbafcf9446355fc403da00a328d3a08f493c8f1"
+  },
+  {
+    "page": "docs/part6/01-fused-kernels-for-real-layers.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part6/01-fused-kernels-for-real-layers/04_standalone_complete.py",
+    "sha256": "fbedd7f3ab822647a21906ae672d7c722405a60444f1b6347c3515e9023087a9",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part6/01-fused-kernels-for-real-layers/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:49.694344+00:00",
+    "finished_utc": "2026-11-21T13:20:50.919635+00:00",
+    "exit_code": 0,
+    "log": "75/output.log",
+    "log_sha256": "d6275621b4e1b4f9a0e36e64cc167ac0628742c4db84a24196660de594a86e14"
+  },
+  {
+    "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
+    "name": "01_flash_attention_core.py",
+    "download": "docs/examples/references/part6/02-flash-attention-moe-advanced-features/01_flash_attention_core.py",
+    "sha256": "231b96ebb3d10fef7046c63b0082ad9cc260da0fd5d7dc30c9576ae46b093ed3",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part6/02-flash-attention-moe-advanced-features/01_flash_attention_core.py"
+    ],
+    "started_utc": "2026-11-21T13:20:50.285299+00:00",
+    "finished_utc": "2026-11-21T13:20:51.527847+00:00",
+    "exit_code": 0,
+    "log": "76/output.log",
+    "log_sha256": "d34b64557a7843e035b46f641c08d0635d88edbdb76ac7a6b165966e6e3df7ed"
+  },
+  {
+    "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
+    "name": "02_causal_flash_attention.py",
+    "download": "docs/examples/references/part6/02-flash-attention-moe-advanced-features/02_causal_flash_attention.py",
+    "sha256": "b0ecc9c63828d6038acb8e36e12be93f269b83e809feae07e79dbabf2f817ca1",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part6/02-flash-attention-moe-advanced-features/02_causal_flash_attention.py"
+    ],
+    "started_utc": "2026-11-21T13:20:50.746405+00:00",
+    "finished_utc": "2026-11-21T13:20:52.049221+00:00",
+    "exit_code": 0,
+    "log": "77/output.log",
+    "log_sha256": "4566a6da4a3b1a7fc4be122815821b00343e2c1dfdba021a45510b5fc5297ece"
+  },
+  {
+    "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
+    "name": "03_moe_gating.py",
+    "download": "docs/examples/references/part6/02-flash-attention-moe-advanced-features/03_moe_gating.py",
+    "sha256": "8f3df0704bc90de91aa1320a34b10156e9d228de65954ca8b7612863ff0d5812",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part6/02-flash-attention-moe-advanced-features/03_moe_gating.py"
+    ],
+    "started_utc": "2026-11-21T13:20:50.919759+00:00",
+    "finished_utc": "2026-11-21T13:20:52.087949+00:00",
+    "exit_code": 0,
+    "log": "78/output.log",
+    "log_sha256": "e3072ec088a5df2caa962359ae79c609aa39ba7767cf754d361fe376fb97eb6a"
+  },
+  {
+    "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part6/02-flash-attention-moe-advanced-features/04_standalone_complete.py",
+    "sha256": "8c0d2ce352b24e84eaac8ecb93034d2bd916e9be69343bea8c67a35c296a556e",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part6/02-flash-attention-moe-advanced-features/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:51.527992+00:00",
+    "finished_utc": "2026-11-21T13:20:52.925064+00:00",
+    "exit_code": 0,
+    "log": "79/output.log",
+    "log_sha256": "d8894a359669cf249818deb37f29dd1a2e3c2ee2832193a11b36265d09752c7e"
+  },
+  {
+    "page": "docs/part7/01-quantitative-finance-examples.md",
+    "name": "01_black_scholes.py",
+    "download": "docs/examples/references/part7/01-quantitative-finance-examples/01_black_scholes.py",
+    "sha256": "8bdb4e5fed43bfc93ec00577abab75852f039f5e2e66f6601df25f5f4741a39e",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part7/01-quantitative-finance-examples/01_black_scholes.py"
+    ],
+    "started_utc": "2026-11-21T13:20:52.049343+00:00",
+    "finished_utc": "2026-11-21T13:20:53.475613+00:00",
+    "exit_code": 0,
+    "log": "80/output.log",
+    "log_sha256": "2966680c54b001d7e9f52b312dd221ed9b90578112b25231a261adf4aa825745"
+  },
+  {
+    "page": "docs/part7/01-quantitative-finance-examples.md",
+    "name": "02_rolling_volatility.py",
+    "download": "docs/examples/references/part7/01-quantitative-finance-examples/02_rolling_volatility.py",
+    "sha256": "7cd43b48002cfe02fc5dc069ed9fc3e619d85e7f11ce1f6a9e53bd414e9f377c",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part7/01-quantitative-finance-examples/02_rolling_volatility.py"
+    ],
+    "started_utc": "2026-11-21T13:20:52.088066+00:00",
+    "finished_utc": "2026-11-21T13:20:53.500628+00:00",
+    "exit_code": 0,
+    "log": "81/output.log",
+    "log_sha256": "43227a61f532bdade49ebe6274d07f64fa2deac6bae1e14ad545646c34671875"
+  },
+  {
+    "page": "docs/part7/01-quantitative-finance-examples.md",
+    "name": "03_monte_carlo_pricing.py",
+    "download": "docs/examples/references/part7/01-quantitative-finance-examples/03_monte_carlo_pricing.py",
+    "sha256": "a8a416c04d9b498cfdb43e1a4f3fca895ab242046d7807b41b37ec8866f44456",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part7/01-quantitative-finance-examples/03_monte_carlo_pricing.py"
+    ],
+    "started_utc": "2026-11-21T13:20:52.925189+00:00",
+    "finished_utc": "2026-11-21T13:20:54.533607+00:00",
+    "exit_code": 0,
+    "log": "82/output.log",
+    "log_sha256": "fc2ec43d5e3a0b294e0c3250edc0f881ddf0f0cca53beba5b639af11947e7cbc"
+  },
+  {
+    "page": "docs/part7/01-quantitative-finance-examples.md",
+    "name": "04_standalone_complete.py",
+    "download": "docs/examples/references/part7/01-quantitative-finance-examples/04_standalone_complete.py",
+    "sha256": "03beb130190814cdb006e878d6d6667d950311b8f20fde448fd22d5ea355b59b",
+    "command": [
+      "python3",
+      "/tmp/triton-review/docs/examples/references/part7/01-quantitative-finance-examples/04_standalone_complete.py"
+    ],
+    "started_utc": "2026-11-21T13:20:53.475734+00:00",
+    "finished_utc": "2026-11-21T13:20:55.181151+00:00",
+    "exit_code": 0,
+    "log": "83/output.log",
+    "log_sha256": "87523ca115df6333f9fc4d7474d5cb88a42de862e71f58f51fe67a03a2b2582f"
+  }
+]

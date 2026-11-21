@@ -1,0 +1,6 @@
+=== Section 21.2: causal Flash Attention vs. naive causal attention ===
+causal kernel allclose to causal oracle? True
+
+=== Section 21.2: a correct (non-causal) kernel applied to the wrong task ===
+non-causal kernel allclose to CAUSAL oracle? False
+non-causal kernel allclose to NON-causal oracle? True

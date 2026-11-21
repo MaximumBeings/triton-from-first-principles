@@ -1,0 +1,6 @@
+=== Two-Phase Model: constexpr-selected kernel variants ===
+USE_RELU=True  -> [0.0, 0.0, 0.0, 1.0, 2.0, 0.0, 0.5, 0.0]
+USE_RELU=False -> [-2.0, -1.0, 0.0, 1.0, 2.0, -0.5, 0.5, -3.0]
+
+=== tl.arange requires a genuine tl.constexpr bound ===
+InterpreterError: ValueError("arange's arguments must be of type tl.constexpr")

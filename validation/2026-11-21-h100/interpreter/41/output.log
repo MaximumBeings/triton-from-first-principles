@@ -1,0 +1,4 @@
+=== Section 12.2: identical results, different numbers of memory passes ===
+naive chain result (3 separate ops): [0.0, 0.0, 0.0, 1.0, 3.0]
+fused kernel result   (1 kernel launch): [0.0, 0.0, 0.0, 1.0, 3.0]
+identical? True

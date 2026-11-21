@@ -1,0 +1,14 @@
+=== Section 11.1: type(add_kernel) under the interpreter ===
+type: <class 'triton.runtime.interpreter.InterpretedFunction'>
+no cache attribute -> AttributeError: 'InterpretedFunction' object has no attribute 'cache'
+
+=== Section 11.2: BLOCK sizes spanning four orders of magnitude ===
+BLOCK=     4 -> correct? True
+BLOCK=  4096 -> correct? True
+BLOCK= 65536 -> correct? True
+
+=== Section 11.3: tl.dot ===
+tl.dot result:
+ tensor([[19., 22.],
+        [43., 50.]])
+matches A @ B? True

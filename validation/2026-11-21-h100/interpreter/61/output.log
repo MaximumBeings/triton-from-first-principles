@@ -1,0 +1,7 @@
+=== Section 17.2: TritonGELU then TritonSquare -- graph structure and call order ===
+y.grad_fn: <torch.autograd.function.TritonSquareBackward object at 0x7fc39ed81e10>
+y.grad_fn.next_functions: ((<torch.autograd.function.TritonGELUBackward object at 0x7fc3a5e86030>, 0),)
+z.grad_fn: <torch.autograd.function.TritonGELUBackward object at 0x7fc3a5e86030>
+z.grad_fn.next_functions: ((<AccumulateGrad object at 0x7fc3a5eb3dc0>, 0),)
+backward call order: ['TritonSquare.backward', 'TritonGELU.backward']
+x.grad allclose to oracle? True

@@ -1,0 +1,5 @@
+=== Section 10.2: num_warps / num_stages under the interpreter ===
+num_warps=1 -> [11.0, 22.0, 33.0, 44.0]
+num_warps=4 -> [11.0, 22.0, 33.0, 44.0]
+num_warps=8 -> [11.0, 22.0, 33.0, 44.0]
+num_stages=3 accepted -> [11.0, 22.0, 33.0, 44.0]

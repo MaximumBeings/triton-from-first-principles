@@ -1,0 +1,7 @@
+=== Section 18.1: constructing and inspecting triton.Config objects ===
+kwargs: {'BLOCK': 1024}
+num_warps: 8
+num_stages: 3
+
+=== Section 18.1: an illegal candidate -- BLOCK=300 is not a power of 2 ===
+caught, as expected: InterpreterError: ValueError("arange's range must be a power of 2")

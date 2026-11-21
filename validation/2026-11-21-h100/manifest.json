@@ -1,0 +1,34 @@
+{
+  "source_commit": "c9fb730eb42ba407e5b3398c62ed4830706477ca",
+  "gpu_source_sha256": "af64ff8cd0901ddc33bac19c2e9ced721fac5f48c886b1b9d9ff50056a941165",
+  "commands": [
+    {
+      "name": "system",
+      "command": [
+        "bash",
+        "-lc",
+        "date -u; uname -a; nvidia-smi -q; nvidia-smi topo -m; nvcc --version; python3 -m pip freeze"
+      ],
+      "started_utc": "2026-11-21T13:20:53.787074+00:00",
+      "finished_utc": "2026-11-21T13:20:54.640334+00:00",
+      "seconds": 0.8532581950000235,
+      "exit_code": 0,
+      "log": "system.log",
+      "log_sha256": "788d68be94f855deabada62795829877f65ec6b0c9e65394a54c837a371ce40c"
+    },
+    {
+      "name": "triton-smoke",
+      "command": [
+        "python3",
+        "/tmp/triton-review/docs/examples/gpu_smoke.py"
+      ],
+      "started_utc": "2026-11-21T13:20:54.640652+00:00",
+      "finished_utc": "2026-11-21T13:20:56.276257+00:00",
+      "seconds": 1.6356151589999968,
+      "exit_code": 0,
+      "log": "triton-smoke.log",
+      "log_sha256": "ab408d139220abf8a2213e505925d4b5b73a4ecd23bfd142e29fcb8af20d747f"
+    }
+  ],
+  "interpreter_scope": "84 complete files; interpreter execution, not GPU compilation"
+}

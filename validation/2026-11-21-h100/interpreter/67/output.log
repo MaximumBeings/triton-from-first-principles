@@ -1,0 +1,13 @@
+=== Section 18.1: triton.Config objects and an illegal candidate ===
+kwargs: {'BLOCK': 1024}  num_warps: 8  num_stages: 3
+BLOCK=300 caught, as expected: InterpreterError
+
+=== Section 18.2: attempting @triton.autotune itself ===
+ran without error (unexpected in this environment)
+
+=== Section 18.3: manual sweep -- correctness invariance across configs ===
+BLOCK=  256 allclose to oracle? True
+BLOCK=  512 allclose to oracle? True
+BLOCK= 1024 allclose to oracle? True
+BLOCK= 2048 allclose to oracle? True
+all four candidates bit-for-bit identical to each other? True

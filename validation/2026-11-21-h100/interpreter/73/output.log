@@ -1,0 +1,4 @@
+=== Section 20.2: row-wise mean/variance vs. x.mean()/x.var() ===
+mean allclose to x.mean(dim=-1)? True
+var allclose to x.var(unbiased=False)? True
+var allclose to x.var(unbiased=True) [WRONG comparison]? False

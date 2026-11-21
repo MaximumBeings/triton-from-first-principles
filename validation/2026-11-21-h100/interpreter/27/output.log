@@ -1,0 +1,12 @@
+=== Section 8.1: no allocation inside a kernel ===
+out: [11.0, 22.0, 33.0, 44.0]
+None as output -> InterpreterError: AttributeError("'NoneType' object has no attribute 'type'")
+tl.zeros, explicitly stored: [1.0, 1.0, 1.0, 1.0]
+
+=== Section 8.2: factory-function-style wrapper ===
+triton_full((6,), 7.0) -> [7.0, 7.0, 7.0, 7.0, 7.0, 7.0]
+torch.full((6,), 7.0)  -> [7.0, 7.0, 7.0, 7.0, 7.0, 7.0]
+
+=== Section 8.3: device placement ===
+torch.cuda.is_available(): True
+interpreter ran a CPU tensor with no complaint: [2.0, 3.0, 4.0]

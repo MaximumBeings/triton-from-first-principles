@@ -1,0 +1,8 @@
+=== Section 3.3: hardcoded strides vs. real strides ===
+hardcoded kernel on contiguous base, correct? True
+base.t() shape: torch.Size([4, 3]) stride: (1, 4) is_contiguous: False
+hardcoded kernel on base.t(), correct? False
+stride-aware kernel on base.t(), correct? True
+
+=== Section 3.4: a 2x2 tile of base.t(), read via the stride-aware kernel ===
+top-left 2x2 tile: [[0.0, 4.0], [1.0, 5.0]] (expected [[0,4],[1,5]])

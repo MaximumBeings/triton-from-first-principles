@@ -1,0 +1,10 @@
+=== Section 3.1: AoS vs. SoA, warp-wide field reads ===
+AoS total: 28 distinct 32B segments = 896 bytes fetched
+needed: 512 bytes -> utilization = 57.1%
+
+SoA total: 16 distinct 32B segments = 512 bytes fetched
+needed: 512 bytes -> utilization = 100.0%
+
+=== Section 3.2: one row vs. one column of a 32x32 row-major matrix ===
+Reading one row: 4 segments, 128 bytes fetched for 128 bytes needed -> 100.0%
+Reading one column: 32 segments, 1024 bytes fetched for 128 bytes needed -> 12.5%

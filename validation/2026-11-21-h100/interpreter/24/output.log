@@ -1,0 +1,6 @@
+=== Section 8.1: the kernel needs somewhere to write BEFORE it launches ===
+out (pre-allocated by torch.empty_like, then filled by the kernel): [11.0, 22.0, 33.0, 44.0]
+passing None as the output buffer -> InterpreterError: AttributeError("'NoneType' object has no attribute 'type'")
+
+=== Section 8.1: tl.zeros() is a register-resident value, not a new allocation ===
+value only survives because it was explicitly tl.store'd: [1.0, 1.0, 1.0, 1.0]

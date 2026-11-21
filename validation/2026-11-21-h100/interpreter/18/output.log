@@ -1,0 +1,4 @@
+=== Section 6.3: dtype triggers its own specialization, automatically ===
+compiled specialization for dtype: fp32
+compiled specialization for dtype: fp16
+compiled specialization for dtype: int32

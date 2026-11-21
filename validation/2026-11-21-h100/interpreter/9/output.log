@@ -1,0 +1,17 @@
+=== Section 3.1: AoS vs. SoA, warp-wide field reads ===
+AoS total: 28 distinct 32B segments = 896 bytes fetched
+needed: 512 bytes -> utilization = 57.1%
+SoA total: 16 distinct 32B segments = 512 bytes fetched
+needed: 512 bytes -> utilization = 100.0%
+
+=== Section 3.2: one row vs. one column of a 32x32 row-major matrix ===
+row: 4 segments -> 100.0% utilization
+column: 32 segments -> 12.5% utilization
+
+=== Section 3.3: hardcoded strides vs. real strides ===
+hardcoded kernel on contiguous base, correct? True
+hardcoded kernel on base.t(), correct? False
+stride-aware kernel on base.t(), correct? True
+
+=== Section 3.4: a 2x2 tile of base.t() ===
+top-left 2x2 tile: [[0.0, 4.0], [1.0, 5.0]] (expected [[0,4],[1,5]])

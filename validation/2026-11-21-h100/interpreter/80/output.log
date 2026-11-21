@@ -1,0 +1,7 @@
+=== Section 22.1: Black-Scholes kernel vs. scipy-based independent oracle ===
+allclose to scipy-based oracle? True
+
+=== Section 22.1: forgetting the discount factor ===
+relative diffs (%): [-26.12  -9.96 -19.95 -16.95 -17.93  -3.07]
+smallest |relative diff| (shortest maturity): -3.07
+largest |relative diff| (longest maturity): -26.12

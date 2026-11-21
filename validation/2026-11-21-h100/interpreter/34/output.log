@@ -1,0 +1,3 @@
+=== Section 10.3: a tl.constexpr flag selecting between hardware-specific code paths ===
+compute_capability=90 (fast path)   -> [2.0, 4.0, 6.0, 8.0]
+compute_capability=80 (fallback path) -> [2.0, 4.0, 6.0, 8.0]

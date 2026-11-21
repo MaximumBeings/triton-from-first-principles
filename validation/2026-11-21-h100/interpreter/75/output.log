@@ -1,0 +1,14 @@
+=== Section 20.1: fused Linear+bias+GELU vs. a real torch.nn.Linear module ===
+allclose to nn.Linear + gelu oracle? True
+
+=== Section 20.2: row-wise mean/variance vs. biased and unbiased oracles ===
+mean allclose to x.mean(dim=-1)? True
+var allclose to x.var(unbiased=False)? True
+var allclose to x.var(unbiased=True) [WRONG comparison]? False
+
+=== Section 20.3: fused LayerNorm vs. a real torch.nn.LayerNorm module ===
+allclose to nn.LayerNorm? True
+
+=== Section 20.3: the eps-placement trap ===
+typical row: correct allclose? True  wrong-eps allclose? True
+near-constant row: correct allclose? True  wrong-eps allclose? False

@@ -1,0 +1,4 @@
+=== Section 13.3: fp32 vs fp16 accumulation over a deep K-loop ===
+K=1024, BLOCK_K=8 -> 128 K-iterations
+fp32acc max abs diff vs exact: 9.737179152580211e-05
+fp16acc max abs diff vs exact: 0.001974425897060428

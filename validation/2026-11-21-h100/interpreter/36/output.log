@@ -1,0 +1,3 @@
+=== Section 11.1: type(add_kernel) under TRITON_INTERPRET=1 ===
+type: <class 'triton.runtime.interpreter.InterpretedFunction'>
+no cache attribute at all -> AttributeError: 'InterpretedFunction' object has no attribute 'cache'

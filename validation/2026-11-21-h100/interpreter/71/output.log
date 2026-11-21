@@ -1,0 +1,13 @@
+=== Section 19.1: attempting triton.testing.do_bench itself ===
+ran without error (unexpected)
+
+=== Section 19.2: warmup effect and median vs. mean ===
+first call slower than steady-state average? False
+median unaffected by synthetic outlier? True
+mean shifted by synthetic outlier by 136.3ms
+
+=== Section 19.3: interpreter timing inversion (BLOCK=256 vs. BLOCK=4096) ===
+BLOCK=256 median: 136.02ms   BLOCK=4096 median: 17.10ms
+BLOCK=256 is slower under this interpreter? True
+(fewer programs measuring 'faster' here reflects interpreter overhead,
+ not real GPU occupancy -- never extrapolate this to real hardware)

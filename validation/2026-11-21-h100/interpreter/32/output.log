@@ -1,0 +1,6 @@
+=== Section 10.1: querying hardware info without a GPU ===
+triton.runtime.driver.active: <nvidia.CudaDriver object at 0x74cab0a43170>
+current target: GPUTarget(backend='cuda', arch=90, warp_size=32)
+
+torch.cuda.is_available(): True
+_CudaDeviceProperties(name='NVIDIA H100 80GB HBM3', major=9, minor=0, total_memory=81079MB, multi_processor_count=132, uuid=ecb5a396-cc5d-20cb-e3d1-ef08deaa995b, L2_cache_size=50MB)

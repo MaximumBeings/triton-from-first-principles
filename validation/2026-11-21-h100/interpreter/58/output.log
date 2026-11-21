@@ -1,0 +1,12 @@
+=== Section 16.3: TritonGELU wired end-to-end, n=5000 ===
+y.grad_fn: <torch.autograd.function.TritonGELUBackward object at 0x7d593b091f20>
+forward allclose to oracle? True
+x.grad allclose to oracle?  True
+
+=== Section 16.3: fp16 storage precision vs. fp32, with fp32 math throughout ===
+fp32-in/fp32-out max abs diff from fp64 ground truth: 2.360000217471736e-07
+fp16-in/fp16-out (fp32 math internally) max abs diff: 0.0015156170082177844
+ratio (fp16 path error / fp32 path error): 6422.105375233661
+
+=== Section 16.3: tl.math.erf refuses fp16 operands without the upcast ===
+caught exception, as expected: InterpreterError: ValueError("Expected dtype ['fp32', 'fp64'] but got fp16")

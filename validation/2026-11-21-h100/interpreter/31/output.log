@@ -1,0 +1,13 @@
+=== Section 9.1: triangular masks ===
+causal-masked:
+ tensor([[ 1.,  0.,  0.,  0.],
+        [ 5.,  6.,  0.,  0.],
+        [ 9., 10., 11.,  0.],
+        [13., 14., 15., 16.]])
+matches torch.tril(x)? True
+
+=== Section 9.2: block-sparse skipping ===
+block-sparse result: [0.0, 2.0, 4.0, 6.0, 0.0, 0.0, 0.0, 0.0, 16.0, 18.0, 20.0, 22.0, 0.0, 0.0, 0.0, 0.0]
+
+=== Section 9.3: ragged batches ===
+ragged row sums: [10.0, 30.0, 15.0]

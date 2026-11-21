@@ -1,0 +1,8 @@
+=== Section 4.4: naive matmul, one program per output row ===
+C (Triton):
+ tensor([[19., 22.],
+        [43., 50.]])
+C (torch @):
+ tensor([[19., 22.],
+        [43., 50.]])
+match? True

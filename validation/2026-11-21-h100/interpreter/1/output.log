@@ -1,0 +1,9 @@
+=== Implicit dtype promotion: fp32 + fp16 ===
+dtype of x: fp32  dtype of y: fp16  dtype of z=x+y: fp32
+out: [1.0999755859375, 2.0999755859375, 3.0999755859375]
+
+=== Accumulation dtype: naive fp16 vs. fp32-accumulated ===
+Summing 2048 copies of 0.0001 (each stored as fp16):
+  naive sequential fp16 accumulation : 0.2337646484375
+  Triton kernel, fp32 accumulator    : 0.204833984375
+  exact answer                       : 0.2048

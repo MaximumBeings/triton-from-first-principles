@@ -1,0 +1,2 @@
+=== Section 21.1: Flash Attention core loop vs. naive full attention ===
+allclose to naive full attention? True
