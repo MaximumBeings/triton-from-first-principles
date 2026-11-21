@@ -1,5 +1,7 @@
 # Chapter 7: Broadcasting, Alignment, and Block Pointers
 
+[![Chapter 7: Expand the view. Preserve ownership.](../images/chapter-openers/07.svg)](../images/chapter-openers/07.svg)
+
 [![Broadcasting expands an expression, not its storage](../images/ch07/01-concept.svg)](../images/ch07/01-concept.svg)
 
 > "Three things happen when you combine or access block-shaped values in Triton: one is checked at trace time and refuses to compile if you get it wrong, one is a promise you make to the compiler that nothing on the interpreter can ever verify, and one is an API that bundles shape and strides back together — but only for the specific rectangular tile it was built for, and only as far as you hand-typed those numbers correctly in the first place."

@@ -1,5 +1,7 @@
 # Chapter 18: Autotuning
 
+[![Chapter 18: Try candidates. Keep the winner.](../images/chapter-openers/18.svg)](../images/chapter-openers/18.svg)
+
 [![Autotuning chooses among correct candidates](../images/ch18/01-concept.svg)](../images/ch18/01-concept.svg)
 
 > Every kernel in this book so far has used one fixed block size, chosen once, by a human, and left alone. Autotuning replaces that guess with an experiment — but an experiment needs something to measure against, and that is exactly the one thing this book's environment has never had.

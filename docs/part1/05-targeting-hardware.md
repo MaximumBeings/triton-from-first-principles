@@ -1,5 +1,7 @@
 # Chapter 10: Targeting Hardware
 
+[![Chapter 10: Logical tiles. Physical hardware.](../images/chapter-openers/10.svg)](../images/chapter-openers/10.svg)
+
 [![Logical blocks are distributed over physical threads](../images/ch10/01-concept.svg)](../images/ch10/01-concept.svg)
 
 > "A compiled kernel is compiled for something — a specific GPU generation, a specific number of warps scheduled per program instance, a specific number of pipeline stages. This book's interpreter has never had to answer any of those questions honestly, because it has never had a GPU to answer them about. This chapter is the one place that gap can no longer be worked around quietly."

@@ -1,5 +1,7 @@
 # Chapter 21: Flash Attention, MoE, and Advanced Features
 
+[![Chapter 21: Stream scores. Keep the state.](../images/chapter-openers/21.svg)](../images/chapter-openers/21.svg)
+
 [![Stream attention without storing the whole score matrix](../images/ch21/01-concept.svg)](../images/ch21/01-concept.svg)
 
 > Every kernel through Chapter 20 computed each output independently of every other. Attention breaks that assumption on purpose — every query genuinely depends on every key and value in its sequence — and the entire trick of Flash Attention is computing that dependency without ever materializing the matrix it implies.

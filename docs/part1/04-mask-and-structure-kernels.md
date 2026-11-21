@@ -1,5 +1,7 @@
 # Chapter 9: Mask and Structure Kernels
 
+[![Chapter 9: Structure is a predicate.](../images/chapter-openers/09.svg)](../images/chapter-openers/09.svg)
+
 [![A causal mask includes the diagonal](../images/ch09/01-concept.svg)](../images/ch09/01-concept.svg)
 
 > "Every mask since Chapter 5 has answered one question: is this index in bounds? A mask can answer a much richer question than that — is this position on or below the diagonal, is this whole tile worth computing at all, does this particular row even have this many real elements — and the moment it does, the mask stops being bookkeeping and starts being the actual structure of the computation."

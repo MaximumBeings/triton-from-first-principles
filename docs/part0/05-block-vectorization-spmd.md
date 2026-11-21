@@ -1,5 +1,7 @@
 # Chapter 5: Block-Level Vectorization and the SPMD Model
 
+[![Chapter 5: Work in blocks. Guard the tail.](../images/chapter-openers/05.svg)](../images/chapter-openers/05.svg)
+
 [![Vectorize the block, mask the tail](../images/ch05/01-concept.svg)](../images/ch05/01-concept.svg)
 
 > "SIMD and SPMD look like near-anagrams because they're describing the same instinct — do many things at once — at two different scales. Confuse which scale you're actually operating at, and you'll reach for a remainder loop Triton never needed, or assume two programs are running in lockstep when they were never promised to be."

@@ -1,5 +1,7 @@
 # Chapter 2: Kernel Parameterization
 
+[![Chapter 2: Choose the tile. Keep the contract.](../images/chapter-openers/02.svg)](../images/chapter-openers/02.svg)
+
 [![Separate the problem from its tile configuration](../images/ch02/01-concept.svg)](../images/ch02/01-concept.svg)
 
 > "Mojo gives you a struct: write the layout once, and the compiler builds you a new type. Triton gives you no such thing — there is no keyword that hands you a new type at all. What it gives you instead is a kernel body that can be compiled into as many distinct, specialized versions of itself as you have combinations of compile-time values to feed it, plus a handful of ordinary Python objects to keep track of which combination is which. This chapter is about learning to see that as a feature, not an absence."

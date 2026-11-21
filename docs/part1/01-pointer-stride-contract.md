@@ -1,5 +1,7 @@
 # Chapter 6: The Pointer+Stride Contract
 
+[![Chapter 6: Pointers carry responsibility.](../images/chapter-openers/06.svg)](../images/chapter-openers/06.svg)
+
 [![The caller owns the pointer-and-stride contract](../images/ch06/01-concept.svg)](../images/ch06/01-concept.svg)
 
 > "A `torch.Tensor` walks up to the kernel boundary carrying a shape, a set of strides, a dtype, and a device. Only one of those four crosses. The other three are a promise you type in by hand, and nothing on the other side checks whether you kept it."

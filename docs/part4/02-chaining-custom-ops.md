@@ -1,5 +1,7 @@
 # Chapter 17: How PyTorch's Autograd Engine Chains Custom Ops
 
+[![Chapter 17: Paths branch. Gradients add.](../images/chapter-openers/17.svg)](../images/chapter-openers/17.svg)
+
 [![Fan-in adds gradient contributions](../images/ch17/01-concept.svg)](../images/ch17/01-concept.svg)
 
 > A custom `backward` method that has only ever been tested alone has only been tested against the one input it can never actually receive in practice: a `grad_output` of uniform ones.

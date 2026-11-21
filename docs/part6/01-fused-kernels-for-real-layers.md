@@ -1,5 +1,7 @@
 # Chapter 20: Fused Kernels for Real Layers
 
+[![Chapter 20: Normalize rows. Fuse the layer.](../images/chapter-openers/20.svg)](../images/chapter-openers/20.svg)
+
 [![Layer normalization reduces within each row](../images/ch20/01-concept.svg)](../images/ch20/01-concept.svg)
 
 > `torch.nn.Linear` followed by an activation, or `torch.nn.LayerNorm` on its own, are each three or four separate memory round trips when built from ordinary PyTorch operators. A real fused kernel reads its input once and writes its output once, no matter how many logical steps sit in between.

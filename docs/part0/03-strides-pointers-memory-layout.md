@@ -1,5 +1,7 @@
 # Chapter 3: Strides, Pointers, and Block-Level Memory Layout
 
+[![Chapter 3: Same tensor. Different addresses.](../images/chapter-openers/03.svg)](../images/chapter-openers/03.svg)
+
 [![A logical coordinate is not a byte address](../images/ch03/01-concept.svg)](../images/ch03/01-concept.svg)
 
 > "A pointer plus an offset is not an address until you multiply by a stride. Get the stride wrong, or assume one that was never actually there, and the kernel doesn't crash — it just quietly reads the wrong sixteen bytes, computes a perfectly plausible-looking wrong answer, and hands it back with no complaint at all."

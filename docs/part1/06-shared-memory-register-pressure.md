@@ -1,5 +1,7 @@
 # Chapter 11: Shared Memory and the Kernel Cache
 
+[![Chapter 11: Budget the live working set.](../images/chapter-openers/11.svg)](../images/chapter-openers/11.svg)
+
 [![Balance live values against resident work](../images/ch11/01-concept.svg)](../images/ch11/01-concept.svg)
 
 > "Part 1 has spent five chapters asking what a kernel actually receives, and one honest answer keeps recurring: less than it looks like, with the rest managed silently on your behalf. This closing chapter applies that same question to the two resources every real GPU kernel depends on most — the compiled binary sitting in a cache somewhere, and the fast on-chip memory a tiled kernel needs to be fast at all — and finds the same answer both times."

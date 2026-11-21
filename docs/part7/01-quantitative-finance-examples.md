@@ -1,5 +1,7 @@
 # Chapter 22: Quantitative Finance Examples
 
+[![Chapter 22: Model payoffs. Check uncertainty.](../images/chapter-openers/22.svg)](../images/chapter-openers/22.svg)
+
 [![Monte Carlo pricing is a mean of discounted payoffs](../images/ch22/01-concept.svg)](../images/ch22/01-concept.svg)
 
 > A closed-form price, a rolling statistic, and a simulated estimate are three different ways of answering the same kind of question, and each one demands a different way of checking whether the answer is right.

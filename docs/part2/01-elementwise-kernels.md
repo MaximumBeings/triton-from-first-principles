@@ -1,5 +1,7 @@
 # Chapter 12: Element-wise Kernels
 
+[![Chapter 12: Fuse the work. Skip the traffic.](../images/chapter-openers/12.svg)](../images/chapter-openers/12.svg)
+
 [![Fuse elementwise work without changing its equation](../images/ch12/01-concept.svg)](../images/ch12/01-concept.svg)
 
 > "Every ingredient for a complete kernel has already been introduced — a wrapper function that assembles a pointer's shape and dtype (Ch. 6, 8), a mask that keeps a launch honest at its edges (Ch. 5), a grid that covers the whole tensor (Ch. 5). This chapter's only genuinely new idea is what happens when you stop treating each of those ingredients as a separate lesson and start asking: what's actually worth building this way, and how do you know it's right when the answer isn't a small hand-traceable integer anymore?"

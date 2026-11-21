@@ -1,5 +1,7 @@
 # Chapter 1: Types and the JIT Boundary
 
+[![Chapter 1: Types meet machine code.](../images/chapter-openers/01.svg)](../images/chapter-openers/01.svg)
+
 [![Compile a signature, then launch its programs](../images/ch01/01-concept.svg)](../images/ch01/01-concept.svg)
 
 > "A `@triton.jit` function is not a function you call. It is a function you compile — and the exact moment that compilation happens, and exactly which of its arguments the compiler is allowed to treat as fixed forever, is the single fact everything else in this book rests on."

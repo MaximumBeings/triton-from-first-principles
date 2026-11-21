@@ -1,5 +1,7 @@
 # Chapter 16: Writing the Backward Kernel
 
+[![Chapter 16: Follow the chain rule.](../images/chapter-openers/16.svg)](../images/chapter-openers/16.svg)
+
 [![Differentiate the function actually implemented](../images/ch16/01-concept.svg)](../images/ch16/01-concept.svg)
 
 > A forward pass computes an answer. A backward pass computes how much every input is to blame for the answer's error. Neither one requires a different kind of code — only a different formula, multiplied through the one number the rest of the network hands you.

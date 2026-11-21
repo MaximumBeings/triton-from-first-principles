@@ -1,0 +1,112 @@
+[
+  {
+    "chapter": 1,
+    "path": "docs/images/chapter-openers/01.svg",
+    "title": "Chapter 1: Types meet machine code."
+  },
+  {
+    "chapter": 2,
+    "path": "docs/images/chapter-openers/02.svg",
+    "title": "Chapter 2: Choose the tile. Keep the contract."
+  },
+  {
+    "chapter": 3,
+    "path": "docs/images/chapter-openers/03.svg",
+    "title": "Chapter 3: Same tensor. Different addresses."
+  },
+  {
+    "chapter": 4,
+    "path": "docs/images/chapter-openers/04.svg",
+    "title": "Chapter 4: One grid. Many programs."
+  },
+  {
+    "chapter": 5,
+    "path": "docs/images/chapter-openers/05.svg",
+    "title": "Chapter 5: Work in blocks. Guard the tail."
+  },
+  {
+    "chapter": 6,
+    "path": "docs/images/chapter-openers/06.svg",
+    "title": "Chapter 6: Pointers carry responsibility."
+  },
+  {
+    "chapter": 7,
+    "path": "docs/images/chapter-openers/07.svg",
+    "title": "Chapter 7: Expand the view. Preserve ownership."
+  },
+  {
+    "chapter": 8,
+    "path": "docs/images/chapter-openers/08.svg",
+    "title": "Chapter 8: Allocate outside. Compute inside."
+  },
+  {
+    "chapter": 9,
+    "path": "docs/images/chapter-openers/09.svg",
+    "title": "Chapter 9: Structure is a predicate."
+  },
+  {
+    "chapter": 10,
+    "path": "docs/images/chapter-openers/10.svg",
+    "title": "Chapter 10: Logical tiles. Physical hardware."
+  },
+  {
+    "chapter": 11,
+    "path": "docs/images/chapter-openers/11.svg",
+    "title": "Chapter 11: Budget the live working set."
+  },
+  {
+    "chapter": 12,
+    "path": "docs/images/chapter-openers/12.svg",
+    "title": "Chapter 12: Fuse the work. Skip the traffic."
+  },
+  {
+    "chapter": 13,
+    "path": "docs/images/chapter-openers/13.svg",
+    "title": "Chapter 13: Tile the product. Accumulate K."
+  },
+  {
+    "chapter": 14,
+    "path": "docs/images/chapter-openers/14.svg",
+    "title": "Chapter 14: Many lanes. One answer."
+  },
+  {
+    "chapter": 15,
+    "path": "docs/images/chapter-openers/15.svg",
+    "title": "Chapter 15: A kernel joins the graph."
+  },
+  {
+    "chapter": 16,
+    "path": "docs/images/chapter-openers/16.svg",
+    "title": "Chapter 16: Follow the chain rule."
+  },
+  {
+    "chapter": 17,
+    "path": "docs/images/chapter-openers/17.svg",
+    "title": "Chapter 17: Paths branch. Gradients add."
+  },
+  {
+    "chapter": 18,
+    "path": "docs/images/chapter-openers/18.svg",
+    "title": "Chapter 18: Try candidates. Keep the winner."
+  },
+  {
+    "chapter": 19,
+    "path": "docs/images/chapter-openers/19.svg",
+    "title": "Chapter 19: Wait for work. Then trust time."
+  },
+  {
+    "chapter": 20,
+    "path": "docs/images/chapter-openers/20.svg",
+    "title": "Chapter 20: Normalize rows. Fuse the layer."
+  },
+  {
+    "chapter": 21,
+    "path": "docs/images/chapter-openers/21.svg",
+    "title": "Chapter 21: Stream scores. Keep the state."
+  },
+  {
+    "chapter": 22,
+    "path": "docs/images/chapter-openers/22.svg",
+    "title": "Chapter 22: Model payoffs. Check uncertainty."
+  }
+]

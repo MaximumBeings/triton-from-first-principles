@@ -1,5 +1,7 @@
 # Chapter 13: The Blocked Matmul Kernel
 
+[![Chapter 13: Tile the product. Accumulate K.](../images/chapter-openers/13.svg)](../images/chapter-openers/13.svg)
+
 [![Every output sums the complete K dimension](../images/ch13/01-concept.svg)](../images/ch13/01-concept.svg)
 
 > "Every kernel through Chapter 12 computed each output position from exactly one corresponding input position — masking kept a launch honest at its edges, but no output ever depended on more than a handful of nearby inputs. A matmul breaks that completely: every single output element depends on an entire row of one matrix and an entire column of the other, and the only way to compute it without reading the whole thing back from memory over and over is to accumulate across tiles, in a loop, inside the kernel itself."

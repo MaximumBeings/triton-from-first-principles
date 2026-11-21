@@ -17,6 +17,9 @@ def main():
         n=int(match[1]);chapters.append(n)
         if f'../images/ch{n:02}/01-concept.svg' not in text:
             raise ValueError('Missing chapter concept figure')
+        banner = f'../images/chapter-openers/{n:02}.svg'
+        if banner not in text or not (ROOT/'docs/images/chapter-openers'/f'{n:02}.svg').is_file():
+            raise ValueError('Missing chapter opening banner: '+str(p))
         if 'Chapter Summary' not in text:
             raise ValueError('Missing chapter summary: '+str(p))
     if sorted(chapters)!=list(range(1,23)):raise ValueError('Chapter inventory differs')
@@ -33,6 +36,6 @@ def main():
         raise ValueError('Stale or overstated homepage scope')
     subprocess.run([sys.executable,str(ROOT/'tools/sync_examples.py'),'--check'],check=True)
     subprocess.run([sys.executable,str(ROOT/'tools/test_math.py')],check=True)
-    print('PASS: 22 chapters, concept figures, 84 complete Python references and GPU-smoke syntax. CPU math only; GPU execution pending.')
+    print('PASS: 22 chapters, concept figures, 84 complete Python references and GPU-smoke syntax. This checker runs CPU math only; GPU evidence is verified separately.')
 
 if __name__=='__main__':main()

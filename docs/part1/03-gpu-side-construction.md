@@ -1,5 +1,7 @@
 # Chapter 8: GPU-Side Construction
 
+[![Chapter 8: Allocate outside. Compute inside.](../images/chapter-openers/08.svg)](../images/chapter-openers/08.svg)
+
 [![Allocate on the host, populate on the device](../images/ch08/01-concept.svg)](../images/ch08/01-concept.svg)
 
 > "A `@triton.jit` kernel can compute anything you can express in its language, and allocate nothing at all. Every buffer it will ever write into has to already exist, built by ordinary Python code, before the kernel is ever indexed with a grid."

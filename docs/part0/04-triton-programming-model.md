@@ -1,5 +1,7 @@
 # Chapter 4: The Triton Programming Model
 
+[![Chapter 4: One grid. Many programs.](../images/chapter-openers/04.svg)](../images/chapter-openers/04.svg)
+
 [![A launch grid is a grid of program instances](../images/ch04/01-concept.svg)](../images/ch04/01-concept.svg)
 
 > "CUDA hands you one soldier and asks you to figure out the army. Triton hands you the platoon directly, already organized, and asks a different question: given that every program you write already thinks in whole blocks of data at once, what exactly did you stop having to write by hand?"

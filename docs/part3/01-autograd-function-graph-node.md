@@ -1,5 +1,7 @@
 # Chapter 15: `torch.autograd.Function` as the Graph Node
 
+[![Chapter 15: A kernel joins the graph.](../images/chapter-openers/15.svg)](../images/chapter-openers/15.svg)
+
 [![Autograd connects a forward to a backward contract](../images/ch15/01-concept.svg)](../images/ch15/01-concept.svg)
 
 > "Every kernel through Chapter 14 was a function you called: you passed it tensors, it gave you back a tensor, and that was the entire transaction. PyTorch's autograd was never in the room. The moment you want `.backward()` to reach through a Triton kernel the way it reaches through `torch.nn.functional.gelu`, you need a genuinely different kind of object — one PyTorch's graph recognizes as a node, not just a Python function that happens to return a tensor."

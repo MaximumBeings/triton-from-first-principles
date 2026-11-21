@@ -1,5 +1,7 @@
 # Chapter 19: Benchmarking Correctly
 
+[![Chapter 19: Wait for work. Then trust time.](../images/chapter-openers/19.svg)](../images/chapter-openers/19.svg)
+
 [![Time the intended interval, not host enqueue calls](../images/ch19/01-concept.svg)](../images/ch19/01-concept.svg)
 
 > A number produced by a stopwatch is not automatically a measurement. It is only a measurement once the thing being timed, the moment timing starts, and the moment timing stops have all been chosen correctly — and getting any one of those three wrong produces a number that looks exactly as convincing as a correct one.
