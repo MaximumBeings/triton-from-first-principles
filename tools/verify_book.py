@@ -23,6 +23,9 @@ def main():
         if 'Chapter Summary' not in text:
             raise ValueError('Missing chapter summary: '+str(p))
     if sorted(chapters)!=list(range(1,23)):raise ValueError('Chapter inventory differs')
+    for page, banner in [('index.md','book-overview'),('getting-started.md','getting-started')]:
+        if f'images/chapter-openers/{banner}.svg' not in (ROOT/'docs'/page).read_text():
+            raise ValueError('Missing entry-page banner: '+page)
     rows=list(examples())
     if len(rows)!=84:raise ValueError('Complete source inventory changed; review the manifest')
     for row in rows:ast.parse(row['code'],filename=row['download'])

@@ -98,3 +98,25 @@ for n,(a,b,subtitle,kind,labels) in enumerate(SPECS,1):
     idx=s.index('\n');page.write_text(s[:idx+1]+marker+s[idx+1:])
 (ROOT/'tools/illustrations/chapter-openers.json').write_text(json.dumps(manifest,indent=2)+'\n')
 print('Created and linked 22 dark chapter banners.')
+
+# Entry pages use the same visual system, with their own learning-path diagrams.
+for page,name,kicker,lines,subtitle,labels in [
+ ('index.md','book-overview','BOOK OVERVIEW',['From tensors.','To GPU kernels.'],['Understand the contract.','Build, differentiate and validate.'],['Contract','Kernel','Evidence']),
+ ('getting-started.md','getting-started','START HERE',['Build the stack.','Verify each layer.'],['Driver, Python environment','and the first checked launch.'],['Driver','Runtime','GPU test']),
+]:
+ d=Banner();d.parts.append('<rect x="1" y="1" width="758" height="338" rx="19" fill="url(#bg)" stroke="#55747c"/><rect x="1" y="1" width="758" height="338" rx="19" fill="url(#dots)"/><path d="M29 44 V280" stroke="#a3e635" stroke-width="3"/>')
+ d.text(43,65,kicker,13,GREEN,weight=700)
+ for i,line in enumerate(lines):d.text(43,118+i*36,line,27,weight=700)
+ for i,line in enumerate(subtitle):d.text(43,207+i*25,line,18,MUTED)
+ d.text(43,307,'TRITON FROM FIRST PRINCIPLES',11,MUTED);d.diagram('flow',labels)
+ title=' '.join(lines);description=' '.join(subtitle)
+ # Reuse only the font/license and background definitions, never chapter content.
+ template=(ROOT/'docs/images/chapter-openers/01.svg').read_text()
+ template=re.sub(r'<title id="title">.*?</title>',f'<title id="title">{escape(title)}</title>',template)
+ template=re.sub(r'<desc id="desc">.*?</desc>',f'<desc id="desc">{escape(description)} Conceptual learning path.</desc>',template)
+ template=re.sub(r'<g font-family="BookDiagram, Inter, Arial, sans-serif">.*?</g>',lambda m:'<g font-family="BookDiagram, Inter, Arial, sans-serif">'+''.join(d.parts)+'</g>',template,flags=re.S)
+ rel=f'images/chapter-openers/{name}.svg';(ROOT/'docs'/rel).write_text(template)
+ p=ROOT/'docs'/page;s=p.read_text();marker=f'\n[![{title}]({rel})]({rel})\n'
+ if marker not in s:
+  at=s.index('\n');p.write_text(s[:at+1]+marker+s[at+1:])
+print('Created and linked Home and Getting Started overview banners.')

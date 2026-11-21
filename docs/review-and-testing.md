@@ -15,7 +15,7 @@
 | Autograd | Flat-address GELU wrappers now make inputs/upstream gradients contiguous. Documented first-order scope and the need for a separate higher-order implementation. |
 | Finance | Distinguished N(d1) from risk-neutral exercise probability N(d2), added domain/zero-boundary requirements, and explained variance and Monte Carlo conventions. |
 | Installation | Selected a documented PyTorch 2.9.1/cu128 + Triton 3.5.1 target, addressed ARM64 separately, preserved provider drivers and separated documentation dependencies from GPU dependencies. This target has not been GPU-tested in this pass. |
-| Reader experience | Added 45 original embedded-font SVGs (22 dark chapter banners plus 23 worked/overview figures), chapter-level download links, a worked quiz and a same-page viewer with fit-width/fit-whole controls and navigation cleanup. |
+| Reader experience | Added 47 original embedded-font SVGs (22 dark chapter banners, two entry-page banners and 23 worked/overview figures), chapter-level download links, a worked quiz and a same-page viewer with fit-width/fit-whole controls and navigation cleanup. |
 
 ## Offline checks and their limits
 

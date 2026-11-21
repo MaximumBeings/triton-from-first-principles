@@ -1,5 +1,7 @@
 # Getting Started
 
+[![Build the stack. Verify each layer.](images/chapter-openers/getting-started.svg)](images/chapter-openers/getting-started.svg)
+
 Start by choosing an execution mode. Reading, building the website and checking Python syntax need no GPU. Interpreter references need a supported Linux Python/Triton installation but do not compile GPU code. Real kernel correctness and performance need a compatible NVIDIA GPU and working driver.
 
 The book contains 22 chapters. Its older printed results are author-reported **interpreter** outputs, not dated GPU captures. This review has not converted them into GPU results. See the [review and testing record](review-and-testing.md) for what was checked and what remains pending.

@@ -1,5 +1,7 @@
 # Triton From First Principles
 
+[![From tensors. To GPU kernels.](images/chapter-openers/book-overview.svg)](images/chapter-openers/book-overview.svg)
+
 [![From tensor contracts to checked GPU kernels](images/ch00/01-concept.svg)](images/ch00/01-concept.svg)
 
 **Building Production GPU Kernels in OpenAI Triton, One Layer at a Time**
