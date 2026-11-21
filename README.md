@@ -10,7 +10,7 @@ autograd integration, measurement, attention and financial-computing examples.
 The printed historical outputs are interpreter references. They do not establish
 compiled GPU correctness or performance. The current edition exports all 84
 complete reference files, records their identities and adds 55 original SVGs, including banners and worked diagrams for all four appendices.
-A separate GPU smoke program is prepared but has not yet been GPU-tested.
+The separate GPU smoke suite passed 12 H100 cases. Changed chapter references now have explicit pending revalidation status; an archived zero exit is not current-source numerical validation.
 
 ## Build and verify without a GPU
 

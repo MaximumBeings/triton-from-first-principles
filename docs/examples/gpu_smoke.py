@@ -1,4 +1,4 @@
-"""Compiled NVIDIA smoke tests. GPU execution is pending; never use interpreter mode."""
+"""Compiled NVIDIA smoke tests. Captured H100 results are documented in execution-2026-11-21.md."""
 import datetime
 import json
 import math

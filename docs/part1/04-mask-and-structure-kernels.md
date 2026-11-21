@@ -19,6 +19,9 @@
 - Chapter 1, Section 1.4's distinction between a genuine scalar (legal to branch on with Python's `if`) and a block-shaped value (not) — Section 9.2 depends on this directly
 - Chapter 7's broadcasting via `[:, None]` / `[None, :]` — used throughout to build 2D index grids
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 9.1 Triangular Structure: Masks as a Function of Two Indices `[FOUNDATIONAL]`
 
 ### Intuition
@@ -48,7 +51,7 @@ x = tl.load(ptrs, mask=bounds_mask, other=0.0)
 result = tl.where(causal_mask, x, 0.0)
 ```
 
-Against a `4×4` tensor of `1..16`, hand-trace row 1 (`rows[1] = 1`): `causal_mask[1, :] = [1<=1, 0<=1... ]` — precisely, `cols = [0,1,2,3]`, so `causal_mask[1, j] = (j <= 1)`, true for `j=0,1` and false for `j=2,3`. Row 1's real values are `[5, 6, 7, 8]`, so the masked row should be `[5, 6, 0, 0]`. Genuinely captured:
+Against a `4×4` tensor of `1..16`, hand-trace row 1 (`rows[1] = 1`): `causal_mask[1, :] = [1<=1, 0<=1... ]` — precisely, `cols = [0,1,2,3]`, so `causal_mask[1, j] = (j <= 1)`, true for `j=0,1` and false for `j=2,3`. Row 1's real values are `[5, 6, 7, 8]`, so the masked row should be `[5, 6, 0, 0]`. historical illustrated output:
 
 ```
 input:
@@ -72,7 +75,7 @@ Every row matches the hand trace, and the whole result matches PyTorch's own `to
 wrong_mask = cols[None, :] < rows[:, None]     # BUG: should be <=
 ```
 
-A single changed character — `<` instead of `<=` — changes "keep the diagonal and everything below it" to "keep only strictly below it." Genuinely captured, on the identical input:
+A single changed character — `<` instead of `<=` — changes "keep the diagonal and everything below it" to "keep only strictly below it." historical illustrated output, on the identical input:
 
 ```
 with < instead of <=:
@@ -107,7 +110,7 @@ Every diagonal entry — a position attending to itself, which causal attention 
 
 ### Intuition
 
-A warehouse worker checking a manifest before opening a shipping container saves real time by not opening containers the manifest already says are empty — the saving isn't in how fast they can search an empty container, it's in never touching it at all. Masking an individual element after loading it (Chapters 5–9.1) is the equivalent of opening every container and then ignoring the empty ones; skipping a whole tile before ever issuing a load for it is the equivalent of reading the manifest first.
+A warehouse worker checking a manifest before opening a shipping container saves real time by not opening containers the manifest already says are empty — the saving isn't in how fast they can search an empty container, it's in never touching it at all. A memory mask prevents false lanes from loading/storing. A value selection such as tl.where after a load instead chooses among computed values. Skipping an inactive tile also avoids its instruction and address-generation work; these are different mechanisms.
 
 Block-sparse patterns — common in sparse attention, mixture-of-experts routing, and pruned models — exploit exactly this: a coarse per-tile flag decides whether an entire block of work is worth computing at all. Chapter 1, Section 1.4 already established the rule this depends on: `tl.program_id(0)` is a genuine scalar, and so is any single value loaded through it (like one flag out of a per-block array) — branching on a scalar with Python's `if` is legal, unlike branching on a block-shaped mask.
 
@@ -117,8 +120,8 @@ Block-sparse patterns — common in sparse attention, mixture-of-experts routing
 |---|---|---|
 | What decides the outcome | A `BLOCK`-shaped boolean tensor | A single scalar, loaded once per program instance |
 | How it's applied | `mask=` on `tl.load`/`tl.store`, or `tl.where` | An ordinary Python `if`, legal per Chapter 1, Section 1.4 |
-| What happens to skipped work | Loads/stores still issue, masked lanes are ignored | The `tl.load`/`tl.store` calls for that tile never execute at all |
-| Where the saving comes from | Correctness — an invalid lane never corrupts memory | Actual avoided memory traffic and compute, not just correctness |
+| What happens to skipped work | Predicated instructions may issue; false memory lanes do not load/store | The `tl.load`/`tl.store` calls for that tile never execute at all |
+| Where the saving comes from | Correctness and suppression of false-lane memory requests; other accesses still need valid addresses | Actual avoided memory traffic and compute, not just correctness |
 
 ### Worked Example 9.2.1 — skipping entire blocks based on a per-block flag
 
@@ -135,7 +138,7 @@ def block_sparse_double_kernel(x_ptr, out_ptr, block_mask_ptr, N,
         tl.store(out_ptr + offsets, x * 2.0, mask=mask)
 ```
 
-With `N=16`, `BLOCK=4` (4 program instances, one per block), and `block_mask = [1, 0, 1, 0]` — blocks 0 and 2 active, blocks 1 and 3 not — the output buffer is pre-zeroed so a skipped block's untouched state is directly visible. Genuinely captured:
+With `N=16`, `BLOCK=4` (4 program instances, one per block), and `block_mask = [1, 0, 1, 0]` — blocks 0 and 2 active, blocks 1 and 3 not — the output buffer is pre-zeroed so a skipped block's untouched state is directly visible. historical illustrated output:
 
 ```
 x:             [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0]
@@ -502,7 +505,7 @@ Every mask in this chapter — triangular, block-sparse, ragged — has still be
 
 **1.** `cols[None, :] <= rows[:, None]` is true at position `(row, col)` exactly when `col <= row` — that is, when the column position is at or before the row position. In standard causal attention, position `row` is allowed to attend to position `col` if `col` is not in `row`'s future, which includes `row` attending to itself (`col == row`). `<=` keeps the diagonal (self-attention) in addition to everything strictly before it; `<` would incorrectly exclude a position from attending to itself, which Worked Example 9.1.2 showed zeroes out every diagonal entry.
 
-**2.** A wrong comparison operator in a causal mask (Section 9.1) produces a well-formed, plausible-looking output that is simply the wrong set of positions — no error, no crash, just silently incorrect structure, exactly like Chapter 6's stride-lying failures. A block-shaped value loaded where `is_active` should be a scalar (Section 9.2) reintroduces Chapter 1, Section 1.4's `if mask:` trap directly: on a real compiled build this is rejected outright as illegal, since Python's `if` cannot resolve a block-shaped condition to one truth value, and under this book's interpreter it behaves the way Worked Example 1.4.2 already showed — a plausible-looking but wrong collapse of the whole block's truthiness into one decision.
+**2.** A wrong comparison operator in a causal mask (Section 9.1) produces a well-formed, plausible-looking output that is simply the wrong set of positions — no error, no crash, just silently incorrect structure, exactly like Chapter 6's stride-lying failures. A block-shaped value loaded where `is_active` should be a scalar (Section 9.2) reintroduces Chapter 1, Section 1.4's `if mask:` trap directly: on a real compiled build this is rejected outright as illegal, since Python's `if` cannot resolve a block-shaped condition to one truth value, and under this book's interpreter it behaves the way Worked Example 1.4.2 already showed — an unsupported scalarization of a vector condition; the masked store in that historical example can hide any visible difference.
 
 **3.** False lanes in a masked `tl.load` do not perform their loads; false lanes in a masked `tl.store` do not write. Active lanes can still fetch whole sectors. Skipping a whole inactive block additionally omits its instruction and address-generation work. This distinction is about predication versus skipping work, not a guarantee that masked-out lanes generate memory traffic.
 

@@ -5,7 +5,7 @@
 **Building Production GPU Kernels in OpenAI Triton, One Layer at a Time**
 
 !!! info "Scope and testing status"
-    All 22 chapters are present. Existing example outputs are interpreter references, not GPU benchmark records. This edition adds original SVGs and an offline technical review; 12 compiled H100 smoke cases have now passed, and all 84 complete references exited zero in interpreter mode. Full compiled chapter coverage remains pending. See the [dated execution record](execution-2026-11-21.md) and [review record](review-and-testing.md).
+    All 22 chapters are present. Existing example outputs are interpreter references, not GPU benchmark records. This edition adds original SVGs and an offline technical review; 12 compiled H100 smoke cases have now passed, and all 84 archived reference versions exited zero in interpreter mode. Twelve subsequently corrected chapter files now need fresh execution; see the [independent review response](opus-review-response-2026-11-21.md). Full compiled chapter coverage remains pending. See the [dated execution record](execution-2026-11-21.md) and [review record](review-and-testing.md).
 
 > "A kernel is not finished when it computes the right answer once. It is finished when you can tell the compiler exactly which memory it may touch, which values it may assume never change, and how many threads get to look at each byte at the same time — and PyTorch's own autograd engine can still find its way through it."
 
@@ -52,7 +52,7 @@ The design principles carried through the whole book:
 | **Part 3 — Wiring Into PyTorch's Autograd** | `torch.autograd.Function` as the real graph node a Triton kernel plugs into |
 | **Part 4 — The Backward Kernel** | Writing the backward kernel and `ctx.save_for_backward`, how PyTorch's autograd engine chains custom ops |
 | **Part 5 — GPU Acceleration and Performance** | Autotuning (`num_warps`, `num_stages`, `BLOCK_SIZE`), benchmarking correctly with `triton.testing.do_bench` |
-| **Part 6 — Neural Network Building Blocks** | Fused LayerNorm/softmax/matmul+bias+activation, Flash Attention, top-2 MoE gating and the boundary to a full expert-dispatch system |
+| **Part 6 — Neural Network Building Blocks** | Fused LayerNorm and matmul+bias+activation, single-head forward attention, top-2 MoE gating and the boundary to a full expert-dispatch system |
 | **Part 7 — Financial Computing Applications** | Black–Scholes calls, rolling standard deviation and Monte Carlo call pricing |
 
 Start with [Getting Started](getting-started.md) to stand up a Triton + PyTorch + CUDA environment, or jump straight into [Part 0: Triton Foundations](part0/01-types-and-the-jit-boundary.md) if your toolchain is already installed.

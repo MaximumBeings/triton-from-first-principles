@@ -20,6 +20,12 @@
 - Chapter 6's pointer+stride contract in full — Section 7.3 of this chapter is best read as a direct continuation of Chapter 6, Section 6.2's finding that shape and strides are unverified, hand-typed promises
 - No new Triton primitives are assumed beyond what Chapters 1–6 already introduced
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
+!!! warning "Block-pointer API is version-specific"
+    The block-pointer listings here target Triton 3.5.1 (also present in the captured 3.3.0 stack). They do not run unchanged on Triton 3.9: make_block_ptr and advance were removed there. The quoted deprecation warning belongs to the author-reported 3.7/3.8 era, not every version. Use the pinned environment for these historical listings or the [descriptor migration example](../version-and-migration.md).
+
 ## 7.1 Broadcasting: Implicit Shape Expansion via `None`-Indexing `[FOUNDATIONAL]`
 
 ### Intuition
@@ -50,7 +56,7 @@ col_row = cols[None, :]               # shape (1, BLOCK_N)
 combined = row_col + col_row          # broadcasts to (BLOCK_M, BLOCK_N)
 ```
 
-With `BLOCK_M = BLOCK_N = 4`, hand-trace `combined[i, j] = rows[i] + cols[j] = i + j`. Genuinely captured, with `tl.static_print` confirming each intermediate shape during tracing:
+With `BLOCK_M = BLOCK_N = 4`, hand-trace `combined[i, j] = rows[i] + cols[j] = i + j`. historical illustrated output, with `tl.static_print` confirming each intermediate shape during tracing:
 
 ```
 row_col shape: ['constexpr[4]', 'constexpr[1]']
@@ -72,7 +78,7 @@ b = tl.arange(0, BLOCK_B)   # shape (BLOCK_B,)
 c = a + b                  # illegal unless BLOCK_A == BLOCK_B
 ```
 
-Launched with `BLOCK_A=4, BLOCK_B=8` — two 1D shapes, neither equal nor equal to `1` — genuinely captured:
+Launched with `BLOCK_A=4, BLOCK_B=8` — two 1D shapes, neither equal nor equal to `1` — historical illustrated output:
 
 ```
 InterpreterError: ValueError('Cannot make_shape_compatible: incompatible dimensions at index 0: 4 and 8')
@@ -98,7 +104,7 @@ This is a real, unconditional rejection, not a permissive interpreter quirk the 
   (repeated across)
 ```
 
-> `[COMMON TRAP]` Worked Example 7.1.2's error only fires when the two shapes genuinely disagree. Forgetting the `[:, None]` / `[None, :]` entirely — writing `rows + cols` where both are plain `(BLOCK,)`-shaped ranges of the *same* length — produces no error at all, because two identical 1D shapes are perfectly valid to add elementwise. Genuinely captured from exactly that mistake, with `BLOCK=4` on both sides:
+> `[COMMON TRAP]` Worked Example 7.1.2's error only fires when the two shapes genuinely disagree. Forgetting the `[:, None]` / `[None, :]` entirely — writing `rows + cols` where both are plain `(BLOCK,)`-shaped ranges of the *same* length — produces no error at all, because two identical 1D shapes are perfectly valid to add elementwise. historical illustrated output from exactly that mistake, with `BLOCK=4` on both sides:
 >
 > ```
 > combined shape (forgot None-indexing): ['constexpr[4]']
@@ -137,7 +143,7 @@ x = tl.load(x_ptr + offsets, mask=mask, other=0.0)
 tl.store(out_ptr + offsets, x * 2.0, mask=mask)
 ```
 
-With `n=16`, `BLOCK=8`, launched across a grid of 2 program instances, this behaves identically to every masked doubling kernel since Chapter 5 — the hints don't change the result, only (on a real compiled build) how efficiently the compiler is able to generate the load and store. Genuinely captured:
+With `n=16`, `BLOCK=8`, launched across a grid of 2 program instances, this behaves identically to every masked doubling kernel since Chapter 5 — the hints don't change the result, only (on a real compiled build) how efficiently the compiler is able to generate the load and store. historical illustrated output:
 
 ```
 hinted kernel result: [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0, 28.0, 30.0]
@@ -151,7 +157,7 @@ offsets = tl.arange(0, BLOCK) + 3          # NOT a multiple of BLOCK in general
 offsets = tl.multiple_of(offsets, BLOCK)   # lie: claim it is anyway
 ```
 
-With `BLOCK=8`, `offsets = [3, 4, 5, 6, 7, 8, 9, 10]` — genuinely not a multiple of 8 in the way `tl.multiple_of` is claiming. Genuinely captured, running exactly this lie under this book's interpreter:
+With `BLOCK=8`, `offsets = [3, 4, 5, 6, 7, 8, 9, 10]` — genuinely not a multiple of 8 in the way `tl.multiple_of` is claiming. historical illustrated output, running exactly this lie under this book's interpreter:
 
 ```
 lied multiple_of result: [0.0, 0.0, 0.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -193,7 +199,7 @@ out_block_ptr = tl.make_block_ptr(
 tl.store(out_block_ptr, tile, boundary_check=(0, 1))
 ```
 
-Against `real = torch.arange(12).reshape(3, 4)`, with correct shape/stride arguments (`M=3, N=4`, `real.stride()`), genuinely captured:
+Against `real = torch.arange(12).reshape(3, 4)`, with correct shape/stride arguments (`M=3, N=4`, `real.stride()`), historical illustrated output:
 
 ```
 correct block_ptr shape/strides -> matches? True
@@ -203,7 +209,7 @@ correct block_ptr shape/strides -> matches? True
 
 ### Worked Example 7.3.2 — the same lie from Chapter 6, told to a block pointer instead
 
-Passing `M=4, N=3, stride_m=3, stride_n=1` for the *out* block pointer's shape — describing the same real `(3, 4)` tensor as if it were `(4, 3)`, exactly Chapter 6, Section 6.2's lie — genuinely captured:
+Passing `M=4, N=3, stride_m=3, stride_n=1` for the *out* block pointer's shape — describing the same real `(3, 4)` tensor as if it were `(4, 3)`, exactly Chapter 6, Section 6.2's lie — historical illustrated output:
 
 ```
 LIED shape (4,3) via block_ptr on a real (3,4) tensor, result:
@@ -557,7 +563,7 @@ Combining two block-shaped values of different shapes through `None`-indexing br
 
 ## Where We Go Next
 
-This chapter's `tl.make_block_ptr` example loaded and stored one rectangular tile per kernel launch, at a fixed offset. Chapter 8 puts that same block pointer to work across a whole tensor at once — `tl.advance`, iterating a block pointer across a grid dimension, and the tiling strategies that turn "load one tile" into "load every tile a matmul or a reduction needs, in the order that keeps memory traffic down." This is also where Part 1's pointer+stride contract stops being an abstract concern and starts directly determining performance: which tile a program instance loads, and in what order, is the single biggest lever Chapters 8 onward will pull.
+This chapter's legacy block-pointer example handles one rectangular tile. Appendix D.3 shows advance on supported older APIs; the version/migration guide supplies a descriptor example for the newer path. Chapter 8 next addresses host allocation and device placement. Neither this historical one-tile example nor the interpreter establishes a GPU memory-traffic optimization.
 
 ## Worked Solutions
 
@@ -565,7 +571,7 @@ This chapter's `tl.make_block_ptr` example loaded and stored one rectangular til
 
 **2.** No error fires because `a` and `b` are both plain `(8,)`-shaped ranges — identical shapes are always valid to add elementwise, with no broadcasting involved at all. The broadcasting-compatibility check that caught Worked Example 7.1.2's mismatch has nothing to catch here, because there is no mismatch: two equal-length 1D ranges added together is a completely ordinary, well-typed operation, it's just very unlikely to be an *outer* combination of two independent axes, which is what `rows[:, None] + cols[None, :]` is for. The fix is to explicitly reshape one operand to a column and the other to a row before adding, exactly as Worked Example 7.1.1 does.
 
-**3.** It asserts that every value in the `offsets` tensor is an exact multiple of `16` — a numeric property about the specific integers in that tensor, not about the tensor's shape or the underlying data it points to. Nobody verifies it: it's an unchecked hint the compiler is told to trust when deciding how to generate load/store instructions, exactly parallel to how nobody verifies the shape and stride arguments from Chapter 6, Section 6.2.
+**3.** multiple_of communicates divisibility at each contiguous group start along a dimension, not that every value is divisible. max_contiguous communicates the run lengths. Both are promises used by the compiler, not runtime checks; the historical interpreter does not validate vectorization.
 
 **4.** Broadcasting compatibility is decided entirely from information the compiler already has at trace time — the shapes of the two operands being combined — so a real check can run and genuinely fail, and this book's interpreter performs that same check, producing a real, reproducible error. A false alignment hint, by contrast, is only ever *acted upon* by the real GPU compiler's optimization passes (choosing vectorized instructions, assuming coalesced memory access) — passes this book's CPU-based interpreter does not run at all. Lying to `tl.multiple_of` under the interpreter costs nothing not because the lie is harmless, but because the interpreter was never going to use the hint for anything in the first place; the actual cost only shows up in a real compiled build this book cannot honestly simulate.
 

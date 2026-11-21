@@ -23,6 +23,9 @@
 !!! warning "A note on how the code in this book is actually run"
     The small reference listings in this edition target interpreter-based instruction and are not all directly GPU-launchable: some use CPU tensors or dot tiles below compiled-backend limits. A compiled GPU version needs valid tiles, CUDA allocations and a compatible toolchain. But this book itself was authored and its output captured on a machine with **no CUDA GPU attached** — not the author's cloud workspace, and not the Mac the book is written on. Rather than fabricate plausible-looking numbers, every "Reference Implementations" section in this book that needed to run code ran it with `TRITON_INTERPRET=1` set — Triton's built-in interpreter, which executes a kernel's logic in Python on the CPU instead of compiling it to PTX and launching it on a GPU. This gives genuinely computed, reproducible output for anything that depends only on a kernel's *logic* being correct. It does **not** exercise the real GPU compiler or its error messages, and it cannot produce a meaningful timing number — Chapters 18 and 19, where wall-clock performance is the entire point, disclose this limitation again and handle it differently. Anywhere this chapter's behavior might differ between the interpreter and a real compiled GPU build, it says so explicitly rather than presenting interpreter-only behavior as universal.
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 1.1 The Two-Phase Model: Python Function, Compiled Kernel `[FOUNDATIONAL]`
 
 ### Intuition
@@ -45,7 +48,7 @@ does not run anything — it registers a description of a kernel with Triton's `
 |---|---|---|
 | What running `f(...)` does | Executes the function body immediately, every call | **Raises an error** — a `JITFunction` is not meant to be called this way from host code |
 | What actually executes it | The call itself | `f[grid](...)` — indexing with a launch grid |
-| When is it compiled? | Never — CPython interprets bytecode on every call | Once per unique combination of argument argument types, constexpr values, target/options and specialization attributes, the first time that combination is launched |
+| When is it compiled? | Never — CPython interprets bytecode on every call | Once per unique combination of argument types, constexpr values, target/options and specialization attributes, the first time that combination is launched |
 | What happens on a repeat call with the same signature | Re-executes from scratch (no such thing as "compiling" a Python function) | Cache hit — the previously compiled kernel is reused, no retracing |
 | What happens on a call with a *different* `tl.constexpr` value | N/A | Cache miss — retraced and recompiled as a distinct kernel variant |
 
@@ -118,9 +121,30 @@ A restaurant's fixed menu items — "large," "medium," "small" — are decided l
 |---|---|---|
 | Known to the compiler | Yes — at trace time, before compilation | No — only as "some value of this dtype/shape" |
 | Can size a `tl.arange(0, N)` or a compile-time-unrolled loop | Yes | **No — `tl.arange`'s bounds must be `tl.constexpr`** |
-| Can appear in a Python-level `if`/`for` inside the kernel body | Yes — resolved during tracing | No — see Section 1.4 |
-| Changing it between launches | Triggers a new trace + compile (cache miss) | Reuses the already-compiled kernel (no retrace) |
+| Can drive scalar `if` / `for range(...)` control flow | Yes — can resolve during compilation | Yes — supported scalar conditions/loop bounds lower to runtime control flow; a multi-element mask is different |
+| Changing it between launches | Selects a constexpr specialization (existing cache entries may be reused) | May reuse code, but scalar-value/alignment specialization can create another variant |
 | Closest Mojo/C++ analogue | `alias` / `constexpr` | `var` / an ordinary function parameter |
+
+### Runtime scalar control flow: a manual trace
+
+Runtime values cannot size `tl.arange`, but scalar control flow is supported:
+
+```python
+@triton.jit
+def scalar_control(out_ptr, n):
+    total = 0
+    for i in range(0, n):
+        total += i
+    if n > 3:
+        total += 10
+    tl.store(out_ptr, total)
+```
+
+For n=5, the loop adds 0+1+2+3+4=10, then the branch adds 10, producing 20. This is an explanatory snippet, not a newly captured GPU run. A scalar condition is not the same as `if offsets < n`, which produces a multi-element tensor and must use elementwise selection/masking. See [Triton's range API](https://triton-lang.org/main/python-api/generated/triton.language.range.html).
+
+### Value and alignment specialization
+
+Runtime does not mean “never recompile.” In the classic launcher, integer value 1 and divisibility properties can influence specialization, as can pointer alignment. A stride change from 1 to 4 or a length change from a multiple of 16 to a nonmultiple can therefore select different code even when types match. These are version-specific launcher rules, not extra tensor-shape metadata. Inspect compiled cache keys/IR on the installed version; interpreter prints do not prove a compilation.
 
 ### Worked Example 1.2.1 — `tl.arange` genuinely refusing a non-constexpr bound
 
@@ -171,7 +195,7 @@ y = tl.load(y_ptr + offsets, mask=mask)   # float16
 z = x + y
 ```
 
-Genuinely captured, via `tl.static_print` fired during tracing:
+historical illustrated output, via `tl.static_print` fired during tracing:
 
 ```
 dtype of x: fp32  dtype of y: fp16  dtype of z=x+y: fp32
@@ -197,7 +221,7 @@ x = tl.load(x_ptr + offsets, mask=mask, other=0.0)   # fp16
 acc = tl.sum(x.to(tl.float32), axis=0)                # accumulate in fp32
 ```
 
-The exact answer is `2048 × 0.0001 = 0.2048`. Genuinely captured:
+The exact answer is `2048 × 0.0001 = 0.2048`. historical illustrated output:
 
 ```
 Summing 2048 copies of 0.0001 (each stored as fp16):
@@ -206,7 +230,8 @@ Summing 2048 copies of 0.0001 (each stored as fp16):
   exact answer                       : 0.2048
 ```
 
-The naive `fp16` accumulation is off by about 14% — not because `0.0001` itself is stored badly (every copy is off by the same small, bounded rounding error), but because `fp16` has only about 10 bits of mantissa, and once the running total climbs toward `0.2`, `fp16`'s representable resolution near that magnitude (roughly `2^-11 ≈ 0.00049`) is already *larger* than the `0.0001` being added on each step — many of the later additions round away most or all of their own contribution, and which way they round compounds unpredictably over 2,048 steps. The `fp32`-accumulated version keeps eleven additional mantissa bits throughout the whole reduction and lands within `0.00003` of the exact answer — the residual is ordinary `fp16` storage rounding on the *inputs*, not compounding accumulation error.
+The naive FP16 sum is about 14% high, not low. Near 0.2, FP16's spacing is 2^-13. Earlier in this sequence, rounding each addition changes direction and step size as the total crosses exponent boundaries. Repeated round-to-nearest need not lose each increment or bias downward. FP32 has 23 fraction bits versus FP16's 10, giving 13 additional fraction bits; its accumulation still rounds. The stored FP16 inputs already differ slightly from the decimal 0.0001.
+
 
 > `[COMMON TRAP]` Seeing a kernel's inputs and outputs declared as `fp16` or `bf16` and assuming every intermediate value inside the kernel is the same dtype is exactly the assumption Worked Example 1.3.2 just broke. Triton will not warn you if you accumulate a reduction, a matmul's inner product, or a running mean or variance in a narrow dtype — it will compute a plausible-looking, silently-degraded number and let you find out later, usually as a training instability or an accuracy regression far away from the kernel that caused it. Chapters 13, 14, and 20 build this "narrow storage, wide accumulation" pattern into every kernel that reduces or multiplies-and-adds, as a rule rather than an afterthought.
 
@@ -237,7 +262,7 @@ else:
     x = x + 1.0
 ```
 
-Launched with `x = [0, 1, 2, 3, 4, 5]`, `BLOCK=4`, over a grid of 2 program instances: program 0 covers offsets `0..3` (all valid against `n=6`) and takes the `pid == 0` branch, multiplying by 100; program 1 covers offsets `4..7`, of which only `4` and `5` are valid under the mask, and takes the `else` branch, adding 1. Genuinely captured:
+Launched with `x = [0, 1, 2, 3, 4, 5]`, `BLOCK=4`, over a grid of 2 program instances: program 0 covers offsets `0..3` (all valid against `n=6`) and takes the `pid == 0` branch, multiplying by 100; program 1 covers offsets `4..7`, of which only `4` and `5` are valid under the mask, and takes the `else` branch, adding 1. historical illustrated output:
 
 ```
 Branching on tl.program_id() (a real scalar): [0.0, 100.0, 200.0, 300.0, 5.0, 6.0]
@@ -256,13 +281,13 @@ if mask:                      # mask is BLOCK-shaped, not one bool
 tl.store(out_ptr + offsets, x, mask=mask)
 ```
 
-With `n=6` and `BLOCK=4` over 2 program instances, program 0's `mask` is `[True, True, True, True]` (uniform — no ambiguity), but program 1's `mask` is `[True, True, False, False]` — a genuinely mixed tensor with no single truth value. Genuinely captured, running exactly this kernel under this book's interpreter:
+With `n=6` and `BLOCK=4` over 2 program instances, program 0's `mask` is `[True, True, True, True]` (uniform — no ambiguity), but program 1's `mask` is `[True, True, False, False]` — a genuinely mixed tensor with no single truth value. historical illustrated output, running exactly this kernel under this book's interpreter:
 
 ```
 ran without raising, but silently wrong: [0.0, 2.0, 4.0, 6.0, 8.0, 10.0]
 ```
 
-That output is **wrong** in a way worth sitting with: every element got doubled, including the two positions (`offsets 6` and `7`) that `mask` marked invalid for program 1 — the masked `tl.store` at the end still protects those two positions from being *written*, so nothing actually corrupts memory here, but `if mask:` did not do what it looks like it does. It did not multiply only the valid lanes by 2 and leave the rest alone the way `tl.where(mask, x * 2.0, x)` would — it evaluated `mask`'s truthiness as one unit (treating "at least one element is `True`" as "the condition holds") and applied `x * 2.0` to the *entire* block, valid and invalid lanes alike, uniformly. This is the interpreter being more permissive than it should be: real compiled Triton rejects converting a block-shaped value to a single Python boolean at trace time, because — exactly as the intuition above argues — there is no principled single answer to "is this manifest true?" A real GPU build turns this into a compile-time error before your kernel exists as a compiled artifact at all; this book's interpreter, being a simpler Python-level simulation, instead does something plausible-looking and silently wrong. Both outcomes point at the same underlying mistake — the fix in either case is the same: replace the `if` with `tl.where(mask, x * 2.0, x)`, which is defined per-lane and never needs a single collapsed truth value in the first place.
+The compiled frontend rejects `if mask:` for a multi-element tensor. The historical interpreter path used here instead treated a multi-element condition as true; this is not an “any true lane” reduction. In this demonstration the final masked store hides the distinction, so its visible stored output can match the `tl.where` version. It is not evidence of an observable wrong answer. Use scalar predicates for control flow and elementwise `tl.where` or memory masks for vector predicates.
 
 ### ASCII Diagram — one program instance, `BLOCK=4` lanes, one scalar
 
@@ -622,7 +647,7 @@ Every number in that output was independently hand-traced earlier in this chapte
 
 ## Chapter Summary
 
-A `@triton.jit` function is a description compiled the first time it's launched with a given combination of argument argument types, constexpr values, target/options and specialization attributes — not a function that runs when you call it the way ordinary Python does, and not recompiled on every subsequent launch that reuses the same combination. `tl.constexpr` is Triton's compile-time/run-time boundary: it is required, not merely preferred, anywhere a value must be known before compilation — sizing a `tl.arange`, or deciding which branch of a Python `if` exists at all in the compiled kernel — and Section 1.2's `ValueError` showed that boundary enforced, not suggested. Triton's numeric types promote implicitly on mismatch, the opposite of a language that rejects mixed-width arithmetic outright, which makes deliberate accumulation-dtype choices — not the language's defaults — the thing standing between a kernel and a silently degraded answer, as the fp16-versus-fp32 accumulation gap in Section 1.3 demonstrated directly. And every value derived from `tl.arange` is block-shaped, not scalar, which makes Python's `if` legal only on genuine scalars like `tl.program_id()` — branching on a whole block, as Section 1.4 showed, is either rejected outright by a real compiled build or, under this book's interpreter, silently wrong in a way that `tl.where` never is.
+A `@triton.jit` function is a description compiled the first time it's launched with a given combination of argument types, constexpr values, target/options and specialization attributes — not a function that runs when you call it the way ordinary Python does, and not recompiled on every subsequent launch that reuses the same combination. `tl.constexpr` is Triton's compile-time/run-time boundary: it is required, not merely preferred, anywhere a value must be known before compilation — sizing a `tl.arange`, or deciding which branch of a Python `if` exists at all in the compiled kernel — and Section 1.2's `ValueError` showed that boundary enforced, not suggested. Triton's numeric types promote implicitly on mismatch, the opposite of a language that rejects mixed-width arithmetic outright, which makes deliberate accumulation-dtype choices — not the language's defaults — the thing standing between a kernel and a silently degraded answer, as the fp16-versus-fp32 accumulation gap in Section 1.3 demonstrated directly. And every value derived from `tl.arange` is block-shaped, not scalar, which makes Python's `if` legal only on genuine scalars like `tl.program_id()` — branching on a whole block, as Section 1.4 showed, is either rejected outright by a real compiled build or, under this book's interpreter, silently wrong in a way that `tl.where` never is.
 
 ## Self-Check Questions
 
@@ -644,7 +669,7 @@ This chapter treated `tl.constexpr` as a binary switch — a value is either kno
 
 **3.** The result is `tl.float32` — Triton promotes mismatched-width arithmetic to the wider of the two dtypes automatically, with no cast required and no error raised, exactly as Worked Example 1.3.1 captured (`fp32 + fp16 -> fp32`). A strictly statically-typed language like Mojo does the opposite: mixing two different-width numeric types in one expression without an explicit conversion is a compile error, not a silent promotion — the type mismatch has to be resolved by the programmer, visibly, rather than resolved automatically by the compiler.
 
-**4.** The source of the error is not how `0.0001` gets stored — every one of the 2,048 copies has the identical, bounded rounding error from being rounded once to the nearest representable `fp16` value. The error comes from *repeated rounding of the running total*: `fp16` has roughly 10 mantissa bits, and once the accumulator's magnitude climbs toward `0.2`, `fp16`'s representable resolution at that magnitude is already larger than the `0.0001` being added on each subsequent step, so many additions round away some or all of their own contribution, and this compounds unpredictably over all 2,048 steps. Casting to `fp32` before summing keeps far more mantissa precision throughout the accumulation itself, so only the original, bounded per-value storage rounding survives into the final answer — which is exactly why the `fp32`-accumulated result lands within a fraction of a percent of the exact answer while the naive version does not.
+**4.** Stored FP16 inputs have an initial quantization error, and repeated additions add further rounding. The naive result is high: rounding increments near exponent boundaries biases this particular sequence upward. FP32 has 13 additional fraction bits and reduces (but does not eliminate) accumulation rounding; it does not restore bits already lost in FP16 storage.
 
 **5.** `pid = tl.program_id(0)` is a genuine scalar — exactly one integer, for the one program instance currently running — so `if pid == 0:` has exactly one, unambiguous truth value, the same as an ordinary Python `if` on an ordinary Python value. `mask = offsets < n`, where `offsets` came from `tl.arange`, is `BLOCK`-shaped: one boolean per lane, and when those booleans disagree (some `True`, some `False`) there is no single fact for `if mask:` to be asking about. `if mask:` should be replaced with `tl.where(mask, a, b)`, which doesn't need to collapse the block into one answer at all — it produces one masked answer per lane, which is the actual question a per-lane condition is asking.
 

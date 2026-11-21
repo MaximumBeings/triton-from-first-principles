@@ -19,6 +19,9 @@
 - Chapter 1, Section 1.1 (the two-phase compile model) and Section 1.4 (block-shaped values) — this chapter names the hardware reality those sections were already relying on
 - Chapter 3 (strides, pointer arithmetic, 2D broadcasting) — this chapter's worked examples build directly on `tl.arange` and the `[:, None]`/`[None, :]` broadcasting pattern introduced there
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 4.1 The Program Hierarchy: Grid and Program, Not Grid/Block/Thread `[FOUNDATIONAL]`
 
 ### Intuition
@@ -46,7 +49,7 @@ def global_id_kernel(out_ptr, BLOCK: tl.constexpr):
     tl.store(out_ptr + offsets, offsets)
 ```
 
-Launched with a grid of 4 programs and `BLOCK=8` — deliberately the same `4 blocks × 8` shape Mojo's Chapter 4, Section 4.1 hand-traces for its own 32-thread example. Genuinely captured:
+Launched with a grid of 4 programs and `BLOCK=8` — deliberately the same `4 blocks × 8` shape Mojo's Chapter 4, Section 4.1 hand-traces for its own 32-thread example. historical illustrated output:
 
 ```
 all global ids: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
@@ -91,7 +94,7 @@ n, BLOCK = 1000, 256
 grid = (triton.cdiv(n, BLOCK),)
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 triton.cdiv(1000, 256) = 4 -> grid = (4,)
@@ -156,7 +159,7 @@ def naive_matmul_row_kernel(a_ptr, b_ptr, c_ptr, M, N, K,
     tl.store(c_ptr + row * stride_cm + n_offsets, acc, mask=n_offsets < N)
 ```
 
-With `A = [[1,2],[3,4]]`, `B = [[5,6],[7,8]]` — Mojo Chapter 4's own `2×2` example — program `row=0` loads `a_row = [1, 2]` and the full `b_tile = [[5,6],[7,8]]`, computes `a_row[:, None] * b_tile = [[1*5, 1*6], [2*7, 2*8]] = [[5,6],[14,16]]`, and sums along `axis=0` to get `[5+14, 6+16] = [19, 22]` — Mojo's `Thread(0,0)=19` and `Thread(0,1)=22`, produced together, in one program, by one reduction, instead of two separate threads each running their own 2-term loop. Genuinely captured:
+With `A = [[1,2],[3,4]]`, `B = [[5,6],[7,8]]` — Mojo Chapter 4's own `2×2` example — program `row=0` loads `a_row = [1, 2]` and the full `b_tile = [[5,6],[7,8]]`, computes `a_row[:, None] * b_tile = [[1*5, 1*6], [2*7, 2*8]] = [[5,6],[14,16]]`, and sums along `axis=0` to get `[5+14, 6+16] = [19, 22]` — Mojo's `Thread(0,0)=19` and `Thread(0,1)=22`, produced together, in one program, by one reduction, instead of two separate threads each running their own 2-term loop. historical illustrated output:
 
 ```
 C (Triton):

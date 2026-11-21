@@ -30,7 +30,8 @@ class Drawing:
         self.path=path;self.title=title;self.lede=lede;self.source=source;self.parts=[];self.w=760
         self.rect(0,0,760,1600,'#ffffff','none',0)
         chapter=path.split('/')[0][2:];num=path.split('/')[1].split('-')[0]
-        self.text(28,30,f'TRITON FROM FIRST PRINCIPLES   /   CHAPTER {chapter}   /   FIGURE {num}',13,MUTED,650)
+        label = 'BOOK OVERVIEW' if chapter == '00' else f'CHAPTER {chapter}'
+        self.text(28,30,f'TRITON FROM FIRST PRINCIPLES   /   {label}   /   FIGURE {num}',13,MUTED,650)
         self.line(28,46,732,46,LINE,1)
         y=self.paragraph(28,81,title,704,29,INK,650,35)
         self.y=self.paragraph(28,y+10,lede,704,22,MUTED,450,25)+24

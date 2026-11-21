@@ -2,7 +2,7 @@
 
 [![Appendix C: Connect the kernel. Keep its contract.](../images/chapter-openers/appendix-c.svg)](../images/chapter-openers/appendix-c.svg)
 
-[![Appendix C worked concept](../images/appendix-c/01-concept.svg)](../images/appendix-c/01-concept.svg)
+[![Appendix C: Three integration questions, three contracts](../images/appendix-c/01-concept.svg)](../images/appendix-c/01-concept.svg)
 
 This appendix steps back from individual kernels and looks at the machinery on the other side of the boundary: what PyTorch actually is underneath `torch.Tensor`, and exactly how a `@triton.jit` kernel becomes something PyTorch's own subsystems — eager execution, autograd, and `torch.compile` — can see, call, and (in the right circumstances) optimize.
 
@@ -82,9 +82,9 @@ resolved schema: aten::add.Tensor(Tensor self, Tensor other, *, Scalar alpha=1) 
 
 ## C.2 Making a Triton Kernel a First-Class PyTorch Operator
 
-Chapters 1–22 launch kernels the direct way: `kernel[grid](x, out, n, BLOCK=...)`, wrapped in an ordinary Python function (and, from Chapter 16 onward, an `autograd.Function`). That is sufficient for eager use and for hand-built autograd, but it is invisible to `torch.compile`: Dynamo traces Python bytecode and dispatcher calls, and a bare Triton kernel launch is neither.
+The chapters use direct launches and, where taught, autograd wrappers. Supported direct Triton launches can be captured by torch.compile. The optional triton_op route below supplies a structured operator contract for additional subsystem integration; it is not needed to make every launch visible.
 
-`torch.library` provides two decorators for closing this gap, and the choice between them matters:
+`torch.library` provides two operator-integration choices, and the choice between them matters:
 
 | API | What `torch.compile`/`torch.export` see | When to use it |
 |---|---|---|
@@ -207,7 +207,7 @@ RuntimeError: Attempted to access the data pointer on an invalid python storage.
 While executing %gelu_default : [num_users=1] = call_function[target=torch.ops.appendixdemo3.gelu.default](args = (%l_x_,), kwargs = {})
 ```
 
-`register_fake` gives the operator a **fake (meta) implementation**: a function with the same signature, run only against storage-less tensors, whose entire job is to describe the *shape and dtype* of the output without touching any real data — `torch.empty_like(x)` on a `FakeTensor` input is legal because `empty_like` only needs the metadata, never the storage. With this in place, Dynamo's graph capture stage succeeds; the error above happens *later*, when Inductor (the default compile backend) actually tries to compile and run the captured graph on CPU, and hits the same "no real storage yet" problem one layer down, at backend-compilation/execution time rather than at tracing time. This is a strictly later, more specific failure than Outcome 1 — Dynamo now understands the *shape* of what `torch.ops.appendixdemo3.gelu` produces; Inductor's CPU backend still doesn't have a way to actually run the Triton kernel underneath it in this no-GPU environment.
+In that historical experiment, registering another fake implementation replaced the existing behavior. Modern triton_op already registers its implementation as the fake implementation; overriding it is not generally required. A separate custom_op may require a fake implementation. A fake implementation gives the operator a **fake (meta) implementation**: a function with the same signature, run only against storage-less tensors, whose entire job is to describe the *shape and dtype* of the output without touching any real data — `torch.empty_like(x)` on a `FakeTensor` input is legal because `empty_like` only needs the metadata, never the storage. With this in place, Dynamo's graph capture stage succeeds; the error above happens *later*, when Inductor (the default compile backend) actually tries to compile and run the captured graph on CPU, and hits the same "no real storage yet" problem one layer down, at backend-compilation/execution time rather than at tracing time. This is a strictly later, more specific failure than Outcome 1 — Dynamo now understands the *shape* of what `torch.ops.appendixdemo3.gelu` produces; Inductor's CPU backend still doesn't have a way to actually run the Triton kernel underneath it in this no-GPU environment.
 
 ### Outcome 3 — `register_fake` + `backend="eager"`: genuine success
 
@@ -227,7 +227,7 @@ succeeded: tensor([-0.3173,  0.6915,  3.9090])
 allclose to oracle? True
 ```
 
-`backend="eager"` tells `torch.compile` to do Dynamo's graph capture and guard installation — the same tracing machinery Outcomes 1–2 exercised — but then simply hand the captured graph to ordinary eager PyTorch execution instead of compiling it with Inductor. That is enough to succeed here: once `register_fake` lets tracing complete, the real op just runs the real Triton kernel on real data, identically to calling `triton_gelu_op(x)` directly. This isolates the two stages cleanly: `register_fake` is what Dynamo's *tracing* needs; Inductor's *backend compilation* is a separate, later concern that this environment's lack of a CUDA device happens to block outright (Section C.4 explains why with genuine evidence, rather than a guess).
+backend="eager" captures a graph but executes it through eager operations rather than Inductor. The historical experiment used a replacement fake implementation and reported a successful interpreter path. That observation does not establish that register_fake is generally required for triton_op: the selected API already registers its implementation as a fake implementation. Keep the historical workaround separate from the current supported GPU recipe.
 
 ### Summary of the three outcomes
 

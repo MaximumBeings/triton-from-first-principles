@@ -5,6 +5,9 @@ the advanced kernels and worked answers, and the illustrations and teaching flow
 A follow-up checked the corrections. This is an offline technical review, not a
 new GPU run or a proof that every possible input is supported.
 
+!!! warning "Superseded in part by the independent review"
+    This page records the earlier review pass. The independent review identified missed errors, stale claims and new numerical edge cases. Its [response and current pending status](opus-review-response-2026-11-21.md) take precedence; the older source-scope claims below are historical.
+
 ## Confirmed issues corrected
 
 | Area | Correction |

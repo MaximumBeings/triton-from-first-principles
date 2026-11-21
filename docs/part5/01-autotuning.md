@@ -9,6 +9,12 @@
 !!! info "Historical interpreter timing examples"
     The driver-less failures below describe the original authoring environment. The later H100 smoke run is recorded separately; interpreter wall-clock times are not GPU performance measurements.
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
+!!! info "Interpreter plus a visible driver is a different environment"
+    A missing driver prevented the original timing helpers from starting. In the November 21 rerun a driver/GPU was visible, so autotune and do_bench did run while kernel bodies were interpreted. Those measurements are not GPU-kernel performance. Neither success nor failure is implied by TRITON_INTERPRET alone. First-call timing booleans are observations, not repeatable correctness assertions; see the [rerun differences](../rerun-differences-2026-11-21.md).
+
 ## What you will understand by the end of this chapter
 
 - What `triton.Config` actually is — a plain, driver-independent Python object bundling a kernel's compile-time meta-parameters (`BLOCK`, and similar) together with `num_warps` and `num_stages` — and what each of those fields roughly controls
@@ -53,7 +59,7 @@ print("num_warps:", cfg.num_warps)
 print("num_stages:", cfg.num_stages)
 ```
 
-Genuinely captured, with no driver, no GPU, and no kernel launch involved at all:
+historical illustrated output, with no driver, no GPU, and no kernel launch involved at all:
 
 ```
 kwargs: {'BLOCK': 1024}
@@ -65,7 +71,7 @@ A `triton.Config` is nothing more than this — a plain container. Everything in
 
 ### Worked Example 18.1.2: not every candidate is legal
 
-A list of candidate configs is only useful if every candidate in it can actually run. Chapter 9 established that `tl.arange`'s range must be a compile-time power of 2; that constraint doesn't go away just because a value came from a `triton.Config` instead of a hand-typed literal. Launching the same `gelu_forward_kernel` from Chapter 12 with `BLOCK=300` — a plausible-looking but non-power-of-2 candidate — genuinely captured:
+A list of candidate configs is only useful if every candidate in it can actually run. Chapter 9 established that `tl.arange`'s range must be a compile-time power of 2; that constraint doesn't go away just because a value came from a `triton.Config` instead of a hand-typed literal. Launching the same `gelu_forward_kernel` from Chapter 12 with `BLOCK=300` — a plausible-looking but non-power-of-2 candidate — historical illustrated output:
 
 ```
 InterpreterError: ValueError("arange's range must be a power of 2")
@@ -95,7 +101,7 @@ Candidate search space (kwargs, num_warps, num_stages):
 
 `@triton.autotune(configs=[...], key=[...])` wraps a `@triton.jit` kernel so that its very first launch for a given combination of `key` argument values doesn't just run the kernel — it benchmarks each candidate `Config` through repeated invocations on real hardware, and keeps only the fastest. Every subsequent launch whose `key` arguments match a combination already tuned skips the entire sweep and reuses the cached winner immediately. The `key` list exists because the "best" config is generally not a universal constant — a `BLOCK` size that's fastest for a 1,000-element tensor is not necessarily fastest for a 10,000,000-element one, so the decorator re-runs its search whenever an argument named in `key` (typically the problem size) takes on a value it hasn't tuned for yet.
 
-Every mechanism this book has examined up through Chapter 17 — masking, pointer arithmetic, shared memory, reductions, even the entire `torch.autograd.Function` machinery — is something the CPU-based interpreter can genuinely execute, because those mechanisms are about what a kernel *computes*. Autotuning is different in kind: its entire purpose is to measure how long each candidate actually takes to *run on real hardware*, and "time it against real hardware" is not something a CPU-based logic simulator can approximate, degrade gracefully into, or substitute a placeholder for. There is no CPU-timing fallback built into Triton's autotuner — its benchmarking step reaches directly for the active GPU driver, and if none exists, it fails immediately, before running a single candidate.
+Every mechanism this book has examined up through Chapter 17 — masking, pointer arithmetic, shared memory, reductions, even the entire `torch.autograd.Function` machinery — is something the CPU-based interpreter can genuinely execute, because those mechanisms are about what a kernel *computes*. Meaningful GPU autotuning is different in kind: its intended purpose is to measure how long each candidate actually takes to *run on real hardware*, and "time it against real hardware" is not something a CPU-based logic simulator can approximate, degrade gracefully into, or substitute a placeholder for. There is no CPU-timing fallback built into Triton's autotuner — its benchmarking step reaches directly for the active GPU driver, and if none exists, it fails immediately, before running a single candidate.
 
 ### Background
 
@@ -123,7 +129,7 @@ grid = lambda meta: (triton.cdiv(n, meta["BLOCK"]),)
 gelu_forward_kernel[grid](x, out, n)
 ```
 
-Genuinely captured, run under `TRITON_INTERPRET=1`, with the relevant portion of the real traceback:
+historical illustrated output, run under `TRITON_INTERPRET=1`, with the relevant portion of the real traceback:
 
 ```
 File ".../triton/runtime/autotuner.py", line 229, in benchmark
@@ -159,7 +165,7 @@ first launch for a new key --> Autotuner.benchmark()
         RuntimeError -- raised BEFORE any candidate's kernel logic ever runs
 ```
 
-> [COMMON TRAP] Every prior "no GPU" disclosure in this book (Chapter 10's hardware query, Chapter 12.2's fusion timing) meant "this specific number can't be measured realistically here," while the kernel's own logic still ran and produced a genuinely correct, verifiable answer. `@triton.autotune` is a different category of limitation entirely: its core mechanism *is* hardware timing, so there is no fallback path, degraded mode, or partial result available — it fails before doing any work at all, the moment it's asked to run. Do not assume every Triton feature that "needs a GPU" fails the same way; some fail gracefully into a slower-but-correct interpreted execution, and some, like this one, cannot start.
+> [COMMON TRAP] Every prior "no GPU" disclosure in this book (Chapter 10's hardware query, Chapter 12.2's fusion timing) meant "this specific number can't be measured realistically here," while the kernel's own logic still ran and produced a genuinely correct, verifiable answer. `@triton.autotune` is a different category of limitation entirely: its core mechanism *is* hardware timing, so with no driver the historical call failed; with a driver visible it may benchmark interpreter work, which is not a meaningful GPU-kernel tuning result. Do not assume every Triton feature that "needs a GPU" fails the same way; some fail gracefully into a slower-but-correct interpreted execution, and some, like this one, cannot start.
 
 ## 18.3 [FOUNDATIONAL] What Remains Verifiable Without a Driver: Manual Sweeps and Correctness Invariance
 
@@ -193,7 +199,7 @@ for cfg in candidate_configs:
     print(cfg, "allclose to oracle?", torch.allclose(out, oracle, atol=1e-5))
 ```
 
-Genuinely captured, on `n = 4096` random values:
+historical illustrated output, on `n = 4096` random values:
 
 ```
 BLOCK=  256 num_warps=2 num_stages=1  allclose to oracle? True
@@ -206,7 +212,7 @@ Every candidate agrees with PyTorch's own oracle, despite using four completely 
 
 ### Worked Example 18.3.2: not just close — bit-for-bit identical to each other
 
-Agreement with an oracle to floating-point tolerance is the standard this book has used since Chapter 12, but `BLOCK`, `num_warps`, and `num_stages` changing the *order* in which elements are grouped into programs raises a sharper question: do different candidates even agree with *each other*, exactly? Comparing the `BLOCK=256` and `BLOCK=1024` runs directly, genuinely captured:
+Agreement with an oracle to floating-point tolerance is the standard this book has used since Chapter 12, but `BLOCK`, `num_warps`, and `num_stages` changing the *order* in which elements are grouped into programs raises a sharper question: do different candidates even agree with *each other*, exactly? Comparing the `BLOCK=256` and `BLOCK=1024` runs directly, historical illustrated output:
 
 ```
 BLOCK=256 output equals BLOCK=1024 output bit-for-bit? True
@@ -531,6 +537,10 @@ Those invocations no longer start from the same mathematical problem.
 ```
 
 For an accumulation benchmark whose intended initial output is zero, use the documented `reset_to_zero=["out_ptr"]` argument (matching the kernel parameter name). To preserve an initial nonzero tensor, use `restore_value=["out_ptr"]`. These are alternative reset policies for different contracts, not a substitute for validating the result of a single intended invocation. A custom pre-hook must preserve the same reset semantics. See [the autotune API's repeated-execution warning](https://triton-lang.org/main/python-api/generated/triton.autotune.html).
+
+## Key and search-policy details
+
+The named key arguments are not the complete implementation key: the selected 3.5.1 autotuner also incorporates tensor dtypes. Compiler/backend target and configuration compatibility still matter. Inspect the installed API for disk-cache support, prune_configs_by and TRITON_PRINT_AUTOTUNING rather than assuming every version uses identical controls. Legacy warmup/rep knobs are version-dependent/deprecated; use supported benchmarking controls. These mechanisms do not replace per-candidate numerical validation or state reset.
 
 ## Chapter Summary
 

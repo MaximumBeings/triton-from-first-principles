@@ -2,7 +2,7 @@
 
 [![Appendix D: Describe the tile. Respect the layout.](../images/chapter-openers/appendix-d.svg)](../images/chapter-openers/appendix-d.svg)
 
-[![Appendix D worked concept](../images/appendix-d/01-concept.svg)](../images/appendix-d/01-concept.svg)
+[![Appendix D: Hints describe every group, not just the first](../images/appendix-d/01-concept.svg)](../images/appendix-d/01-concept.svg)
 
 Chapters 6 through 11 built this book's whole account of Triton's memory model: pointers plus `tl.arange`-generated offsets plus a boolean mask (Chapters 6–7), the block-shaped values that make a "kernel" a program over tiles rather than scalars (Chapter 8 onward), and the register-pressure story in Chapter 11 explaining why Triton exposes no `__shared__` keyword at all. That account is complete for everything the rest of the book builds on. It leaves out four things, all added to Triton after — or used only at the very edge of — the material those chapters draw from: alignment hints, block pointers, autotuning's actual failure mode under this book's no-GPU methodology, and tensor descriptors, the newest of the four and the closest thing Triton has to this appendix's CUDA-book sibling's WMMA section.
 
@@ -10,6 +10,9 @@ The following outputs were author-reported in the original authoring environment
 
 !!! info "Historical appendix captures"
     These version strings and interpreter results describe the original authoring session. They were not among the 84 complete chapter references in the [November 21 rerun](../execution-2026-11-21.md). The appendix snippets have not been revalidated on that H100 stack.
+
+!!! warning "Block-pointer API is version-specific"
+    The block-pointer listings here target Triton 3.5.1 (also present in the captured 3.3.0 stack). They do not run unchanged on Triton 3.9: make_block_ptr and advance were removed there. The quoted deprecation warning belongs to the author-reported 3.7/3.8 era, not every version. Use the pinned environment for these historical listings or the [descriptor migration example](../version-and-migration.md).
 
 ## D.1 Why None of This Needed a `__shared__` Keyword
 

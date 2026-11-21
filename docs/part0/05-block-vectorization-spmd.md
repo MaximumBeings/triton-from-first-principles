@@ -11,7 +11,7 @@
 - Why `tl.arange(0, BLOCK)` requires `BLOCK` to be a power of two, for a reason that's related to Mojo's legal-SIMD-width rule but not identical to it
 - **SIMD** (one instruction, many data lanes, in lockstep, inside one execution unit) versus **SPMD** (the same program, run independently many times, with no lockstep guarantee between runs) — the actual difference the acronyms are pointing at, and where each one is genuinely happening inside a single Triton kernel launch
 - Why Triton's masking eliminates the separate "remainder loop" Mojo's vectorized-loop shape always needs — one masked pass handles every size, not a main loop plus a scalar tail
-- The accumulate-wide, reduce-narrow reduction pattern, traced through a genuine grid-stride loop that sums 1000 elements in 8 chunks of 128 before ever collapsing to one number
+- The accumulate-wide, reduce-narrow reduction pattern, traced through a genuine grid of fixed tiles that sums 1000 elements in 8 chunks of 128 before ever collapsing to one number
 - How assigning one program per output tile — rather than one thread per output element (Chapter 4) or one instruction per data lane (this chapter's SIMD side) — is SPMD applied to a concrete problem: transposing a matrix block by block
 
 **What you need to know first:**
@@ -19,20 +19,23 @@
 - Chapter 1, Section 1.4 (every value in a kernel body is block-shaped) — this chapter is a direct continuation of that lane model, now asking which parts of it are SIMD and which are SPMD
 - Chapter 3 (strides and 2D broadcasting) and Chapter 4 (the program hierarchy, `triton.cdiv`) — this chapter's reduction and transpose examples reuse both directly
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 5.1 SIMD vs. SPMD: Two Different Meanings of "Parallel" `[FOUNDATIONAL]`
 
 ### Intuition
 
 Four workers stapling in perfect lockstep — same motion, same instant, one shared instruction — is Chapter 1.4's SIMD picture, and it only works because all four sit on one fixed-width assembly line with a fixed number of equally-sized slots. Now picture something different: four separate kitchens, each following the identical recipe card, each cooking on its own schedule with no requirement that they chop their onions at the same moment as any other kitchen. That's SPMD — **Single Program, Multiple Data** — and it's a genuinely different kind of parallelism than SIMD's lockstep lanes, even though both names describe "many things happening at once."
 
-A single Triton kernel launch does *both*, at two different scales, simultaneously. Across **programs** — `tl.program_id(0)=0`, `=1`, `=2`, ... — Triton is SPMD: the identical kernel body runs once per program, on genuinely independent, unsynchronized schedules, exactly like the separate kitchens. *Within* one program's `BLOCK`-shaped values — the `tl.arange(0, BLOCK)` vector every kernel in this book has used since Chapter 1 — the hardware executes those `BLOCK` lanes in the lockstep SIMD/SIMT style Mojo's Chapter 1.4 and Chapter 5 describe for a CPU's vector registers.
+A single Triton kernel launch does *both*, at two different scales, simultaneously. Across **programs** — `tl.program_id(0)=0`, `=1`, `=2`, ... — Triton is SPMD: the identical kernel body runs once per program, on genuinely independent, unsynchronized schedules, exactly like the separate kitchens. *Within* one program's `BLOCK`-shaped values — the `tl.arange(0, BLOCK)` vector every kernel in this book has used since Chapter 1 — the compiler distributes those logical elements over threads and independently scheduled warps; this is not a block-wide lockstep guarantee. A loose analogy is the SIMD/SIMT style Mojo's Chapter 1.4 and Chapter 5 describe for a CPU's vector registers.
 
 ### Background
 
 | | SIMD (Mojo `SIMD[dtype, width]`) | SPMD (Triton's grid of programs) |
 |---|---|---|
 | What's shared across the parallel units | One instruction, issued once, for all lanes | One *program's source code* — each instance fetches and executes it independently |
-| Synchronization between units | Implicit — all lanes complete the same instruction at the same time by construction | None guaranteed — one program can finish before another one starts, on real hardware |
+| Synchronization between units | Logical vector semantics; not a Triton block-wide hardware scheduling guarantee | None guaranteed — one program can finish before another one starts, on real hardware |
 | Where it happens in one Triton kernel | *Within* one program, across a `BLOCK`-shaped value | *Across* programs, via `tl.program_id` |
 | Legal "width"/count | Powers of two, tied to physical register width (Mojo Chapter 5) | Any grid size at all — a program count isn't a hardware register width |
 
@@ -47,7 +50,7 @@ def double_kernel(x_ptr, out_ptr, n, BLOCK: tl.constexpr):
     tl.store(out_ptr + offsets, x * 2.0, mask=mask)
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 BLOCK=7 -> InterpreterError: ValueError("arange's range must be a power of 2")
@@ -60,9 +63,9 @@ BLOCK=8 (next power of 2, masked down to n=7): [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 1
 
 ```
 grid = (3,)   <- 3 programs, SPMD: independent, no lockstep between them
- Program 0: BLOCK=8 lanes, all 8 execute in lockstep (SIMD/SIMT)   -----+
- Program 1: BLOCK=8 lanes, all 8 execute in lockstep (SIMD/SIMT)        |-- SPMD across these 3
- Program 2: BLOCK=8 lanes, all 8 execute in lockstep (SIMD/SIMT)   -----+
+ Program 0: BLOCK=8 lanes, logical block values; mapped over threads/warps   -----+
+ Program 1: BLOCK=8 lanes, logical block values; mapped over threads/warps        |-- SPMD across these 3
+ Program 2: BLOCK=8 lanes, logical block values; mapped over threads/warps   -----+
 
 Zoom into Program 1's own 8 lanes:
  lane: 0  1  2  3  4  5  6  7      <- SIMD/SIMT: one instruction, all 8 at once
@@ -91,7 +94,7 @@ n, BLOCK = 10, 8
 grid = (triton.cdiv(n, BLOCK),)   # triton.cdiv(10, 8) = 2
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 n=10, BLOCK=8, grid=(2,) -> one kernel, no separate remainder kernel
@@ -106,7 +109,7 @@ Program 0 handles elements `0..7` with `mask` entirely `True` — the "main loop
 
 ### Intuition
 
-Mojo's Chapter 5 draws a sharp line between two ways to sum a long vector with a `width`-wide SIMD register: reduce to a single number after *every* chunk (paying the "collapse many lanes into one" cost repeatedly), versus accumulate into a `width`-wide running total across *all* chunks and reduce to one number only once, at the very end. The second is `width` times less reduction work for the identical answer. Triton's version of this looks almost identical in shape, just with `BLOCK` standing in for `width` and a genuine grid-stride loop standing in for Mojo's chunked main loop.
+Mojo's Chapter 5 draws a sharp line between two ways to sum a long vector with a `width`-wide SIMD register: reduce to a single number after *every* chunk (paying the "collapse many lanes into one" cost repeatedly), versus accumulate into a `width`-wide running total across *all* chunks and reduce to one number only once, at the very end. The second is `width` times less reduction work for the identical answer. Triton's version of this looks almost identical in shape, just with `BLOCK` standing in for `width` and a genuine grid of fixed tiles standing in for Mojo's chunked main loop.
 
 ### Background
 
@@ -127,7 +130,7 @@ def sum_gridstride_kernel(x_ptr, out_ptr, n, BLOCK: tl.constexpr, NUM_CHUNKS: tl
     tl.store(out_ptr, total)
 ```
 
-For `N=1000, BLOCK=128`: `NUM_CHUNKS = triton.cdiv(1000, 128) = 8`. Genuinely captured:
+For `N=1000, BLOCK=128`: `NUM_CHUNKS = triton.cdiv(1000, 128) = 8`. historical illustrated output:
 
 ```
 N=1000, BLOCK=128, NUM_CHUNKS=8
@@ -153,7 +156,7 @@ acc (128 lanes, starts at 0) after each chunk folded in:
 
 ### Intuition
 
-Mojo's Chapter 5 nests its vectorized-loop shape inside a matmul's row/column loops and a transpose's row loop — SIMD width reused as a sub-component of a bigger, still fundamentally loop-based structure. Triton's SPMD model answers the same "transpose a matrix" problem completely differently: instead of one core working through nested loops, assign one *program* per output tile, launch all of them at once, and let each program's own `BLOCK_M × BLOCK_N` worth of work be exactly Section 5.1's SIMD-lockstep tile, with SPMD covering the *many tiles running independently* layer on top.
+Mojo's Chapter 5 nests its vectorized-loop shape inside a matmul's row/column loops and a transpose's row loop — SIMD width reused as a sub-component of a bigger, still fundamentally loop-based structure. Triton's SPMD model answers the same "transpose a matrix" problem completely differently: instead of one core working through nested loops, assign one *program* per output tile, launch all of them at once, and let each program's own `BLOCK_M × BLOCK_N` worth of work be exactly Section 5.1's logical tile, with SPMD covering the *many tiles running independently* layer on top.
 
 ### Background
 
@@ -165,7 +168,7 @@ A `(4, 6)` matrix, transposed in `2×2` tiles, needs `⌈4/2⌉ × ⌈6/2⌉ = 2
 grid_t = (triton.cdiv(M, BLOCK_M), triton.cdiv(N, BLOCK_N))   # (2, 3)
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 grid (programs): (2, 3) = 6 programs total
@@ -451,7 +454,7 @@ matches A.t()? True
 
 ## Chapter Summary
 
-SIMD and SPMD are two distinct kinds of "many things at once," and a single Triton kernel launch genuinely contains both: SPMD across the grid's independent programs, no synchronization implied or provided between them, and SIMD/SIMT within one program's `BLOCK`-shaped lanes, executing in lockstep. `tl.arange`'s power-of-two requirement echoes Mojo's hardware-register-width rule in shape but not in cause — one is silicon, the other is a compiler convention — and Section 5.1 triggered the real error to prove it's enforced, not just documented. Masking collapses Mojo's two-part vectorized-loop shape (a full-width main loop plus a scalar remainder loop) into one code path that handles any size identically, ragged or not, which Section 5.2 confirmed by running the exact same kernel body across a perfectly-divisible program and a partially-masked one. The accumulate-wide-reduce-narrow reduction pattern carries over with `tl.zeros`/`tl.sum` standing in for Mojo's wide register and final collapse, verified against `1000 × 999 / 2 = 499500` exactly. And Section 5.4's transpose showed SPMD's independence guarantee is only as real as the tiling that backs it — six programs ran with zero coordination specifically because their read and write regions were disjoint by construction, not because SPMD promises safety on its own.
+SIMD and SPMD are two distinct kinds of "many things at once," and a single Triton kernel launch genuinely contains both: SPMD across the grid's independent programs, no synchronization implied or provided between them, and SIMD/SIMT within one program's `BLOCK`-shaped lanes, with compiler-managed thread/warp mapping. `tl.arange`'s power-of-two requirement echoes Mojo's hardware-register-width rule in shape but not in cause — one is silicon, the other is a compiler convention — and Section 5.1 triggered the real error to prove it's enforced, not just documented. Masking collapses Mojo's two-part vectorized-loop shape (a full-width main loop plus a scalar remainder loop) into one code path that handles any size identically, ragged or not, which Section 5.2 confirmed by running the exact same kernel body across a perfectly-divisible program and a partially-masked one. The accumulate-wide-reduce-narrow reduction pattern carries over with `tl.zeros`/`tl.sum` standing in for Mojo's wide register and final collapse, verified against `1000 × 999 / 2 = 499500` exactly. And Section 5.4's transpose showed SPMD's independence guarantee is only as real as the tiling that backs it — six programs ran with zero coordination specifically because their read and write regions were disjoint by construction, not because SPMD promises safety on its own.
 
 ## Self-Check Questions
 
@@ -467,12 +470,12 @@ Every kernel since Chapter 1 has consumed a `torch.Tensor` it didn't create and 
 
 ## Worked Solutions
 
-**1.** No — they share a shape (both require a power of two) but not a cause. Mojo's `SIMD[dtype, width]` restriction is physical: a fixed-bit-width hardware vector register only splits into equal-sized lanes at power-of-two counts, so a width of 3 or 5 corresponds to no real way of slicing an actual register. `tl.arange`'s restriction is a compiler-level rule in Triton's frontend, enforced (as Worked Example 5.1.1 genuinely captured) independent of any specific GPU's actual warp width — it would reject `BLOCK=7` even if some hypothetical target hardware could handle a 7-wide operation natively, because the restriction lives in Triton's own indexing and code-generation logic, not in a register Triton is trying to fit `BLOCK` into.
+**1.** No — they share a shape (both require a power of two) but not a cause. Mojo's `SIMD[dtype, width]` restriction is physical: a fixed-bit-width hardware vector register only splits into equal-sized lanes at power-of-two counts, so a width of 3 or 5 corresponds to no real way of slicing an actual register. `tl.arange`'s restriction is a compiler-level rule in Triton's frontend, enforced (as Worked Example 5.1.1 historical illustrated output) independent of any specific GPU's actual warp width — it would reject `BLOCK=7` even if some hypothetical target hardware could handle a 7-wide operation natively, because the restriction lives in Triton's own indexing and code-generation logic, not in a register Triton is trying to fit `BLOCK` into.
 
-**2.** No, it is not safe to assume any ordering — this is the SPMD side of Section 5.1's table, and SPMD explicitly does not guarantee synchronization between separate program instances. Program 0 and program 1 might run on different streaming multiprocessors at different times, with no ordering promised by the programming model; only *within* one program's `BLOCK`-shaped lanes does this chapter's SIMD/SIMT lockstep guarantee apply, and that guarantee doesn't extend across the program boundary.
+**2.** No, it is not safe to assume any ordering — this is the SPMD side of Section 5.1's table, and SPMD explicitly does not guarantee synchronization between separate program instances. Program 0 and program 1 might run on different streaming multiprocessors at different times, with no ordering promised by the programming model; there is no block-wide lockstep guarantee either: logical vector semantics must not be confused with hardware scheduling.
 
 **3.** The `mask = offsets < n` computation replaced the remainder loop's job, living inline in the exact same kernel body that also handles the "main loop" case — there is no second function, no second code path, and no separate launch for the ragged portion. Program 1 in Worked Example 5.2.1's `n=10, BLOCK=8` case computes `mask = [True, True, False, False, False, False, False, False]`, and that single mask value does the entire job Mojo's separate scalar remainder loop exists to do: correctly handle the 2 real elements and skip the 6 that don't exist, using the identical compiled instructions as every other program in the grid.
 
-**4.** Calling `tl.sum` once per chunk instead of once total would not change the *final numeric answer* — summation is associative, so adding up 8 partial sums equals summing everything at once, `499500` either way. What changes is the amount of reduction work performed: 8 separate reductions (each collapsing 128 lanes to 1 number) instead of 1, exactly the "reduce after every chunk" pattern Mojo's Chapter 5 contrasts against "reduce once, at the end." Section 5.3 avoids it because folding chunks into a still-wide accumulator and reducing only once is strictly less reduction work for the identical result — the entire motivation behind naming this pattern "accumulate wide, reduce narrow" in the first place.
+**4.** Calling `tl.sum` once per chunk instead of once total would not change the *final numeric answer* — summation is associative in real arithmetic; floating-point addition is not, so adding up 8 partial sums equals summing everything at once, `499500` either way. What changes is the amount of reduction work performed: 8 separate reductions (each collapsing 128 lanes to 1 number) instead of 1, exactly the "reduce after every chunk" pattern Mojo's Chapter 5 contrasts against "reduce once, at the end." Section 5.3 avoids it because folding chunks into a still-wide accumulator and reducing only once is strictly less reduction work for the identical result — the entire motivation behind naming this pattern "accumulate wide, reduce narrow" in the first place.
 
 **5.** Each program computes its own `rows = pid_m * BLOCK_M + tl.arange(0, BLOCK_M)` and `cols = pid_n * BLOCK_N + tl.arange(0, BLOCK_N)` from its *own*, distinct `(pid_m, pid_n)` pair — and because `BLOCK_M` and `BLOCK_N` are fixed, non-overlapping strides between tiles, two different `(pid_m, pid_n)` pairs always produce two disjoint `rows`/`cols` ranges, which in turn address two disjoint regions of both `A` and `out`. The safety comes specifically from the tiling arithmetic guaranteeing no two programs' index ranges ever intersect — not from any promise SPMD itself makes, which, as the trap notes, guarantees nothing about memory safety on its own.

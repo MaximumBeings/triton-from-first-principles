@@ -22,6 +22,9 @@
 !!! info "What the segment-counting model measures"
     The AoS calculation unions sectors across four separate field-load instructions. Its 28 sectors / 896 bytes are a **unique-sector footprint with ideal reuse between fields**, not measured memory traffic. Each of the four AoS field instructions touches 28 sectors: 112 sector requests before cache reuse. SoA touches four sectors per field: 16 requests across four fields. Cache hits/misses and actual DRAM bytes are separate quantities. Historical code/output labels such as “bytes fetched” below name this modeled footprint, not a hardware measurement. See [NVIDIA's memory-access model](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html).
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 3.1 Memory Transactions: Every Segment Costs Bandwidth, Whether You Use It or Not `[FOUNDATIONAL]`
 
 ### Intuition
@@ -136,7 +139,7 @@ def copy_2d_hardcoded_kernel(x_ptr, out_ptr, M, N, BLOCK_M: tl.constexpr, BLOCK_
     ...
 ```
 
-`base = torch.arange(12).reshape(3, 4)` is contiguous, so the hardcoded kernel copies it correctly. `t = base.t()` is the same 12 numbers, logically transposed to shape `(4, 3)` with `stride = (1, 4)` — genuinely captured:
+`base = torch.arange(12).reshape(3, 4)` is contiguous, so the hardcoded kernel copies it correctly. `t = base.t()` is the same 12 numbers, logically transposed to shape `(4, 3)` with `stride = (1, 4)` — historical illustrated output:
 
 ```
 base.t() shape: torch.Size([4, 3]) stride: (1, 4) is_contiguous: False

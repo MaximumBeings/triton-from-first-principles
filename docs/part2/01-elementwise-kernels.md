@@ -19,6 +19,9 @@
 - Chapter 5's masking discipline — reused without further explanation
 - Chapter 1's opening disclosure about this book's interpreter-only, no-GPU environment — directly relevant to what Section 12.2 can and cannot demonstrate about performance
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 12.1 Anatomy of a Complete Element-wise Kernel: From Wrapper to Launch `[FOUNDATIONAL]`
 
 ### Intuition
@@ -56,7 +59,7 @@ def fused_fma_relu(x: torch.Tensor, a: float, b: float) -> torch.Tensor:
     return out
 ```
 
-This computes `relu(a*x + b)` — a fused multiply-add followed by a clamp, the same shape of computation that appears, chained many times, inside real neural network layers. Hand-trace `a=2.0, b=-1.0` against `x = [-2, -1, 0, 1, 2]`: `2x - 1 = [-5, -3, -1, 1, 3]`, then `relu(...) = [0, 0, 0, 1, 3]`. Genuinely captured, both from the kernel and from an independent, unfused PyTorch reference computing the identical formula with three separate operators:
+This computes `relu(a*x + b)` — a fused multiply-add followed by a clamp, the same shape of computation that appears, chained many times, inside real neural network layers. Hand-trace `a=2.0, b=-1.0` against `x = [-2, -1, 0, 1, 2]`: `2x - 1 = [-5, -3, -1, 1, 3]`, then `relu(...) = [0, 0, 0, 1, 3]`. historical illustrated output, both from the kernel and from an independent, unfused PyTorch reference computing the identical formula with three separate operators:
 
 ```python
 out = fused_fma_relu(x, a, b)
@@ -158,7 +161,7 @@ def gelu_exact_kernel(x_ptr, out_ptr, n, BLOCK: tl.constexpr):
     tl.store(out_ptr + offsets, y, mask=mask)
 ```
 
-This computes GELU's exact mathematical definition, `x * 0.5 * (1 + erf(x / sqrt(2)))`, using `tl.math.erf` directly. Genuinely captured, against `torch.nn.functional.gelu(x, approximate="none")` as the oracle:
+This computes GELU's exact mathematical definition, `x * 0.5 * (1 + erf(x / sqrt(2)))`, using `tl.math.erf` directly. historical illustrated output, against `torch.nn.functional.gelu(x, approximate="none")` as the oracle:
 
 ```
 x:                [-3.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0, 3.0]

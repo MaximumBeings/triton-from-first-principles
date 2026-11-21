@@ -303,13 +303,13 @@
     "page": "docs/part2/03-reduction-kernels.md",
     "name": "03_online_softmax.py",
     "download": "docs/examples/references/part2/03-reduction-kernels/03_online_softmax.py",
-    "sha256": "f546382b0b8c6ef61e0f20a4521ef2b23d40dcff57e956bae7e53e013d149e3e"
+    "sha256": "108d636cabc08eae7446e27217b7f3619239761c974ecfb9a4a80db918cc99f9"
   },
   {
     "page": "docs/part2/03-reduction-kernels.md",
     "name": "04_standalone_complete.py",
     "download": "docs/examples/references/part2/03-reduction-kernels/04_standalone_complete.py",
-    "sha256": "2ad47cca5f7484cc7f244b9287cfccb37d4c74b4a16d98b381567f145eb3da44"
+    "sha256": "05a9170b43d682d1faa3b77973a00a8446387a41f57b0a0a397bb14d03ecee9a"
   },
   {
     "page": "docs/part3/01-autograd-function-graph-node.md",
@@ -417,7 +417,7 @@
     "page": "docs/part5/02-benchmarking-correctly.md",
     "name": "02_warmup_and_statistics.py",
     "download": "docs/examples/references/part5/02-benchmarking-correctly/02_warmup_and_statistics.py",
-    "sha256": "4fb9bfc0a5a65d876311e8c9b4d26f210e47b50abb921fb468851f53d7bf7ef4"
+    "sha256": "1594b721b1226c9734d7fac5a4ee8ff353e0b664e0dc7cd569c2856d75f04788"
   },
   {
     "page": "docs/part5/02-benchmarking-correctly.md",
@@ -435,37 +435,37 @@
     "page": "docs/part6/01-fused-kernels-for-real-layers.md",
     "name": "01_fused_linear_gelu.py",
     "download": "docs/examples/references/part6/01-fused-kernels-for-real-layers/01_fused_linear_gelu.py",
-    "sha256": "669eaf2d5cc3806eff6cba0eb1fca1fa7879c014e9d586b249f08d9cf2cf5ac4"
+    "sha256": "56af06c5dd2140ffb5c0be25668db03308c608d19149f766938333709574c55f"
   },
   {
     "page": "docs/part6/01-fused-kernels-for-real-layers.md",
     "name": "02_row_mean_var.py",
     "download": "docs/examples/references/part6/01-fused-kernels-for-real-layers/02_row_mean_var.py",
-    "sha256": "a1da1b5d5ae384e8b0ef393fa4a82617fe8f69cd975483c11d900b7741b4dcbc"
+    "sha256": "6c3bdd05851dc900df6ae480179f0e3cea749fc214ab0214fd426d9bbcab5a71"
   },
   {
     "page": "docs/part6/01-fused-kernels-for-real-layers.md",
     "name": "03_fused_layernorm.py",
     "download": "docs/examples/references/part6/01-fused-kernels-for-real-layers/03_fused_layernorm.py",
-    "sha256": "56775fd63ebba8603edfecef1484ebcc55bc32dbc4903b5dec53645b6237dc0e"
+    "sha256": "90890eebc8e730323f2e161e65186f4445065b1fab5778975d0747413bbf5318"
   },
   {
     "page": "docs/part6/01-fused-kernels-for-real-layers.md",
     "name": "04_standalone_complete.py",
     "download": "docs/examples/references/part6/01-fused-kernels-for-real-layers/04_standalone_complete.py",
-    "sha256": "fbedd7f3ab822647a21906ae672d7c722405a60444f1b6347c3515e9023087a9"
+    "sha256": "88915e02bab02cd0734663f84e954332c4a423efca73ab4e1e71600d8db10385"
   },
   {
     "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
     "name": "01_flash_attention_core.py",
     "download": "docs/examples/references/part6/02-flash-attention-moe-advanced-features/01_flash_attention_core.py",
-    "sha256": "231b96ebb3d10fef7046c63b0082ad9cc260da0fd5d7dc30c9576ae46b093ed3"
+    "sha256": "98a62b5d6adedb5994d30ad39341e89cc36e0bd1e6fb393718c85814d13dfd79"
   },
   {
     "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
     "name": "02_causal_flash_attention.py",
     "download": "docs/examples/references/part6/02-flash-attention-moe-advanced-features/02_causal_flash_attention.py",
-    "sha256": "b0ecc9c63828d6038acb8e36e12be93f269b83e809feae07e79dbabf2f817ca1"
+    "sha256": "9d25e6211b4cde9e9ec13e27f61e9331246d9632c7f291c083a089e5ac23f3a4"
   },
   {
     "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
@@ -477,7 +477,7 @@
     "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
     "name": "04_standalone_complete.py",
     "download": "docs/examples/references/part6/02-flash-attention-moe-advanced-features/04_standalone_complete.py",
-    "sha256": "8c0d2ce352b24e84eaac8ecb93034d2bd916e9be69343bea8c67a35c296a556e"
+    "sha256": "0d27c3b69adff8695de42cd45e995c6f593dee5fbdca244372d7cdbf1855e2e2"
   },
   {
     "page": "docs/part7/01-quantitative-finance-examples.md",
@@ -495,12 +495,12 @@
     "page": "docs/part7/01-quantitative-finance-examples.md",
     "name": "03_monte_carlo_pricing.py",
     "download": "docs/examples/references/part7/01-quantitative-finance-examples/03_monte_carlo_pricing.py",
-    "sha256": "a8a416c04d9b498cfdb43e1a4f3fca895ab242046d7807b41b37ec8866f44456"
+    "sha256": "5e0ac971331edd3dd66b7faba9ba15bdfc4875671a03ec2bc1be11dcb2cbdafe"
   },
   {
     "page": "docs/part7/01-quantitative-finance-examples.md",
     "name": "04_standalone_complete.py",
     "download": "docs/examples/references/part7/01-quantitative-finance-examples/04_standalone_complete.py",
-    "sha256": "03beb130190814cdb006e878d6d6667d950311b8f20fde448fd22d5ea355b59b"
+    "sha256": "2e07b08a50d8a63df69f8d5f08ab19c051d6f1879fdc17ca34d7521232a2bad4"
   }
 ]

@@ -1,10 +1,16 @@
-# Chapter 21: Flash Attention, MoE, and Advanced Features
+# Chapter 21: Forward Attention and Top-2 MoE Gating
 
 [![Chapter 21: Stream scores. Keep the state.](../images/chapter-openers/21.svg)](../images/chapter-openers/21.svg)
 
 [![Stream attention without storing the whole score matrix](../images/ch21/01-concept.svg)](../images/ch21/01-concept.svg)
 
 > Every kernel through Chapter 20 computed each output independently of every other. Attention breaks that assumption on purpose — every query genuinely depends on every key and value in its sequence — and the entire trick of Flash Attention is computing that dependency without ever materializing the matrix it implies.
+
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
+!!! warning "Physical dot tiles corrected; rerun pending"
+    Current wrappers use BLOCK_M=BLOCK_N=16 and pad the feature extent to at least 16. Logical hand traces may still use four-wide tiles. The selected Triton 3.5.1 NVIDIA non-INT8 frontend permits small M/N but requires K>=16; the captured 3.3.0-era backend has stricter M/N limits. The descriptor and minimum-dot rules are version-specific, not universal Triton rules. These revised chapter sources have not been GPU-rerun. They implement single-head FP32 forward attention and top-2 gating, not the full FlashAttention training stack.
 
 ## What you will understand by the end of this chapter
 
@@ -178,7 +184,7 @@ Causal mask, tiled (BLOCK_M = BLOCK_N = 4, query block starting at row 8):
                                      per-pair)
 
   "ALL VALID" blocks: causal_mask always true here, but col_mask (boundary) still applies
-  "DIAGONAL" block: causal_mask varies per (row, col) pair -- the only block needing tl.where
+  "DIAGONAL" block: causal_mask varies per (row, col) pair -- future-key exclusion varies within this diagonal tile; code may apply tl.where on every tile
   "SKIPPED" blocks: never loaded at all -- entire block is beyond every query's reach
 ```
 
@@ -249,7 +255,7 @@ Every selected expert index matches PyTorch's own `topk`, and the renormalized w
 
 ### Worked Example 21.3.2: forgetting to renormalize
 
-Skipping the final division — using the raw softmax probabilities of the top-2 experts directly as mixture weights — looks like a harmless simplification, since each individual weight is still a genuine, correctly-computed probability. Genuinely captured, computing what those two raw probabilities sum to per token, on the same 6 tokens:
+Skipping the final division — using the raw softmax probabilities of the top-2 experts directly as mixture weights — looks like a harmless simplification, since each individual weight is still a genuine, correctly-computed probability. historical illustrated output, computing what those two raw probabilities sum to per token, on the same 6 tokens:
 
 ```
 raw (non-renormalized) top-2 weight sums per row: tensor([0.5978, 0.5059, 0.6346, 0.5354, 0.3600, 0.7166])
@@ -341,10 +347,10 @@ def flash_attn_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
     tl.store(out_ptrs, acc, mask=row_mask[:, None] & d_mask[None, :])
 
 
-def flash_attention(q, k, v, BLOCK_M=4, BLOCK_N=4):
+def flash_attention(q, k, v, BLOCK_M=16, BLOCK_N=16):
     M, D = q.shape
     N, _ = k.shape
-    BLOCK_D = triton.next_power_of_2(D)
+    BLOCK_D = max(16, triton.next_power_of_2(D))
     scale = 1.0 / math.sqrt(D)
     out = torch.empty((M, D), dtype=torch.float32)
     grid = (triton.cdiv(M, BLOCK_M),)
@@ -365,7 +371,7 @@ def section_21_1():
     scale = 1.0 / math.sqrt(D)
 
     oracle = torch.softmax(q @ k.T * scale, dim=-1) @ v
-    out = flash_attention(q, k, v, BLOCK_M=4, BLOCK_N=4)
+    out = flash_attention(q, k, v, BLOCK_M=16, BLOCK_N=16)
     print("allclose to naive full attention?", torch.allclose(out, oracle, atol=1e-4))
 
 
@@ -464,10 +470,10 @@ def flash_attn_causal_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
     tl.store(out_ptrs, acc, mask=row_mask[:, None] & d_mask[None, :])
 
 
-def _run(kernel, q, k, v, BLOCK_M=4, BLOCK_N=4):
+def _run(kernel, q, k, v, BLOCK_M=16, BLOCK_N=16):
     M, D = q.shape
     N, _ = k.shape
-    BLOCK_D = triton.next_power_of_2(D)
+    BLOCK_D = max(16, triton.next_power_of_2(D))
     scale = 1.0 / math.sqrt(D)
     out = torch.empty((M, D), dtype=torch.float32)
     grid = (triton.cdiv(M, BLOCK_M),)
@@ -684,10 +690,10 @@ def flash_attn_causal_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
     tl.store(out_ptrs, acc, mask=row_mask[:, None] & d_mask[None, :])
 
 
-def _run_attn(kernel, q, k, v, BLOCK_M=4, BLOCK_N=4):
+def _run_attn(kernel, q, k, v, BLOCK_M=16, BLOCK_N=16):
     M, D = q.shape
     N, _ = k.shape
-    BLOCK_D = triton.next_power_of_2(D)
+    BLOCK_D = max(16, triton.next_power_of_2(D))
     scale = 1.0 / math.sqrt(D)
     out = torch.empty((M, D), dtype=torch.float32)
     grid = (triton.cdiv(M, BLOCK_M),)
@@ -838,7 +844,7 @@ This chapter closes Part 6's tour of realistic neural network building blocks �
 
 ### Contracts that the small examples do not cover
 
-The historical outputs above are interpreter results. The worked BLOCK=4 tiles are useful for tracing but are not valid NVIDIA `tl.dot` tiles in the referenced v3.3.1 backend, which requires at least 16 in M/N/K for its non-INT8 dot contract. D=8 may be logically valid but needs padding to a valid physical dot extent. CPU tensors also need CUDA counterparts before a GPU launch. Explicit `input_precision="ieee"` in the current FP32 teaching kernels avoids silently substituting TF32 for an FP32 comparison; that choice is not a Tensor Core peak-performance recipe. The current corrected sources were included in the [November 21 interpreter rerun](../execution-2026-11-21.md); only the separate smoke source has compiled GPU coverage.
+The logical hand traces use small tiles; corrected current wrappers use physical dot extents of at least 16. Triton 3.5.1's NVIDIA non-INT8 minimum is (1,1,16); the older 3.3.1 backend cited previously uses (16,16,16). These are version-specific contracts. Current FP32 dots request IEEE precision. The revised chapter sources have not been rerun; historical interpreter captures apply to their archived hashes. Only the separate smoke source has compiled GPU coverage.
 
 The bounded causal loop avoids unsupported `continue` control flow and skips future-key tiles. Valid query rows need at least one unmasked key; all-masked rows, NaNs, empty sequences and rectangular causal alignment require an explicit separate contract. These examples use top-left causal alignment.
 

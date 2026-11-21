@@ -6,6 +6,8 @@ Start by choosing an execution mode. Reading, building the website and checking 
 
 The book contains 22 chapters. Its older printed results are author-reported **interpreter** outputs, not dated GPU captures. This review has not converted them into GPU results. See the [review and testing record](review-and-testing.md) for what was checked and what remains pending.
 
+See [the version matrix and descriptor migration](version-and-migration.md) and the [independent-review response](opus-review-response-2026-11-21.md). The selected recipe is not a claim that old printed transcripts reproduce byte-for-byte.
+
 ## 1 — Inspect a managed GPU host before installing anything
 
 ```bash
@@ -15,7 +17,7 @@ nvidia-smi
 python3 --version
 ```
 
-An H100 or GH200 is suitable for the planned single-GPU tests. GH200 uses an ARM64 CPU (`aarch64`); ordinary H100 hosts commonly use `x86_64`. Select wheels and system packages for the actual CPU architecture. Apple Silicon's ARM CPU does not make macOS a CUDA/Triton GPU platform. Windows users should use a supported Linux/WSL GPU setup rather than assuming native Linux wheels work on Windows.
+Use an NVIDIA GPU with compute capability at least 8.0 for the supported current classic-language path. An H100 or GH200 is suitable for the planned single-GPU tests. GH200 uses an ARM64 CPU (`aarch64`); ordinary H100 hosts commonly use `x86_64`. Select wheels and system packages for the actual CPU architecture. Apple Silicon's ARM CPU does not make macOS a CUDA/Triton GPU platform. The supported Triton platform for this recipe is Linux; Windows/WSL use is not validated by this book.
 
 Keep a working provider driver. `nvidia-smi` checks the driver/device path; it does not prove that PyTorch is CUDA-enabled, that Triton can compile, or that a kernel is correct. A missing `nvcc` is not by itself a failure: normal wheel-based PyTorch/Triton use does not require installing the complete CUDA C++ toolkit. CUDA extensions and profiling tools have separate requirements.
 
@@ -56,7 +58,7 @@ python -m pip check
 
 The explicit Triton version matches this PyTorch release's x86-64 dependency; it also avoids assuming the same dependency marker installs Triton on ARM64. Do not upgrade Triton independently and assume compatibility remains established. Preserve an existing supported provider environment if appropriate, recording its exact versions instead.
 
-Sources: [official PyTorch CUDA wheel index](https://download.pytorch.org/whl/cu128/torch/), [PyTorch 2.9.1 metadata](https://pypi.org/pypi/torch/2.9.1/json), [Triton 3.5.1 wheels](https://pypi.org/project/triton/3.5.1/#files). The wheel's CUDA runtime and the installed driver are separate components; the host driver must support the selected runtime and generated GPU code.
+Sources: [official PyTorch CUDA wheel index](https://download.pytorch.org/whl/cu128/torch/), [PyTorch 2.9.1 metadata](https://pypi.org/pypi/torch/2.9.1/json), [Triton 3.5.1 wheels](https://pypi.org/project/triton/3.5.1/#files). The wheel's CUDA runtime and the installed driver are separate components; for this recipe use an R570-or-newer supported driver for CUDA 12.8 JIT/PTX support; the generic CUDA 12.x minor-compatibility floor is a different, restricted contract. See [CUDA release notes](https://docs.nvidia.com/cuda/archive/12.8.0/cuda-toolkit-release-notes/index.html).
 
 ## 4 — Run a real GPU smoke test
 
@@ -85,13 +87,14 @@ Set the variable before importing Triton. The interpreter bypasses compilation a
 
 ## 6 — Build the website without GPU dependencies
 
-Use a separate environment so documentation work does not replace runtime packages:
+Use Python 3.12 for the documentation build (the pinned dependencies need Python >=3.11.5; Ubuntu 22.04 default Python 3.10 is insufficient). Use a separate environment so documentation work does not replace runtime packages:
 
 ```bash
 python3 -m venv .venv-docs
 source .venv-docs/bin/activate
 python -m pip install -r requirements.txt
 python tools/verify_book.py
+python tools/verify_execution.py
 python tools/verify_svg_readability.py
 mkdocs build --strict
 python tools/verify_site_links.py

@@ -20,6 +20,12 @@
 - Chapter 1 in full — this chapter reuses its two-phase compile model (Section 1.1) and its `tl.constexpr` vs. runtime distinction (Section 1.2) without re-explaining them
 - Familiarity with ordinary Python classes (`__init__`, keyword arguments) — nothing Triton-specific beyond Chapter 1
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
+!!! info "Interpreter plus a visible driver is a different environment"
+    A missing driver prevented the original timing helpers from starting. In the November 21 rerun a driver/GPU was visible, so autotune and do_bench did run while kernel bodies were interpreted. Those measurements are not GPU-kernel performance. Neither success nor failure is implied by TRITON_INTERPRET alone. First-call timing booleans are observations, not repeatable correctness assertions; see the [rerun differences](../rerun-differences-2026-11-21.md).
+
 ## 2.1 The `tl.constexpr` Signature as a Kernel's "Layout" `[FOUNDATIONAL]`
 
 ### Intuition
@@ -111,7 +117,7 @@ for c in configs:
     print("kwargs:", c.kwargs, "num_warps:", c.num_warps, "num_stages:", c.num_stages)
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 kwargs: {'BLOCK': 64} num_warps: 2 num_stages: 3
@@ -179,7 +185,7 @@ Mojo's Chapter 1, Section 1.5 left a real gap open — `UnsafePointer.alloc()`/`
 | Who allocates it | The programmer (`UnsafePointer.alloc`) or a struct's `__init__` | Nobody explicitly — registers/shared memory the compiler assigns for the kernel's duration | The host, before launch (`torch.empty`, `torch.zeros`, ...) |
 | Lifetime | Until `.free()` is called, or a destructor runs at scope end | Exactly one kernel invocation — gone the instant the kernel returns | Until PyTorch's allocator decides to reclaim it (reference counting) |
 | Can a kernel leak it | N/A to a kernel's own locals — nothing to leak | No — there's no persistent handle a kernel could fail to release | Not from inside the kernel — a kernel has no `free()`-equivalent to forget to call at all |
-| What a kernel author needs to write to avoid a leak | `__del__`, correctly, on every owning struct | Nothing | Nothing — but forgetting to *keep a live Python reference* to a tensor on the host side can free it out from under a kernel that hasn't launched yet, which is a real, different mistake (Chapter 10) |
+| What a kernel author needs to write to avoid a leak | `__del__`, correctly, on every owning struct | Nothing | Nothing — but forgetting to *keep a live Python reference* to a tensor on the host side can free it out from under a kernel that hasn't launched yet, which requires correct host ownership and stream/lifetime handling, not a kernel-side destructor |
 
 ### Worked Example 2.4.1 — A kernel that needs scratch space, and where that space actually comes from
 
@@ -198,7 +204,7 @@ Nothing in `scratch_kernel` allocates anything. `out`'s memory exists because `t
 
 ### Intuition
 
-Mojo's `trait` lets many different structs — `Rectangle`, `Circle`, anything else that implements `area()` and `draw()` — plug into one generic function, each one compiled to its own direct, monomorphized call with zero runtime dispatch cost. Triton reaches the identical destination — one piece of source, several zero-cost specializations, chosen with no runtime branch check surviving into the compiled kernel — by a completely different road: instead of many *types* satisfying one interface, Triton typically writes one *kernel body* with a `tl.constexpr` flag selecting which branch exists, and lets the compiler delete every branch that constexpr didn't select. Chapter 1's `USE_RELU` boolean was the simplest possible version of this; this section generalizes it to a string-valued flag choosing among three genuinely different formulas, the same shape of problem Mojo's `Rectangle`/`Circle` example solves with two different `area()` implementations behind one shared signature.
+Mojo's `trait` lets many different structs — `Rectangle`, `Circle`, anything else that implements `area()` and `draw()` — plug into one generic function, each one compiled to its own direct, monomorphized call with zero runtime dispatch cost. Triton reaches the identical destination — one piece of source, several specialized bodies, chosen with no runtime branch check surviving into the compiled kernel — by a completely different road: instead of many *types* satisfying one interface, Triton typically writes one *kernel body* with a `tl.constexpr` flag selecting which branch exists, and lets the compiler delete every branch that constexpr didn't select. Chapter 1's `USE_RELU` boolean was the simplest possible version of this; this section generalizes it to a string-valued flag choosing among three genuinely different formulas, the same shape of problem Mojo's `Rectangle`/`Circle` example solves with two different `area()` implementations behind one shared signature.
 
 ### Background
 
@@ -227,7 +233,7 @@ def fused_activation_kernel(x_ptr, out_ptr, n, ACTIVATION: tl.constexpr, BLOCK: 
 
 `ACTIVATION == "relu"` compares a `tl.constexpr` string against a literal — legal specifically *because* `ACTIVATION` is constexpr, resolved during tracing exactly like `USE_RELU` in Chapter 1; a runtime string comparison inside a kernel body would run straight into Chapter 1 Section 1.4's block-shaped-value problem. The `gelu` branch uses the exact error-function definition of GELU, `0.5x(1 + \mathrm{erf}(x/\sqrt2))` — the same formula PyTorch's own `torch.nn.functional.gelu` computes by default. Hand-checking one point first: at `x = 1.0`, `x/\sqrt2 \approx 0.70711`, `\mathrm{erf}(0.70711) \approx 0.68269`, giving `0.5 \times 1.0 \times 1.68269 \approx 0.841345`.
 
-Genuinely captured, launching all three specializations against `x = [-2.0, -1.0, 0.0, 1.0, 2.0]`:
+historical illustrated output, launching all three specializations against `x = [-2.0, -1.0, 0.0, 1.0, 2.0]`:
 
 ```
 ACTIVATION='none'   -> [-2.0, -1.0, 0.0, 1.0, 2.0]
@@ -455,11 +461,11 @@ ACTIVATION='gelu'   -> [-0.0455, -0.158655, 0.0, 0.841345, 1.9545]
 gelu reference (torch.nn.functional.gelu): [-0.0455, -0.158655, 0.0, 0.841345, 1.9545]
 ```
 
-Note the extra `COMPILING a version with BLOCK = 4` line in the Section 2.4 block: `run_with_scratch` calls `shape_kernel` with `BLOCK=x.shape[0]=4`, a signature never launched earlier in this same script, so it triggers its own genuine compilation — exactly the cache-keyed behavior Section 2.1 traced, showing up again, unprompted, later in the same program.
+The extra COMPILING label is emitted by static_print while the interpreter executes another call. Its wording does not establish a compilation or cache miss. A compiled backend must be inspected separately for actual specialization/cache behavior.
 
 ## Chapter Summary
 
-Triton has no `struct`, no user-defined type, and nothing resembling Mojo's fixed field layout — a kernel operates on raw pointers, never on an instance of anything it defined itself. What plays the structural role a struct's layout plays is the full tuple of `tl.constexpr` values a kernel is compiled with: two different combinations are, functionally, two unrelated compiled artifacts, exactly as two struct instantiations would be, even when their output happens to look identical. `triton.Config` is the real, working object production code bundles those combinations into — but it is an ordinary, unchecked Python object, not a compiler-verified type, and Section 2.2's constructed examples showed exactly how little verification happens at the point a `Config` is built. `@triton.autotune` is genuine monomorphization — compiling every listed config separately and keeping whichever one measurably wins — but "measurably" requires a real GPU this book's setup doesn't have, which Section 2.3 disclosed rather than faked. RAII has nothing to attach to in a kernel body, because a kernel never owns memory that outlives its own single invocation; the allocation-and-freeing story Mojo's Chapter 2 closes with a destructor is, in Triton's world, PyTorch's problem, happening entirely on the host side. And where Mojo's traits let many types satisfy one interface with zero-cost dispatch, Triton reaches the same zero-cost-specialization destination by branching on `tl.constexpr` flags inside one kernel body instead — Section 2.5's three-way `ACTIVATION` split, verified digit-for-digit against PyTorch's own GELU, is that mechanism doing real work.
+A Config object packages candidate metadata; construction alone does not prove compiled legality. Constexpr values, argument types and version-specific specialization attributes influence generated variants, while lookup/dispatch still has runtime cost. The original interpreter prints do not demonstrate compilation. Meaningful autotuning compares compiled GPU kernels; a driver-visible interpreter may run the timing machinery on an inappropriate workload. Memory allocation and lifetime belong to the host/framework, and asynchronous launches require the framework's stream/lifetime contracts.
 
 ## Self-Check Questions
 

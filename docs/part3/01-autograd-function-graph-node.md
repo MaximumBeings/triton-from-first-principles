@@ -22,6 +22,9 @@
 - Chapter 6's wrapper-function convention — a `torch.autograd.Function`'s `forward` staticmethod is, mechanically, an elaborated version of exactly that wrapper pattern
 - No prior autograd or backpropagation knowledge is assumed; this chapter builds the mechanism from its most basic observable behavior
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 15.1 Autograd Can't See Through a Raw Kernel Launch `[FOUNDATIONAL]`
 
 ### Intuition
@@ -51,7 +54,7 @@ x = torch.tensor([-1.0, 0.5, 2.0], requires_grad=True)
 y = plain_triton_gelu(x)
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 x.requires_grad: True
@@ -121,7 +124,7 @@ class TritonGELU(torch.autograd.Function):
         return grad_output * d_gelu
 ```
 
-`forward` is Section 15.1's identical kernel launch, with one addition: `ctx.save_for_backward(x)`, keeping `x` available for later. `backward` implements GELU's actual derivative — `d/dx[x \cdot \Phi(x)] = \Phi(x) + x \cdot \phi(x)`, where `\Phi` is the CDF and `\phi` the PDF of the standard normal distribution — using ordinary PyTorch tensor operations, explicitly *not* a Triton kernel yet. Genuinely captured:
+`forward` is Section 15.1's identical kernel launch, with one addition: `ctx.save_for_backward(x)`, keeping `x` available for later. `backward` implements GELU's actual derivative — `d/dx[x \cdot \Phi(x)] = \Phi(x) + x \cdot \phi(x)`, where `\Phi` is the CDF and `\phi` the PDF of the standard normal distribution — using ordinary PyTorch tensor operations, explicitly *not* a Triton kernel yet. historical illustrated output:
 
 ```
 y.requires_grad: True
@@ -199,7 +202,7 @@ with torch.no_grad():
 y.sum().backward()
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 RuntimeError: one of the variables needed for gradient computation has been modified by an inplace operation: [torch.FloatTensor [1]] is at version 1; expected version 0 instead. Hint: enable anomaly detection to find the operation that failed to compute its gradient, with torch.autograd.set_detect_anomaly(True, check_nan=False).
@@ -228,7 +231,7 @@ with torch.no_grad():
 y2.sum().backward()
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 backward succeeded silently, x2.grad: tensor([60.])
@@ -565,7 +568,7 @@ A raw Triton kernel launch, however correct its output, is invisible to PyTorch'
 
 1. `x = torch.tensor([1.0], requires_grad=True)` and `y = some_function(x)` where `some_function` launches a Triton kernel internally. What specifically determines whether `y.grad_fn` is `None` or points to a real node?
 2. What are the two static methods a `torch.autograd.Function` subclass must define, and what is each one responsible for?
-3. Why does calling `TritonGELU.forward(x)` directly, instead of `TritonGELU.apply(x)`, produce a tensor with the correct numeric values but no working gradient?
+3. Why does calling TritonGELU.forward(x) raise a missing-argument TypeError for forward(ctx,x), and why must users call apply(x) rather than supplying a dummy ctx?
 4. `ctx.save_for_backward(x)` and `ctx.x = x` both make `x` available inside `backward`. What specific scenario distinguishes their behavior, and which one fails loudly versus silently?
 5. In Worked Example 15.2.1, `backward` is implemented using ordinary PyTorch tensor operations (`torch.erf`, `torch.exp`), not a Triton kernel. Is this a mistake this chapter should have caught? Why or why not?
 
@@ -579,7 +582,7 @@ This chapter's `backward` staticmethod computed GELU's derivative correctly, but
 
 **2.** `forward(ctx, ...)`, which performs the actual computation (in this chapter's case, launching the Triton kernel) and returns the output tensor, and `backward(ctx, grad_output)`, which receives the gradient of the loss with respect to this operation's output and must return the gradient of the loss with respect to each of `forward`'s inputs. `ctx` is shared between the two, typically used via `ctx.save_for_backward(...)` in `forward` to make data available to `backward` later.
 
-**3.** `forward` alone only performs the numeric computation — it never runs `apply`'s surrounding machinery, which is what actually registers the operation with autograd, attaches the correct `grad_fn` to the output, and sets up the plumbing that lets `backward` be found and invoked later. Calling `forward` directly produces a tensor with the right values (the arithmetic inside `forward` still runs correctly) but with no `grad_fn` attached at all — mechanically identical to Section 15.1's problem, since from autograd's perspective nothing distinguishable from an ordinary, unobserved function call took place.
+**3.** This forward has signature (ctx,x). Calling forward(x) passes only one argument and raises TypeError; it does not return a grad-less tensor. Manually supplying a dummy ctx bypasses apply’s autograd bookkeeping and may fail on context operations. Use apply(x), which creates the real context and graph connection. This Python signature fact is tested without claiming a new PyTorch execution.
 
 **4.** The distinguishing scenario is a tensor saved during `forward` being modified in-place before `backward` runs. `ctx.save_for_backward(x)` records `x`'s version counter at save time and checks it again when `backward` retrieves `x` via `ctx.saved_tensors` — if the version has changed (an in-place mutation occurred), it raises a clear `RuntimeError` rather than proceeding with stale data, as Worked Example 15.3.1 showed. `ctx.x = x` stores a plain reference with no version tracking at all — `backward` simply reads whatever `x` currently holds, silently using the mutated value and producing a wrong gradient with no indication anything went wrong, as Worked Example 15.3.2 demonstrated with a gradient of `60.0` instead of the correct `6.0`.
 

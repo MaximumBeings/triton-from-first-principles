@@ -2,7 +2,7 @@
 
 **Review date: November 21, 2026.** This pass reviewed technical contracts, source listings, installation instructions and diagrams without a CUDA host. A subsequent H100 session passed 12 compiled smoke cases and reran all 84 complete references in interpreter mode. This does not establish full compiled-GPU coverage; see the [dated execution record](execution-2026-11-21.md).
 
-See also the [final adversarial review and corrections](final-review-2026-11-21.md).
+The [independent Opus review response](opus-review-response-2026-11-21.md) supersedes parts of the earlier [self-review](final-review-2026-11-21.md), including its stale “already fixed” claims.
 
 ## What changed
 
@@ -23,9 +23,9 @@ See also the [final adversarial review and corrections](final-review-2026-11-21.
 
 All **84 explicitly titled complete Python reference listings** parse and have byte-identical downloads with recorded hashes. The new GPU-smoke source also passes Python syntax checks. Syntax parsing does not import PyTorch/Triton, compile a GPU kernel or execute its mathematics.
 
-Ten CPU binary64 tests check the worked stride/mask/GEMM/GELU/softmax/variance/option/payoff arithmetic. SVG checks examine embedded fonts, glyph coverage, label bounds and overlap. A strict documentation build and built-link check cover page structure and targets. These checks are not a substitute for interpreter reruns, GPU numerical tests, sanitizer checks or benchmarking.
+Thirteen CPU arithmetic/signature tests check the worked stride/mask/GEMM/GELU/softmax/variance/option/payoff arithmetic. SVG checks examine embedded fonts, glyph coverage, label bounds and overlap. A strict documentation build and built-link check cover page structure and targets. These checks are not a substitute for interpreter reruns, GPU numerical tests, sanitizer checks or benchmarking.
 
-The [original source-identity inventory](https://github.com/MaximumBeings/triton-from-first-principles/blob/main/audit/original-reference-identities.json) records the pre-review baseline. Historical outputs already printed in the chapters remain author-reported interpreter results. The repository did not supply their original raw logs, package snapshots or per-run timestamps. This review does not invent that historical evidence. A separate interpreter rerun records the captured source hashes and fresh logs. A later print-label-only correction in one finance file is explicitly pinned; its revised label has not been recaptured. No numerical operations changed. Current downloads identify current source; a historical printed result is not a new validation of its hash.
+The [original source-identity inventory](https://github.com/MaximumBeings/triton-from-first-principles/blob/main/audit/original-reference-identities.json) records the pre-review baseline. Historical outputs already printed in the chapters remain author-reported interpreter results. The repository did not supply their original raw logs, package snapshots or per-run timestamps. This review does not invent that historical evidence. A separate interpreter rerun records the captured source hashes and fresh logs. Later independent-review corrections change several numerical/launch paths and are explicitly marked pending; their older logs remain valid only for the archived source identities. See the [independent-review response](opus-review-response-2026-11-21.md). Current downloads identify current source; a historical printed result is not a new validation of its hash.
 
 ## First GPU validation and remaining work
 

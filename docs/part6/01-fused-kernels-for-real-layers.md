@@ -6,6 +6,12 @@
 
 > `torch.nn.Linear` followed by an activation, or `torch.nn.LayerNorm` on its own, are each three or four separate memory round trips when built from ordinary PyTorch operators. A real fused kernel reads its input once and writes its output once, no matter how many logical steps sit in between.
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
+!!! warning "Corrected sources need revalidation"
+    Current reductions upcast inputs and affine parameters to FP32; row wrappers normalize contiguous storage; fused GEMM launch tiles now use 16-wide dot dimensions. These changes address the independent review and have not been rerun on a GPU. Historical printed outputs describe earlier sources. For this one-program LayerNorm, require nonempty rows, finite values and positive eps; extremely wide rows need a different resource-aware implementation.
+
 ## What you will understand by the end of this chapter
 
 - How to fuse a bias-add and an activation directly into a matmul kernel's epilogue — the code that runs on an accumulated tile immediately before it's written out — turning `gelu(x @ W.T + b)` into one kernel launch instead of three
@@ -93,14 +99,14 @@ bias = tl.load(bias_ptr + rows, mask=rows < M, other=0.0)  # BUG: wrong axis AND
 acc = acc + bias[:, None]
 ```
 
-On the same `M=20, K=12, N=16` shapes, genuinely captured:
+On the same `M=20, K=12, N=16` shapes, historical illustrated output:
 
 ```
 buggy kernel allclose to oracle? False
 max abs diff: 0.43509936332702637
 ```
 
-This mistake is wrong in two independent ways at once, and the second is easy to miss. First, the bias values themselves are simply attached to the wrong axis — every column-specific bias term is now broadcast down rows instead. Second, the mask (`rows < M`) uses the wrong bound: `bias` genuinely has only `N=16` elements, but `rows` ranges up to `M-1=19`, so the mask lets four out-of-bounds reads through. Probing exactly what those specific reads return, genuinely captured:
+This mistake is wrong in two independent ways at once, and the second is easy to miss. First, the bias values themselves are simply attached to the wrong axis — every column-specific bias term is now broadcast down rows instead. Second, the mask (`rows < M`) uses the wrong bound: `bias` genuinely has only `N=16` elements, but `rows` ranges up to `M-1=19`, so the mask lets four out-of-bounds reads through. Probing exactly what those specific reads return, historical illustrated output:
 
 ```
 tensor([ 0.,  1.,  2., ...,  14., 15.,  7.9420e-27, 0.0000e+00, 1.5835e-43, 0.0000e+00])
@@ -158,7 +164,7 @@ def row_mean_var_kernel(x_ptr, mean_ptr, var_ptr, M, N, stride_m, BLOCK_N: tl.co
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
 
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
@@ -168,7 +174,7 @@ def row_mean_var_kernel(x_ptr, mean_ptr, var_ptr, M, N, stride_m, BLOCK_N: tl.co
     tl.store(var_ptr + row, var)
 ```
 
-Genuinely captured, on 5 rows of 10 random values each:
+historical illustrated output, on 5 rows of 10 random values each:
 
 ```
 mean allclose to x.mean(dim=-1)? True
@@ -205,7 +211,7 @@ PASS 2:  var = sum((x_i - mean)^2) / N     <-- BIASED: divide by N   (what Layer
 
 ### Intuition
 
-Section 20.2's reduction, combined with the normalization formula and an affine transform (`gamma * normalized + beta`, with `gamma` and `beta` learned per-feature parameters), is the entire computation `torch.nn.LayerNorm` performs — and all of it can happen inside one kernel launch, one program per row, reading the row once and writing the output once. This introduces a genuinely new launch pattern for this book: every previous elementwise kernel (Chapters 9, 12) could split a large tensor across as many programs as convenient, because each output element only ever depended on its own corresponding input element. LayerNorm's normalization can't start until the *entire row's* mean and variance are known, so `BLOCK_N` must be large enough to hold an entire row in one program — one program per row, not one program per chunk of arbitrary size.
+Section 20.2's reduction, combined with the normalization formula and an affine transform (`gamma * normalized + beta`, with `gamma` and `beta` learned per-feature parameters), is the entire computation `torch.nn.LayerNorm` performs — and all of it can happen inside one kernel launch, one program per row, reading the row once and writing the output once. This introduces a row-wise launch pattern for this book: every previous elementwise kernel (Chapters 9, 12) could split a large tensor across as many programs as convenient, because each output element only ever depended on its own corresponding input element. LayerNorm's normalization can't start until the *entire row's* mean and variance are known, so `BLOCK_N` must be large enough to hold an entire row in one program — one program per row, not one program per chunk of arbitrary size.
 
 The formula's one subtlety is exactly where `eps` (a small constant, `1e-5` by default in PyTorch) belongs: inside the square root, added to the variance before taking `sqrt`, as `1/sqrt(var + eps)`. `eps` exists specifically to prevent division by (near) zero when a row's true variance is extremely small — and putting it in the wrong place, `1/(sqrt(var) + eps)`, looks almost identical algebraically while behaving identically to the correct version everywhere except exactly the situation `eps` was added to protect against.
 
@@ -227,7 +233,7 @@ def layernorm_forward_kernel(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N, stride_m
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
 
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
@@ -235,8 +241,8 @@ def layernorm_forward_kernel(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N, stride_m
     inv_std = 1.0 / tl.sqrt(var + eps)
     x_norm = diff * inv_std
 
-    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0)
-    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0)
+    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0).to(tl.float32)
+    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     y = x_norm * gamma + beta
 
     out_row_ptr = out_ptr + row * stride_m
@@ -258,7 +264,7 @@ A version with `eps` added *after* the square root instead of before:
 inv_std = 1.0 / (tl.sqrt(var) + eps)   # BUG: eps outside the sqrt
 ```
 
-On a typical row of ordinary random values, genuinely captured:
+On a typical row of ordinary random values, historical illustrated output:
 
 ```
 typical row: correct allclose? True  wrong-eps allclose? True  max diff (wrong): 9.298324584960938e-06
@@ -367,7 +373,7 @@ def fused_linear_gelu_kernel_buggy_bias_axis(a_ptr, b_ptr, bias_ptr, c_ptr, M, N
     tl.store(c_ptrs, result, mask=c_mask)
 
 
-def fused_linear_gelu(x, weight, bias, kernel=fused_linear_gelu_kernel, BLOCK_M=8, BLOCK_N=8, BLOCK_K=4):
+def fused_linear_gelu(x, weight, bias, kernel=fused_linear_gelu_kernel, BLOCK_M=16, BLOCK_N=16, BLOCK_K=16):
     M, K = x.shape
     N = weight.shape[0]
     w_t = weight.t().contiguous()
@@ -420,7 +426,7 @@ def row_mean_var_kernel(x_ptr, mean_ptr, var_ptr, M, N, stride_m, BLOCK_N: tl.co
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
 
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
@@ -431,6 +437,7 @@ def row_mean_var_kernel(x_ptr, mean_ptr, var_ptr, M, N, stride_m, BLOCK_N: tl.co
 
 
 def row_mean_var(x, BLOCK_N=None):
+    x = x.contiguous()
     M, N = x.shape
     if BLOCK_N is None:
         BLOCK_N = triton.next_power_of_2(N)
@@ -478,7 +485,7 @@ def layernorm_forward_kernel(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N, stride_m
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
 
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
@@ -486,8 +493,8 @@ def layernorm_forward_kernel(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N, stride_m
     inv_std = 1.0 / tl.sqrt(var + eps)
     x_norm = diff * inv_std
 
-    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0)
-    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0)
+    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0).to(tl.float32)
+    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     y = x_norm * gamma + beta
 
     out_row_ptr = out_ptr + row * stride_m
@@ -501,7 +508,7 @@ def layernorm_forward_kernel_wrong_eps(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
 
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
@@ -509,8 +516,8 @@ def layernorm_forward_kernel_wrong_eps(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N
     inv_std = 1.0 / (tl.sqrt(var) + eps)   # BUG: eps outside the sqrt
 
     x_norm = diff * inv_std
-    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0)
-    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0)
+    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0).to(tl.float32)
+    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     y = x_norm * gamma + beta
 
     out_row_ptr = out_ptr + row * stride_m
@@ -518,6 +525,9 @@ def layernorm_forward_kernel_wrong_eps(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N
 
 
 def triton_layernorm(x, gamma, beta, eps=1e-5, kernel=layernorm_forward_kernel):
+    x = x.contiguous()
+    gamma = gamma.contiguous()
+    beta = beta.contiguous()
     M, N = x.shape
     BLOCK_N = triton.next_power_of_2(N)
     out = torch.empty_like(x)
@@ -614,7 +624,7 @@ def fused_linear_gelu_kernel(a_ptr, b_ptr, bias_ptr, c_ptr, M, N, K,
     tl.store(c_ptrs, result, mask=c_mask)
 
 
-def fused_linear_gelu(x, weight, bias, BLOCK_M=8, BLOCK_N=8, BLOCK_K=4):
+def fused_linear_gelu(x, weight, bias, BLOCK_M=16, BLOCK_N=16, BLOCK_K=16):
     M, K = x.shape
     N = weight.shape[0]
     w_t = weight.t().contiguous()
@@ -650,7 +660,7 @@ def row_mean_var_kernel(x_ptr, mean_ptr, var_ptr, M, N, stride_m, BLOCK_N: tl.co
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
     var = tl.sum(diff * diff, axis=0) / N
@@ -687,14 +697,14 @@ def layernorm_forward_kernel(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N, stride_m
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
     var = tl.sum(diff * diff, axis=0) / N
     inv_std = 1.0 / tl.sqrt(var + eps)
     x_norm = diff * inv_std
-    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0)
-    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0)
+    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0).to(tl.float32)
+    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     y = x_norm * gamma + beta
     out_row_ptr = out_ptr + row * stride_m
     tl.store(out_row_ptr + cols, y, mask=mask)
@@ -707,20 +717,23 @@ def layernorm_forward_kernel_wrong_eps(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
     var = tl.sum(diff * diff, axis=0) / N
     inv_std = 1.0 / (tl.sqrt(var) + eps)  # BUG
     x_norm = diff * inv_std
-    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0)
-    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0)
+    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0).to(tl.float32)
+    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     y = x_norm * gamma + beta
     out_row_ptr = out_ptr + row * stride_m
     tl.store(out_row_ptr + cols, y, mask=mask)
 
 
 def _run_layernorm(x, gamma, beta, eps, kernel):
+    x = x.contiguous()
+    gamma = gamma.contiguous()
+    beta = beta.contiguous()
     M, N = x.shape
     BLOCK_N = triton.next_power_of_2(N)
     out = torch.empty_like(x)
@@ -810,7 +823,7 @@ This chapter fused a matmul's epilogue and built a complete row-wise normalizati
 ## Worked Solutions
 
 1. It computes the same formula while removing global-memory round trips for the intermediate matmul output and biased tensor. It still loads A, B and bias and stores the final output; tile reuse, caches and repeated input loads determine actual traffic. “Two touches total” is not a physical memory-transaction count. The "less work" is entirely in memory traffic, not arithmetic: the intermediate matmul result and the intermediate biased result both live only in registers for the lifetime of one program, and are never materialized in memory at all.
-2. When `M != N`, the mask `rows < M` is checked against the wrong bound — it should be checked against `N`, the bias tensor's actual length — so whenever `M > N`, indices from `N` up to `M-1` pass the mask and read genuinely out-of-bounds memory. It doesn't produce a clean error because that out-of-bounds read happens to land inside some other allocated region of memory rather than past all allocated memory entirely, so it returns whatever garbage values (in this case, tiny denormalized floats) happen to be sitting there, silently, with no crash and no exception.
+2. When `M != N`, the mask `rows < M` is checked against the wrong bound — it should be checked against `N`, the bias tensor's actual length — so whenever `M > N`, indices from `N` up to `M-1` pass the mask and read genuinely out-of-bounds memory. In the historical illustration it did not produce a clean error; an invalid access may instead fault or corrupt data. The illustrated read happened to land inside some other allocated region of memory rather than past all allocated memory entirely, so it returns whatever garbage values (in this case, tiny denormalized floats) happen to be sitting there, silently, with no crash and no exception.
 3. Because `x.var(dim=-1)` called with no extra arguments defaults to `unbiased=True` (dividing the sum of squared deviations by `N-1`), while every standard LayerNorm formula — including the kernel built in this chapter and PyTorch's own `torch.nn.LayerNorm` — uses the biased convention (dividing by `N`). Passing `unbiased=False` explicitly makes the oracle compute the same quantity the kernel does, resolving the mismatch; the kernel was correct all along, the comparison itself was checking the wrong formula.
 4. This chapter assigns one program to an entire LayerNorm row, so this implementation requires BLOCK_N to cover N. The normalization depends on whole-row statistics. Other implementations can combine partial statistics across tiles or launches; one program holding the entire row is not a universal LayerNorm requirement.
 5. `eps` exists specifically to keep `1/sqrt(var + eps)` from dividing by (near) zero when `var` itself is near zero. When `var` is a typical, non-tiny number, adding `eps` to it before the square root versus adding `eps` after the square root produces nearly the same result either way, because `eps=1e-5` is negligible compared to a `var` of order `1`. But when `var` genuinely is near zero, `sqrt(var + eps)` is dominated entirely by `eps` itself (`≈ sqrt(eps) ≈ 0.00316`), while `sqrt(var) + eps` is dominated by `eps` added on its own (`≈ 0 + eps = 0.00001`) — two denominators differing by roughly `sqrt(eps)/eps ≈ 316`, which is exactly the scale of the divergence Worked Example 20.3.2 measured. The bug is invisible whenever `var` is far from the regime `eps` was designed to protect, and only appears when an input actually exercises that regime.

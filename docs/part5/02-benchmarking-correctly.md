@@ -9,6 +9,12 @@
 !!! info "Historical interpreter timing examples"
     The driver-less failures below describe the original authoring environment. The later H100 smoke run is recorded separately; interpreter wall-clock times are not GPU performance measurements.
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
+!!! info "Interpreter plus a visible driver is a different environment"
+    A missing driver prevented the original timing helpers from starting. In the November 21 rerun a driver/GPU was visible, so autotune and do_bench did run while kernel bodies were interpreted. Those measurements are not GPU-kernel performance. Neither success nor failure is implied by TRITON_INTERPRET alone. First-call timing booleans are observations, not repeatable correctness assertions; see the [rerun differences](../rerun-differences-2026-11-21.md).
+
 ## What you will understand by the end of this chapter
 
 - What `triton.testing.do_bench` actually does internally — estimating a single call's cost, deriving warmup and repeat counts from target durations in milliseconds, timing with GPU-side events, and clearing the cache between repeats — read directly from its real, installed source
@@ -54,7 +60,7 @@ def run():
 triton.testing.do_bench(run)
 ```
 
-Genuinely captured, run under `TRITON_INTERPRET=1`:
+historical illustrated output, run under `TRITON_INTERPRET=1`:
 
 ```
 File ".../triton/testing.py", line 147, in do_bench
@@ -102,10 +108,10 @@ do_bench(fn):
 
 | Idea | Why it matters | What this section demonstrates |
 |---|---|---|
-| Warmup | A function's very first call often pays a one-time cost (JIT compilation, cache population, Python import machinery settling) that has nothing to do with its steady-state performance | A genuinely measured, repeatable gap between this book's interpreted kernel's first call and its later calls |
+| Warmup | A function's very first call often pays a one-time cost (JIT compilation, cache population, Python import machinery settling) that has nothing to do with its steady-state performance | A historical timing gap that is not guaranteed to repeat between this book's interpreted kernel's first call and its later calls |
 | Robust statistics | Timing measurements are noisy — a single unlucky trial (a garbage collection pause, an OS context switch, on real hardware: thermal throttling or a neighboring process) can be much slower than typical, and rarely much faster | A genuinely measured trial set, plus one clearly-labeled synthetic outlier, showing exactly how much a mean moves versus a median |
 
-### Worked Example 19.2.1: a genuine, repeatable warmup effect
+### Worked Example 19.2.1: an observed first-call timing difference
 
 Timing five consecutive launches of the same kernel, same arguments, with nothing else changed:
 
@@ -117,13 +123,13 @@ for _ in range(5):
     print(t1 - t0)
 ```
 
-Genuinely captured, on this book's own container, `n = 65536`:
+historical illustrated output, on this book's own container, `n = 65536`:
 
 ```
 first 5 calls (seconds): ['0.183678', '0.098827', '0.099560', '0.104460', '0.095680']
 ```
 
-The first call took roughly 1.8-2x longer than every call after it — a real, measured cost (almost certainly Triton's own internal caching and dispatch machinery settling on its first invocation of this specific kernel) that has nothing to do with the kernel's steady-state cost. These exact figures are specific to this run and this container — a different machine, or even a later run on this same one, will show different absolute numbers — but the *qualitative* pattern (first call measurably slower, later calls converging to a steady value) is the reproducible finding, and it is precisely why `do_bench` discards an initial warmup period rather than including it in its reported statistic.
+The first call took roughly 1.8-2x longer than every call after it — an observed timing difference whose cause was not isolated that has nothing to do with the kernel's steady-state cost. These exact figures are specific to this run and this container — a different machine, or even a later run on this same one, will show different absolute numbers — but the *qualitative* pattern (first-call cost and later variability must be measured on each run) is a historical observation, not a guaranteed pattern, and it is precisely why `do_bench` discards an initial warmup period rather than including it in its reported statistic.
 
 ### Worked Example 19.2.2: median versus mean, with one synthetic outlier
 
@@ -158,7 +164,7 @@ The median doesn't move at all — one value out of twenty-one doesn't change wh
                                            20 of 21 trials never changed
 ```
 
-> [COMMON TRAP] Reporting a raw mean over a small number of trials as "the" benchmark result is a common and easy mistake, because it requires no extra thought and the resulting number always looks legitimate. A single unusually slow trial — from a cause that has nothing to do with the kernel being measured — can dominate a mean while barely nudging a median. This is precisely why `do_bench` defaults toward robust statistics for real GPU work, where thermal throttling, driver overhead spikes, and contention from other processes are genuine, common sources of exactly this kind of outlier.
+> [COMMON TRAP] Reporting a raw mean over a small number of trials as "the" benchmark result is a common and easy mistake, because it requires no extra thought and the resulting number always looks legitimate. A single unusually slow trial — from a cause that has nothing to do with the kernel being measured — can dominate a mean while barely nudging a median. This is precisely why `do_bench` supports explicit summary statistics; select median or quantiles when desired (the tested default is mean) for real GPU work, where thermal throttling, driver overhead spikes, and contention from other processes are genuine, common sources of exactly this kind of outlier.
 
 ## 19.3 [FOUNDATIONAL] Why the Interpreter's Own Numbers Actively Mislead About GPU Performance
 
@@ -179,7 +185,7 @@ Every other chapter's "no GPU" disclosure has taken the same shape: this book's 
 
 ### Worked Example 19.3.1: fewer programs measures dramatically "faster" here — for the wrong reason
 
-Reusing Chapter 18's manually-swept, already-verified-correct `gelu_forward_kernel`, comparing `BLOCK=256` (256 programs for `n=65536`) against `BLOCK=4096` (16 programs for the same `n`), 20 trials each after warmup, genuinely captured on this book's own container:
+Reusing Chapter 18's manually-swept, already-verified-correct `gelu_forward_kernel`, comparing `BLOCK=256` (256 programs for `n=65536`) against `BLOCK=4096` (16 programs for the same `n`), 20 trials each after warmup, historical illustrated output on this book's own container:
 
 ```
 BLOCK=  256  n_programs= 256  median=294.7906ms  mean=295.2633ms  min=282.6192ms  max=314.7542ms
@@ -279,7 +285,7 @@ def gelu_forward_kernel(x_ptr, out_ptr, n, BLOCK: tl.constexpr):
 
 
 def section_19_2():
-    print("=== Section 19.2: a genuine, repeatable warmup effect ===")
+    print("=== Section 19.2: an observed first-call timing difference ===")
     torch.manual_seed(0)
     n = 65536
     x = torch.randn(n)
@@ -516,27 +522,44 @@ if __name__ == "__main__":
 
 ### Expected Output for `04_standalone_complete.py`
 
-```
+```text
 === Section 19.1: attempting triton.testing.do_bench itself ===
-caught, as expected: RuntimeError
+ran without error (unexpected)
 
 === Section 19.2: warmup effect and median vs. mean ===
-first call slower than steady-state average? True
+first call slower than steady-state average? False
 median unaffected by synthetic outlier? True
-mean shifted by synthetic outlier by [some positive number, roughly 100-140ms on this book's container]
+mean shifted by synthetic outlier by 136.3ms
 
 === Section 19.3: interpreter timing inversion (BLOCK=256 vs. BLOCK=4096) ===
-BLOCK=256 median: [varies]ms   BLOCK=4096 median: [varies]ms
+BLOCK=256 median: 136.02ms   BLOCK=4096 median: 17.10ms
 BLOCK=256 is slower under this interpreter? True
 (fewer programs measuring 'faster' here reflects interpreter overhead,
  not real GPU occupancy -- never extrapolate this to real hardware)
 ```
 
-Unlike every earlier chapter's `Expected Output` block, the bracketed values above are not filled in with one fixed number: this chapter is about timing, and timing genuinely varies run to run and machine to machine, even on the very same container. What reproduces reliably — verified directly on this book's own environment, both in the chapter text above and independently when this exact file was executed — is every boolean and qualitative claim: `do_bench` genuinely raises `RuntimeError`, the first call is genuinely slower than steady-state, the median genuinely does not move when a synthetic outlier is added while the mean genuinely does, and `BLOCK=256` is genuinely slower than `BLOCK=4096` under this specific interpreter, for reasons that do not transfer to real hardware.
+The block above is the exact recorded standalone output from the GPU-visible interpreter rerun, not a template of expected booleans. Its do_bench branch and timing comparisons differ from the original driver-less illustrations. Neither timings nor first-call comparisons are guaranteed to repeat; see the linked raw differences report.
+
+## Device events and meaningful rates
+
+For a compiled CUDA workload, an event-based measurement can time one stream. The following is a pattern, not a newly executed benchmark:
+
+```python
+# Compile and warm up the real GPU kernel first; keep interpreter mode off.
+start = torch.cuda.Event(enable_timing=True)
+end = torch.cuda.Event(enable_timing=True)
+start.record()
+run_compiled_workload()
+end.record()
+end.synchronize()
+seconds = start.elapsed_time(end) / 1000.0
+```
+
+Reset stateful outputs before each trial. Repeat and report median/quantiles explicitly; do_bench's tested default return_mode is mean. Include other streams through explicit dependencies or use a timing boundary covering all relevant work. Effective bandwidth is algorithmically counted bytes/seconds, not necessarily measured DRAM traffic; GEMM rate is approximately 2*M*N*K/seconds. Launch overhead matters for short workloads. CUDA-graph timing has different scope; do_bench_cudagraph is not interchangeable with host-enqueue timing. GPU clocks, cache policy, power state and concurrent work must be reported before comparing results.
 
 ## Chapter Summary
 
-`triton.testing.do_bench`'s real, inspected source shows exactly how much correctness a genuine GPU benchmark requires — GPU-side timing events instead of a CPU clock, an explicit synchronization point, cache-clearing between repeats, and warmup/repeat counts computed from target durations rather than fixed iteration counts — and every one of those pieces reaches for a real device, which is why `do_bench` fails with the identical driver-requirement error Chapter 18's `@triton.autotune` already produced, for the identical underlying reason: `@triton.autotune` calls `do_bench` internally (Section 19.1). Two of `do_bench`'s core ideas can still be genuinely practiced without a GPU using nothing but `time.perf_counter()`: a real, repeatable warmup gap was measured on this book's own interpreter, and a real twenty-trial dataset, combined with one clearly-labeled synthetic outlier, showed a median staying completely unmoved while a mean shifted by over 40% — concretely justifying `do_bench`'s own preference for robust statistics (Section 19.2). And this chapter's central warning is that the interpreter's own timing numbers are not simply imprecise the way earlier chapters' unmeasurable quantities were — they measure something real (Python-level per-program overhead) that points in the *opposite* direction from what determines real GPU performance (occupancy, memory bandwidth, warp scheduling), demonstrated by a genuinely captured ~7.6x gap between two `BLOCK` sizes that would be actively misleading to extrapolate to real hardware (Section 19.3).
+GPU work must be timed over its intended completion interval, not only host enqueue calls. The tested do_bench default returns a mean; choose median or quantiles explicitly when appropriate. The original no-driver illustrations failed before timing, whereas the driver-visible interpreter rerun did not follow the same branch. Neither interpreter timings nor first-call slowdown booleans establish GPU performance. Warm up compiled kernels, control state/cache/stream scope, verify outputs separately and report measured variability and hardware/software details.
 
 ## Self-Check Questions
 

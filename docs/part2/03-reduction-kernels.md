@@ -19,6 +19,11 @@
 - Chapter 12, Section 12.3's oracle-based verification method (`torch.allclose` against a trusted independent implementation) — reused directly for softmax
 - Chapter 1, Section 1.3's accumulation-precision findings — this chapter's numerical-stability problem is a different failure mode from that one, and it's worth being clear about the distinction going in
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
+The introductory single-row reduction/softmax examples use FP32 inputs. The corrected online variant explicitly upcasts; do not infer arbitrary dtype or empty-row support from an FP32 example.
+
 ## 14.1 Row-wise Reductions: Sum and Max, Explicit Instead of Hidden Inside `tl.dot` `[FOUNDATIONAL]`
 
 ### Intuition
@@ -50,7 +55,7 @@ def row_sum_max_kernel(x_ptr, sum_ptr, max_ptr, stride_row, N, BLOCK_N: tl.const
     tl.store(max_ptr + row, row_max)
 ```
 
-Notice the mask's `other=` value differs between the two reductions: `other=0.0` for the sum (padding lanes shouldn't add anything) and `other=float('-inf')` for the max (padding lanes must never win a maximum). Genuinely captured, against a `4×6` tensor:
+Notice the mask's `other=` value differs between the two reductions: `other=0.0` for the sum (padding lanes shouldn't add anything) and `other=float('-inf')` for the max (padding lanes must never win a maximum). historical illustrated output, against a `4×6` tensor:
 
 ```
 row sums: [10.0, -9.0, 35.0, 0.0]  expected: [10.0, -9.0, 35.0, 0.0]
@@ -87,7 +92,7 @@ The fix exploits an algebraic identity: `e^{x_i} / \sum_j e^{x_j} = e^{x_i - c} 
 x = torch.tensor([[1.0, 2.0, 3.0, 0.5]])
 ```
 
-Genuinely captured, comparing both kernels against `torch.softmax` as the oracle:
+historical illustrated output, comparing both kernels against `torch.softmax` as the oracle:
 
 ```
 naive:  [[0.08536889404058456, 0.23205669224262238, 0.6307955384254456, 0.051778849214315414]]
@@ -105,7 +110,7 @@ Both kernels agree with the oracle within ordinary floating-point tolerance — 
 x = torch.tensor([[100.0, 101.0, 50.0, 0.0]])
 ```
 
-`100` and `101` are not exotic inputs — they're the kind of raw attention-score or logit values that appear routinely in real neural network layers before normalization. Genuinely captured:
+`100` and `101` are not exotic inputs — they're the kind of raw attention-score or logit values that appear routinely in real neural network layers before normalization. historical illustrated output:
 
 ```
 RuntimeWarning: overflow encountered in exp
@@ -131,12 +136,15 @@ The two `RuntimeWarning`s are genuine, unedited output from this book's interpre
 
   stable:  c = max(x) = 101
            x - c = [-1, 0, -51, -101]
-           exp(x-c) = [0.368, 1.0, ~1.9e-23, ~1.7e-44]   <-- all <= 1, none overflow
+           exp(x-c) = [0.368, 1.0, ~7.1e-23, ~1.4e-44]   <-- all <= 1, none overflow
            sum = 1.368...
            result = exp(x-c) / sum   <-- identical ratio, computed safely
 ```
 
 > `[COMMON TRAP]` It's tempting to think numerical instability is a rare edge case that only shows up with contrived, deliberately extreme test inputs. `100` and `101` are not contrived — pre-softmax logits and raw attention scores routinely reach this magnitude in real trained models, especially before any normalization layer has had a chance to constrain them. A softmax kernel written the naive way isn't subtly wrong in rare cases; it is a `nan`-producing kernel waiting for an entirely ordinary input to trigger it, which is precisely why every production softmax implementation — including PyTorch's own — subtracts the max unconditionally, rather than only when it looks necessary.
+
+!!! warning "Online-softmax edge case corrected; rerun pending"
+    A leading chunk of all negative infinity previously produced inf-inf and poisoned the running state. The current recurrence uses a safe reference maximum and a zero rescale for empty prior state. A wholly masked row is explicitly defined to return zeros; NaN and positive-infinity inputs remain outside this example's contract. Reductions are upcast to FP32. These source changes need fresh interpreter and compiled-GPU tests.
 
 ## 14.3 Online Softmax: Computing a Running Max and a Correctly Rescaled Sum Together `[FOUNDATIONAL]`
 
@@ -170,17 +178,22 @@ def online_softmax_kernel(x_ptr, out_ptr, stride_row, N,
     for c in range(NUM_CHUNKS):
         cols = c * BLOCK_N + cols0
         mask = cols < N
-        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
+        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
         chunk_max = tl.max(x, axis=0)
         m_new = tl.maximum(m, chunk_max)
-        l = l * tl.exp(m - m_new) + tl.sum(tl.where(mask, tl.exp(x - m_new), 0.0), axis=0)
+        safe_max = tl.where(m_new == float('-inf'), 0.0, m_new)
+        alpha = tl.where(m == float('-inf'), 0.0, tl.exp(m - safe_max))
+        weights = tl.where(mask, tl.exp(x - safe_max), 0.0)
+        l = l * alpha + tl.sum(weights, axis=0)
         m = m_new
 
     for c in range(NUM_CHUNKS):
         cols = c * BLOCK_N + cols0
         mask = cols < N
-        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
-        y = tl.exp(x - m) / l
+        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
+        safe_max = tl.where(m == float('-inf'), 0.0, m)
+        safe_l = tl.where(l > 0.0, l, 1.0)
+        y = tl.where(l > 0.0, tl.exp(x - safe_max) / safe_l, 0.0)
         tl.store(out_ptr + row * stride_row + cols, y, mask=mask)
 ```
 
@@ -365,17 +378,22 @@ def online_softmax_kernel(x_ptr, out_ptr, stride_row, N,
     for c in range(NUM_CHUNKS):
         cols = c * BLOCK_N + cols0
         mask = cols < N
-        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
+        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
         chunk_max = tl.max(x, axis=0)
         m_new = tl.maximum(m, chunk_max)
-        l = l * tl.exp(m - m_new) + tl.sum(tl.where(mask, tl.exp(x - m_new), 0.0), axis=0)
+        safe_max = tl.where(m_new == float('-inf'), 0.0, m_new)
+        alpha = tl.where(m == float('-inf'), 0.0, tl.exp(m - safe_max))
+        weights = tl.where(mask, tl.exp(x - safe_max), 0.0)
+        l = l * alpha + tl.sum(weights, axis=0)
         m = m_new
 
     for c in range(NUM_CHUNKS):
         cols = c * BLOCK_N + cols0
         mask = cols < N
-        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
-        y = tl.exp(x - m) / l
+        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
+        safe_max = tl.where(m == float('-inf'), 0.0, m)
+        safe_l = tl.where(l > 0.0, l, 1.0)
+        y = tl.where(l > 0.0, tl.exp(x - safe_max) / safe_l, 0.0)
         tl.store(out_ptr + row * stride_row + cols, y, mask=mask)
 
 
@@ -426,7 +444,7 @@ def row_sum_max_kernel(x_ptr, sum_ptr, max_ptr, stride_row, N, BLOCK_N: tl.const
     mask = cols < N
     x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=0.0)
     row_sum = tl.sum(x, axis=0)
-    x_for_max = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
+    x_for_max = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
     row_max = tl.max(x_for_max, axis=0)
     tl.store(sum_ptr + row, row_sum)
     tl.store(max_ptr + row, row_max)
@@ -450,7 +468,7 @@ def stable_softmax_kernel(x_ptr, out_ptr, stride_row, N, BLOCK_N: tl.constexpr):
     row = tl.program_id(0)
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
-    x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
+    x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
     row_max = tl.max(x, axis=0)
     x_shifted = x - row_max
     num = tl.exp(x_shifted)
@@ -470,16 +488,21 @@ def online_softmax_kernel(x_ptr, out_ptr, stride_row, N,
     for c in range(NUM_CHUNKS):
         cols = c * BLOCK_N + cols0
         mask = cols < N
-        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
+        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
         chunk_max = tl.max(x, axis=0)
         m_new = tl.maximum(m, chunk_max)
-        l = l * tl.exp(m - m_new) + tl.sum(tl.where(mask, tl.exp(x - m_new), 0.0), axis=0)
+        safe_max = tl.where(m_new == float('-inf'), 0.0, m_new)
+        alpha = tl.where(m == float('-inf'), 0.0, tl.exp(m - safe_max))
+        weights = tl.where(mask, tl.exp(x - safe_max), 0.0)
+        l = l * alpha + tl.sum(weights, axis=0)
         m = m_new
     for c in range(NUM_CHUNKS):
         cols = c * BLOCK_N + cols0
         mask = cols < N
-        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
-        y = tl.exp(x - m) / l
+        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
+        safe_max = tl.where(m == float('-inf'), 0.0, m)
+        safe_l = tl.where(l > 0.0, l, 1.0)
+        y = tl.where(l > 0.0, tl.exp(x - safe_max) / safe_l, 0.0)
         tl.store(out_ptr + row * stride_row + cols, y, mask=mask)
 
 
@@ -560,7 +583,7 @@ This chapter's row-wise kernels treated each row entirely independently — noth
 
 **2.** `e^{x_i - c} / \sum_j e^{x_j - c} = (e^{x_i} \cdot e^{-c}) / \sum_j (e^{x_j} \cdot e^{-c}) = e^{-c}(e^{x_i}) / e^{-c}(\sum_j e^{x_j})`, and the `e^{-c}` factor cancels between numerator and denominator, leaving exactly `e^{x_i} / \sum_j e^{x_j}` — the original, unshifted softmax. This holds for any constant `c`, so nothing about the mathematical result changes. Choosing `c = \max_j x_j` specifically guarantees that the largest value being exponentiated, `x_i - c` for `i` at the max, is exactly `0`, and every other shifted value is `\le 0` — meaning the largest possible exponent computed anywhere is `e^0 = 1`, which can never overflow, while any other value can only underflow toward `0`, a survivable failure mode.
 
-**3.** `tl.exp(x)` applied to `x = [100, 101, 50, 0]` computes `exp(100)` and `exp(101)` first — both exceed `fp32`'s maximum representable value (`~3.4 \times 10^{38}`; `e^{101} \approx 7.2 \times 10^{43}`), so both become `inf`. The subsequent `denom = tl.sum(num, axis=0)` sums a list containing two `inf` values, producing `inf` (a sum involving `inf` is `inf`, not `nan`, at this stage). The `nan` appears one step later, at `y = num / denom`: computing `inf / inf` (for the two positions whose numerator is itself `inf`) is mathematically indeterminate, and IEEE 754 floating-point arithmetic defines this specific operation's result as `nan`.
+**3.** `tl.exp(x)` applied to `x = [100, 101, 50, 0]` computes `exp(100)` and `exp(101)` first — both exceed `fp32`'s maximum representable value (`~3.4 \times 10^{38}`; `e^{101} \approx 7.3 \times 10^{43}`), so both become `inf`. The subsequent `denom = tl.sum(num, axis=0)` sums a list containing two `inf` values, producing `inf` (a sum involving `inf` is `inf`, not `nan`, at this stage). The `nan` appears one step later, at `y = num / denom`: computing `inf / inf` (for the two positions whose numerator is itself `inf`) is mathematically indeterminate, and IEEE 754 floating-point arithmetic defines this specific operation's result as `nan`.
 
 **4.** That line rescales the running sum `l`, which was accumulated relative to the *previous* running max `m`, so that it becomes exactly what it would have been had it been computed relative to the *new*, larger max `m_new` all along — then adds the current chunk's own contribution (already computed against `m_new`). It is exact rather than approximate because of the algebraic identity `e^{x - m_{new}} = e^{x - m} \cdot e^{m - m_{new}}`: multiplying the old sum by `e^{m - m_{new}}` applies precisely the correction factor needed to convert every previously-summed term from being scaled relative to `m` to being scaled relative to `m_new`, as an identity in real arithmetic. Floating-point implementations can still round and underflow. Valid normalized rows need finite inputs and at least one valid element; define a separate policy for empty or all-masked rows.
 

@@ -2,7 +2,7 @@
 
 [![Appendix A: Check the layer. Find the failure.](../images/chapter-openers/appendix-a.svg)](../images/chapter-openers/appendix-a.svg)
 
-[![Appendix A worked concept](../images/appendix-a/01-concept.svg)](../images/appendix-a/01-concept.svg)
+[![Appendix A: Isolate the first failing layer](../images/appendix-a/01-concept.svg)](../images/appendix-a/01-concept.svg)
 
 The complete, architecture-aware installation recipe is in [Getting Started](../getting-started.md). Use one recipe and record its versions rather than mixing CUDA 12.1 commands from an older draft with a newer standalone Triton package.
 

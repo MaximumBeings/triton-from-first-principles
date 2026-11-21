@@ -1,0 +1,7 @@
+{
+  "captured_sha256": "af64ff8cd0901ddc33bac19c2e9ced721fac5f48c886b1b9d9ff50056a941165",
+  "current_sha256": "b2a5f80871f7e83c3a32f825d9550a02f088dc9325f9bf67b6141f7922afeae5",
+  "old_text": "Compiled NVIDIA smoke tests. GPU execution is pending; never use interpreter mode.",
+  "new_text": "Compiled NVIDIA smoke tests. Captured H100 results are documented in execution-2026-11-21.md.",
+  "scope": "Module docstring only; numerical source and captured logs unchanged."
+}

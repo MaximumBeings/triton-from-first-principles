@@ -19,6 +19,9 @@
 - Chapter 2's autotuning finding (`RuntimeError: 0 active drivers ([]). There should only be one.`) — this chapter extends that same finding to hardware querying in general, rather than re-deriving it
 - Chapter 8's device-placement disclosure (`torch.cuda.is_available() == False`, no NVIDIA driver present anywhere in this book's environment) — the running constraint this entire chapter is written around
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 10.1 Querying the Hardware You're Compiling For (and What Happens With None) `[FOUNDATIONAL]`
 
 ### Intuition
@@ -44,7 +47,7 @@ triton.runtime.driver.active.get_current_target()      # which architecture?
 torch.cuda.get_device_properties(0)                    # device name, SM count, memory?
 ```
 
-Genuinely captured, attempting all three in this book's environment:
+historical illustrated output, attempting all three in this book's environment:
 
 ```
 RuntimeError: 0 active drivers ([]). There should only be one.
@@ -105,7 +108,7 @@ add_kernel[(1,)](x, y, out, 4, BLOCK=4, num_warps=4)
 add_kernel[(1,)](x, y, out, 4, BLOCK=4, num_warps=8)
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 num_warps=1 -> [11.0, 22.0, 33.0, 44.0]
@@ -154,7 +157,7 @@ def launch_for_hardware(x, out, n, BLOCK, compute_capability):
     hw_aware_kernel[(1,)](x, out, n, USE_FAST_PATH=use_fast_path, BLOCK=BLOCK)
 ```
 
-Genuinely captured, calling `launch_for_hardware` with two different hand-supplied `compute_capability` values, standing in for hardware this book's environment cannot actually detect:
+historical illustrated output, calling `launch_for_hardware` with two different hand-supplied `compute_capability` values, standing in for hardware this book's environment cannot actually detect:
 
 ```
 compute_capability=90 (fast path, tensor-core-style op) -> [2.0, 4.0, 6.0, 8.0]

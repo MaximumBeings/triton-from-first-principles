@@ -6,6 +6,9 @@
 
 > A custom `backward` method that has only ever been tested alone has only been tested against the one input it can never actually receive in practice: a `grad_output` of uniform ones.
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## What you will understand by the end of this chapter
 
 - What `grad_output` actually looks like when `TritonGELU` sits inside a real expression — `2 * TritonGELU(x) + 1`, not an isolated `.sum().backward()` — and why it is essentially never uniformly `1` in practice
@@ -46,7 +49,7 @@ loss = w.sum()
 loss.backward()
 ```
 
-`register_hook` runs a callback the moment autograd computes the gradient flowing into `z` — exactly the `grad_output` that `TritonGELU.backward` receives as its argument. On six random values, genuinely captured:
+`register_hook` runs a callback the moment autograd computes the gradient flowing into `z` — exactly the `grad_output` that `TritonGELU.backward` receives as its argument. On six random values, historical illustrated output:
 
 ```
 grad_output that arrived at TritonGELU's node (dL/dz): tensor([2., 2., 2., 2., 2., 2.])
@@ -110,7 +113,7 @@ loss = y.sum()
 loss.backward()
 ```
 
-Genuinely captured, printing `.grad_fn` and `.grad_fn.next_functions` *before* calling `.backward()`, and the actual order `backward` methods were invoked (via a shared list each `backward` appends its own name to):
+historical illustrated output, printing `.grad_fn` and `.grad_fn.next_functions` *before* calling `.backward()`, and the actual order `backward` methods were invoked (via a shared list each `backward` appends its own name to):
 
 ```
 y.grad_fn: <torch.autograd.function.TritonSquareBackward object at 0x7ff966b4b020>
@@ -171,7 +174,7 @@ loss = z.sum() + z.sum()
 loss.backward()
 ```
 
-Genuinely captured, comparing against the single-use case and counting how many times `TritonGELU.backward` actually ran:
+historical illustrated output, comparing against the single-use case and counting how many times `TritonGELU.backward` actually ran:
 
 ```
 used once  -> grad_output at TritonGELU.backward: tensor([1., 1., 1., 1.])
@@ -191,7 +194,7 @@ loss = (2 * z).sum() + (3 * z).sum()
 loss.backward()
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 grad_output at TritonGELU.backward (expect uniformly 5.0): tensor([5., 5., 5., 5.])

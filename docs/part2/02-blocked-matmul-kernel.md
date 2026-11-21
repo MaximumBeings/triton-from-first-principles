@@ -19,6 +19,9 @@
 - Chapter 5's masking discipline and Chapter 9's structural masking — both are extended here to a third dimension
 - Chapter 1, Section 1.3's fp16-vs-fp32 accumulation finding — Section 13.3 is a direct, deeper continuation of that same lesson
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 13.1 Tiling a Real Matmul: A 2D Grid and a K-Loop `[FOUNDATIONAL]`
 
 ### Intuition
@@ -64,7 +67,7 @@ def matmul_kernel(a_ptr, b_ptr, c_ptr, M, N, K,
     tl.store(c_ptrs, acc, mask=c_mask)
 ```
 
-Against genuine `(8, 8) @ (8, 8)` matrices, with `BLOCK_M = BLOCK_N = BLOCK_K = 4`, the grid is `(cdiv(8,4), cdiv(8,4)) = (2, 2)` — four program instances, each computing one `4×4` tile of the `8×8` output — and each program instance's `K`-loop runs `cdiv(8, 4) = 2` iterations, accumulating two `4×4×4` partial products before its tile is complete. Genuinely captured:
+Against genuine `(8, 8) @ (8, 8)` matrices, with `BLOCK_M = BLOCK_N = BLOCK_K = 4`, the grid is `(cdiv(8,4), cdiv(8,4)) = (2, 2)` — four program instances, each computing one `4×4` tile of the `8×8` output — and each program instance's `K`-loop runs `cdiv(8, 4) = 2` iterations, accumulating two `4×4×4` partial products before its tile is complete. historical illustrated output:
 
 ```
 M,K,N = 8 8 8  grid = (2, 2)  K-iterations per tile = 2
@@ -129,7 +132,7 @@ a = tl.load(a_ptrs, mask=a_mask, other=0.0)
 b = tl.load(b_ptrs, mask=b_mask, other=0.0)
 ```
 
-To make the consequence unmistakable rather than a subtle, allocator-dependent difference, `A` and `B`'s real `(M, K)` and `(K, N)` data are sliced out of a larger underlying buffer whose out-of-range columns/rows are filled with an obvious sentinel, `999.0` — the same technique Chapter 9's ragged-batch example used. Genuinely captured:
+To make the consequence unmistakable rather than a subtle, allocator-dependent difference, `A` and `B`'s real `(M, K)` and `(K, N)` data are sliced out of a larger underlying buffer whose out-of-range columns/rows are filled with an obvious sentinel, `999.0` — the same technique Chapter 9's ragged-batch example used. historical illustrated output:
 
 ```
 torch reference (ground truth):
@@ -173,6 +176,9 @@ matches? False
 
 > `[COMMON TRAP]` It's tempting to assume that getting `M` and `N` masking right is "the hard part" of a matmul kernel, since that's the pattern already familiar from Chapters 5 and 9 — and then apply the identical two-dimensional mask pattern to the `a`/`b` loads without separately checking `K`. Worked Example 13.2.2's corruption happened with *correct* `M`/`N` masks in place the whole time; the bug was entirely in the dimension that has nothing to do with output tile position at all. A matmul kernel's masking checklist has one more item on it than a 2D elementwise kernel's does, and it's easy to reuse a mental model that only accounts for two.
 
+!!! info "What the accumulation experiment measures"
+    The FP32-accumulator path stores FP16 output. Its printed error therefore includes final output rounding, and the ratio of the two stored errors is not the ratio of their accumulation errors. To isolate accumulation, retain both outputs in FP32 and compare to the same FP64 reference, separately reporting FP16 storage rounding. The historical experiment did not capture that additional comparison; it does not establish an accumulation-only 20× claim.
+
 ## 13.3 Accumulation Precision at Real Depth: Why `fp32` Accumulation Matters More in a Loop `[FOUNDATIONAL]`
 
 ### Intuition
@@ -185,7 +191,7 @@ Chapter 1, Section 1.3 showed that summing 2,048 copies of a small `fp16` number
 |---|---|---|
 | Accumulator dtype across the `K`-loop | `tl.float32`, regardless of input dtype | `tl.float16` — rounds after every single `K`-iteration |
 | When precision is lost | FP32 operations round too; final FP16 storage adds a coarser rounding | Repeatedly — once per `K`-iteration, compounding |
-| Deviation from an `fp64` ground truth, `K=1024` (128 iterations of `BLOCK_K=8`) | `~9.7e-5` | **`~2.0e-3` — roughly 20× worse** |
+| Deviation from an `fp64` ground truth, `K=1024` (128 iterations of `BLOCK_K=8`) | `~9.7e-5` | **`~2.0e-3` end-to-end error** |
 | Where this matters most | Any real matmul with a nontrivial shared dimension — which is most of them | — |
 
 ### Worked Example 13.3.1 — the same K-loop, two accumulator dtypes, a deep `K`
@@ -209,7 +215,7 @@ for k0 in range(0, K, BLOCK_K):
     acc += partial   # rounds to fp16 every single K-chunk
 ```
 
-With `fp16`-stored inputs, `K=1024`, `BLOCK_K=8` (128 `K`-iterations per output tile), compared against an `fp64` "ground truth" computed from the identical `fp16`-rounded inputs — isolating accumulation error from the unavoidable, one-time rounding cost of storing the inputs as `fp16` in the first place — genuinely captured:
+With `fp16`-stored inputs, `K=1024`, `BLOCK_K=8` (128 `K`-iterations per output tile), compared against an `fp64` "ground truth" computed from the identical `fp16`-rounded inputs — isolating accumulation error from the unavoidable, one-time rounding cost of storing the inputs as `fp16` in the first place — historical illustrated output:
 
 ```
 K=1024, BLOCK_K=8 -> 128 K-iterations
@@ -219,7 +225,7 @@ fp16acc max abs diff vs exact: 0.001974425897060428
 
 The `fp32`-accumulated kernel stays within `~1e-4` of the `fp64` ground truth even after 128 accumulation steps; the `fp16`-accumulated kernel drifts roughly twenty times further, for exactly the reason Chapter 1, Section 1.3 identified: `fp16` has too little mantissa precision to keep absorbing small updates onto a growing running total without repeatedly rounding away part of each addition.
 
-> `[COMMON TRAP]` `tl.dot(a, b)` on `fp16` inputs often produces an `fp32`-typed result already, on real hardware, as part of how tensor-core matmul instructions work — but that only protects the *result of one `tl.dot` call*. Worked Example 13.3.1's buggy version explicitly cast that per-tile `fp32` result back down to `fp16` before adding it into the accumulator (`tl.dot(a, b).to(tl.float16)`), which throws away exactly the precision `tl.dot` had just provided. The accumulator's own declared dtype — not merely `tl.dot`'s internal behavior — is what determines whether that precision survives across the whole `K`-loop or gets discarded one `K`-tile at a time.
+> `[COMMON TRAP]` `tl.dot(a, b)` on `fp16` inputs defaults to an `fp32`-typed result, on real hardware, as part of how tensor-core matmul instructions work — but that only protects the *result of one `tl.dot` call*. Worked Example 13.3.1's buggy version explicitly cast that per-tile `fp32` result back down to `fp16` before adding it into the accumulator (`tl.dot(a, b).to(tl.float16)`), which throws away exactly the precision `tl.dot` had just provided. The accumulator's own declared dtype — not merely `tl.dot`'s internal behavior — is what determines whether that precision survives across the whole `K`-loop or gets discarded one `K`-tile at a time.
 
 ## 13.4 Complete Runnable Code
 
@@ -634,7 +640,7 @@ Every claim here was verified with full numeric detail earlier in this chapter: 
 
 ## Chapter Summary
 
-A tiled matmul kernel needs exactly one genuinely new structural idea beyond what Chapters 1 through 12 already established: a loop over the shared dimension `K`, accumulating each tile's `tl.dot` product into a running total initialized once, before the loop, using the same accumulator pattern Chapter 5's reductions introduced (Section 13.1). That loop needs its own bounds check — `K` masking is a third, independent requirement alongside the familiar `M`/`N` output-tile masking, and Section 13.2 showed both a correct three-way-masked matmul on deliberately awkward dimensions and, with a deterministic sentinel-based construction, exactly how dramatically wrong the result becomes when only the `K` mask is missing. And accumulation precision, first introduced in Chapter 1 as a single reduction over 2,048 terms, matters even more inside a matmul's `K`-loop, where every additional `K`-tile is another accumulation step — Section 13.3 showed a `20`× gap between `fp32` and `fp16` accumulation open up over 128 iterations, far larger than the single-reduction gap Chapter 1 first measured.
+A tiled matmul kernel needs exactly one genuinely new structural idea beyond what Chapters 1 through 12 already established: a loop over the shared dimension `K`, accumulating each tile's `tl.dot` product into a running total initialized once, before the loop, using the same accumulator pattern Chapter 5's reductions introduced (Section 13.1). That loop needs its own bounds check — `K` masking is a third, independent requirement alongside the familiar `M`/`N` output-tile masking, and Section 13.2 showed both a correct three-way-masked matmul on deliberately awkward dimensions and, with a deterministic sentinel-based construction, exactly how dramatically wrong the result becomes when only the `K` mask is missing. And accumulation precision, first introduced in Chapter 1 as a single reduction over 2,048 terms, matters even more inside a matmul's `K`-loop, where every additional `K`-tile is another accumulation step — Section 13.3 showed a difference between the two end-to-end stored results open up over 128 iterations, far larger than the single-reduction gap Chapter 1 first measured.
 
 ## Self-Check Questions
 
@@ -642,7 +648,7 @@ A tiled matmul kernel needs exactly one genuinely new structural idea beyond wha
 2. What specifically goes wrong if the accumulator `acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)` is placed inside the `K`-loop instead of before it?
 3. A matmul kernel correctly masks `rows[:, None] < M` and `cols[None, :] < N` on every load and store, but never checks `ks < K` anywhere. Will this kernel produce a compile error, a runtime error, or a silently wrong result? Explain why, referencing Worked Example 13.2.2.
 4. Worked Example 13.3.1 found a `~20`× larger deviation from the `fp64` ground truth for the `fp16`-accumulated kernel compared to the `fp32`-accumulated one. Why does this gap grow with the number of `K`-iterations, rather than staying constant?
-5. `tl.dot(a, b)` on `fp16` inputs can produce an `fp32`-typed result even before you do anything else to it. Why doesn't this alone guarantee that a matmul kernel's overall accumulation is accurate?
+5. `tl.dot(a, b)` on `fp16` inputs defaults to an `fp32`-typed result even before you do anything else to it. Why doesn't this alone guarantee that a matmul kernel's overall accumulation is accurate?
 
 ## Where We Go Next
 
@@ -662,4 +668,4 @@ The matmul kernel in this chapter accumulates a genuine reduction — a sum over
 
 ### Taking the hand-sized tile to a compiled GPU
 
-The BLOCK=4 and BLOCK_K=8 traces are interpreter examples. They are below the NVIDIA v3.3.1 dot backend's minimum non-INT8 dimensions (16,16,16); merely setting `TRITON_INTERPRET=0` does not make those launches valid. Keep logical M/N/K arbitrary, choose supported power-of-two physical tile extents, and use masks for all three tails. A new GPU run must allocate CUDA tensors and use independent numerical and memory checks. Current FP32 teaching dots request IEEE input precision; the historical interpreter outputs do not establish compiled performance.
+The BLOCK=4 and BLOCK_K=8 traces are interpreter examples. Their K extents are below the selected 3.5.1 backend's non-INT8 K>=16 requirement; that version permits small M/N. The older 3.3.1 backend required (16,16,16); merely setting `TRITON_INTERPRET=0` does not make those launches valid. Keep logical M/N/K arbitrary, choose supported power-of-two physical tile extents, and use masks for all three tails. A new GPU run must allocate CUDA tensors and use independent numerical and memory checks. Current FP32 teaching dots request IEEE input precision; the historical interpreter outputs do not establish compiled performance.

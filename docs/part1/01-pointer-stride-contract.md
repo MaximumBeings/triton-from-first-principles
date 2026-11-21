@@ -21,6 +21,9 @@
 - Chapter 5's masking discipline (`mask=`, `other=`) — used throughout without further explanation
 - If you've read the Mojo edition of this book, Chapter 6 there ("The Tensor") builds `Tensor[dtype]` as a `struct` with `TensorShape`, `TensorStrides`, a raw pointer, and a dtype, all bundled into one compile-time-checked type. This chapter covers the same four concepts from the opposite direction: Triton never bundles them at all, and Part 1 of this book is largely about what that costs you and what you do about it.
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 6.1 What Actually Crosses the Kernel Boundary: A Raw Pointer `[FOUNDATIONAL]`
 
 ### Intuition
@@ -69,7 +72,7 @@ def shape_probe_kernel(x_ptr, out_ptr, BLOCK: tl.constexpr):
     tl.store(out_ptr, 0.0)
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 x_ptr.shape as seen inside the kernel: []
@@ -190,7 +193,9 @@ On the compiled path, pointer element types participate in specialization. In in
 
 That said, this enforcement is narrower than it might sound: dtype specialization guarantees the *compiled code* matches the *tensor's actual dtype*, but it does not check whether the kernel's logic is *meaningful* for that dtype. `dtype_report_kernel` above uses only `tl.load` and `tl.store` — operations that typecheck equally well for floats and integers — so on a compiled backend, a supported `int32` launch would create a distinct typed specialization; the interpreter messages above do not demonstrate that compilation, even though nothing about this kernel was written with integers in mind. dtype checking tells you the pointer type and the tensor's real dtype never disagree; it does not tell you the kernel author intended this dtype to be here.
 
-> `[COMMON TRAP]` It's tempting to read Section 6.3 as "dtype is safe, shape/strides aren't" and stop there. The more precise statement is narrower: dtype *mismatches between the pointer and the underlying tensor* cannot happen, because there's no separate channel to introduce one. Whether a given kernel's *arithmetic* makes sense for a given dtype — mixing signed and unsigned integers, applying a floating-point-only function like `tl.math.erf` to integer data — is a completely separate question that dtype specialization does not answer, and that later chapters (particularly Chapter 20, on quantization) return to directly.
+> `[COMMON TRAP]` It's tempting to read Section 6.3 as "dtype is safe, shape/strides aren't" and stop there. The more precise statement is narrower: dtype *mismatches between the pointer and the underlying tensor* cannot happen, because there's no separate channel to introduce one. Whether a given kernel's *arithmetic* makes sense for a given dtype — mixing signed and unsigned integers, applying a floating-point-only function like `tl.math.erf` to integer data — is a completely separate question that dtype specialization does not answer, and that later chapters (particularly the separate topic of quantization (not implemented in Chapter 20)) return to directly.
+
+This chapter’s single-program wrappers are small teaching examples, not arbitrary-size production launchers. next_power_of_2(n) cannot grow without bound: the classic tensor element limit is 2^20, and useful GPU resource limits can be much smaller. Use a bounded BLOCK with a grid for larger arrays.
 
 ## 6.4 The Wrapper Function: Where the Contract Actually Gets Assembled `[FOUNDATIONAL]`
 
@@ -221,7 +226,7 @@ def add(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     return out
 ```
 
-This is where the actual composition happens: `add` reads `x.shape`, computes `BLOCK` and `grid` from it, and only then launches the kernel — everything Section 6.1 showed does *not* automatically cross the boundary is gathered here, by hand, once, before the launch. Genuinely captured:
+This is where the actual composition happens: `add` reads `x.shape`, computes `BLOCK` and `grid` from it, and only then launches the kernel — everything Section 6.1 showed does *not* automatically cross the boundary is gathered here, by hand, once, before the launch. historical illustrated output:
 
 ```
 a = [1.0, 2.0, 3.0, 4.0], b = [10.0, 20.0, 30.0, 40.0]

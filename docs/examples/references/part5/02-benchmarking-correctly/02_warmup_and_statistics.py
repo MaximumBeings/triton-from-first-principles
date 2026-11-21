@@ -17,7 +17,7 @@ def gelu_forward_kernel(x_ptr, out_ptr, n, BLOCK: tl.constexpr):
 
 
 def section_19_2():
-    print("=== Section 19.2: a genuine, repeatable warmup effect ===")
+    print("=== Section 19.2: an observed first-call timing difference ===")
     torch.manual_seed(0)
     n = 65536
     x = torch.randn(n)

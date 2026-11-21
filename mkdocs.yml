@@ -63,8 +63,11 @@ plugins:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Versions & Migration: version-and-migration.md
   - Review & Testing Status: review-and-testing.md
   - Final Adversarial Review: final-review-2026-11-21.md
+  - Independent Review Response: opus-review-response-2026-11-21.md
+  - Interpreter Rerun Differences: rerun-differences-2026-11-21.md
   - November 21 H100 Results: execution-2026-11-21.md
   - "Part 0 — Triton Foundations":
       - "1. Types and the JIT Boundary": part0/01-types-and-the-jit-boundary.md
@@ -93,7 +96,7 @@ nav:
       - "19. Benchmarking Correctly": part5/02-benchmarking-correctly.md
   - "Part 6 — Neural Network Building Blocks":
       - "20. Fused Kernels for Real Layers": part6/01-fused-kernels-for-real-layers.md
-      - "21. Flash Attention, MoE, and Advanced Features": part6/02-flash-attention-moe-advanced-features.md
+      - "21. Forward Attention and Top-2 MoE Gating": part6/02-flash-attention-moe-advanced-features.md
   - "Part 7 — Financial Computing Applications":
       - "22. Quantitative Finance Examples": part7/01-quantitative-finance-examples.md
   - Appendix:

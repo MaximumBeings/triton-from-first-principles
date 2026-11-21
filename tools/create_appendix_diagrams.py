@@ -42,7 +42,7 @@ for letter,page,a,b,description,labels in SPECS:
   w.columns([('Block pointer','Describe the logical tile, strides, offsets and boundary checks.','blue'),('Descriptor','Also meet base/stride alignment, contiguous final dimension, supported shape and allocator requirements.','violet')])
  height=w.write();path=ROOT/'docs/images'/rel;s=path.read_text().replace('CHAPTER '+letter,'APPENDIX '+letter);# Drawing path metadata is made explicit for appendices.
  s=re.sub(r'CHAPTER pendix-[a-d]', 'APPENDIX '+letter,s);path.write_text(s)
- p=ROOT/'docs/appendix'/page;s=p.read_text();links=f'\n[![Appendix {letter}: {title}](../{banner})](../{banner})\n\n[![Appendix {letter} worked concept](../images/{rel})](../images/{rel})\n'
+ p=ROOT/'docs/appendix'/page;s=p.read_text();links=f'\n[![Appendix {letter}: {title}](../{banner})](../{banner})\n\n[![Appendix {letter}: {w.title}](../images/{rel})](../images/{rel})\n'
  if f'../{banner}' not in s:
   at=s.index('\n');p.write_text(s[:at+1]+links+s[at+1:])
  manifest.append(dict(appendix=letter,banner='docs/'+banner,concept='docs/images/'+rel,height=height))

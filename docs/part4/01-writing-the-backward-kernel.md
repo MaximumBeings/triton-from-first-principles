@@ -6,12 +6,15 @@
 
 > A forward pass computes an answer. A backward pass computes how much every input is to blame for the answer's error. Neither one requires a different kind of code — only a different formula, multiplied through the one number the rest of the network hands you.
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## What you will understand by the end of this chapter
 
 - How to derive and implement a genuine Triton kernel for a function's backward pass, starting from GELU's analytical derivative, rather than the placeholder plain-PyTorch `backward` written in Chapter 15
 - Why a correct backward kernel must return the *vector-Jacobian product* — `grad_output * local_derivative` — and not the local derivative alone, and what happens, concretely, when that multiplication is silently dropped
 - How to generalize Chapter 15's single-block launch (`grid=(1,)`, `BLOCK=next_power_of_2(n)`) into a genuine masked, multi-program grid for tensors of arbitrary size, in both the forward and backward directions
-- Why omitting the mask on a multi-program kernel is not a subtle numerical discrepancy here — it is a real, reproducible crash in this book's own interpreter environment, honestly captured rather than described secondhand
+- Why omitting the mask on a multi-program kernel is not a subtle numerical discrepancy here — it is an invalid access whose visible outcome is not guaranteed in this book's own interpreter environment, honestly captured rather than described secondhand
 - How to replace Chapter 15's placeholder `backward` staticmethod inside `TritonGELU` with the real Triton kernel, and confirm the wired-together `torch.autograd.Function` still produces gradients matching PyTorch's own GELU exactly
 - Why storing gradients in `fp16` costs meaningfully more precision than the arithmetic itself does, and why Triton's own `tl.math.erf` refuses to run on `fp16` operands at all rather than silently degrading
 
@@ -61,7 +64,7 @@ def gelu_backward_kernel(grad_out_ptr, x_ptr, grad_in_ptr, n, BLOCK: tl.constexp
     tl.store(grad_in_ptr + offsets, grad_in, mask=mask)
 ```
 
-Run on the same three values Chapter 15 used (`x = [-1.0, 0.5, 2.0]`, `grad_output = [1.0, 1.0, 1.0]`), genuinely captured:
+Run on the same three values Chapter 15 used (`x = [-1.0, 0.5, 2.0]`, `grad_output = [1.0, 1.0, 1.0]`), historical illustrated output:
 
 ```
 triton kernel grad_input: tensor([-0.0833,  0.8675,  1.0852])
@@ -92,14 +95,14 @@ def gelu_backward_kernel_buggy_no_chain_rule(grad_out_ptr, x_ptr, grad_in_ptr, n
     tl.store(grad_in_ptr + offsets, d_gelu, mask=mask)  # BUG: never multiplied by grad_out
 ```
 
-With `grad_output = [1.0, 1.0, 1.0]`, genuinely captured:
+With `grad_output = [1.0, 1.0, 1.0]`, historical illustrated output:
 
 ```
 correct kernel matches oracle?    True
 buggy kernel matches oracle?      True
 ```
 
-Both pass. Now the same two kernels with `grad_output = [2.0, 2.0, 2.0]` — the gradient a loss like `(2 * y).sum()` would hand back — genuinely captured:
+Both pass. Now the same two kernels with `grad_output = [2.0, 2.0, 2.0]` — the gradient a loss like `(2 * y).sum()` would hand back — historical illustrated output:
 
 ```
 oracle grad (grad_output=2.0):    tensor([-0.1666,  1.7350,  2.1705])
@@ -165,7 +168,7 @@ def triton_gelu_backward(grad_output, x, BLOCK=1024):
     return grad_input
 ```
 
-With `n = 10000` and `BLOCK = 1024`, `triton.cdiv(10000, 1024) = 10` — ten programs, the last of which only has `10000 - 9*1024 = 784` valid lanes out of its `1024`, leaving `240` that must be masked off. Genuinely captured, comparing both directions against the PyTorch oracle on random input:
+With `n = 10000` and `BLOCK = 1024`, `triton.cdiv(10000, 1024) = 10` — ten programs, the last of which only has `10000 - 9*1024 = 784` valid lanes out of its `1024`, leaving `240` that must be masked off. historical illustrated output, comparing both directions against the PyTorch oracle on random input:
 
 ```
 triton.cdiv(n, BLOCK) = 10  (10 programs; last covers only 784 of 1024 lanes)
@@ -260,7 +263,7 @@ class TritonGELU(torch.autograd.Function):
         return triton_gelu_backward(grad_output.contiguous(), x)
 ```
 
-Run on `n = 5000` — large enough to require five separate programs in both directions — genuinely captured:
+Run on `n = 5000` — large enough to require five separate programs in both directions — historical illustrated output:
 
 ```
 y.grad_fn: <torch.autograd.function.TritonGELUBackward object at 0x7fcb6784ae00>
@@ -287,7 +290,7 @@ x = tl.load(x_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
 grad_out = tl.load(grad_out_ptr + offsets, mask=mask, other=0.0).to(tl.float32)
 ```
 
-With that upcast in place, the kernel runs on `fp16` tensors without error. But running it, storing both the inputs and the output gradient as genuine `fp16` tensors, and comparing against an `fp64` ground truth alongside a full-`fp32` run of the identical kernel, genuinely captured:
+With that upcast in place, the kernel runs on `fp16` tensors without error. But running it, storing both the inputs and the output gradient as genuine `fp16` tensors, and comparing against an `fp64` ground truth alongside a full-`fp32` run of the identical kernel, historical illustrated output:
 
 ```
 fp32-in/fp32-out max abs diff from fp64 ground truth:   2.360000217471736e-07
@@ -856,7 +859,7 @@ The exact fp16/fp32 diff values above depend on the `torch.manual_seed` calls in
 
 ## Chapter Summary
 
-A backward kernel is not a new kind of Triton program — GELU's derivative, `Φ(x) + x*φ(x)`, is exactly as elementwise as GELU itself, built from the same masked-load-compute-store body as every kernel since Chapter 9 (Section 16.1). What is genuinely new is the chain rule: a correct `backward` must multiply that local derivative by `grad_output`, and forgetting that multiplication produces a kernel that passes any test built around `.sum().backward()` — where `grad_output` happens to be uniformly `1` — while being silently wrong the moment it sits inside a larger graph receiving a real, non-uniform gradient from upstream. Generalizing Chapter 15's single-block launch into a genuine masked, multi-program grid carried no new arithmetic, only more chances to get the masking wrong across two aligned input loads and one store — and omitting that masking entirely was shown to produce not a subtle wrong number but a real, reproducible crash in this book's own interpreter environment, honestly captured rather than glossed over (Section 16.2). Wiring the resulting kernel into `TritonGELU.forward`/`backward` required no changes to the autograd machinery Chapter 15 already built; what it did surface was a genuinely new precision question distinct from Chapter 13.3's accumulation-loop lesson — `fp16` storage costs real precision on every load and store regardless of the arithmetic's own precision, and Triton's own `tl.math.erf` refuses `fp16` operands outright rather than silently degrading (Section 16.3).
+A backward kernel is not a new kind of Triton program — GELU's derivative, `Φ(x) + x*φ(x)`, is exactly as elementwise as GELU itself, built from the same masked-load-compute-store body as every kernel since Chapter 9 (Section 16.1). What is genuinely new is the chain rule: a correct `backward` must multiply that local derivative by `grad_output`, and forgetting that multiplication produces a kernel that passes any test built around `.sum().backward()` — where `grad_output` happens to be uniformly `1` — while being silently wrong the moment it sits inside a larger graph receiving a real, non-uniform gradient from upstream. Generalizing Chapter 15's single-block launch into a genuine masked, multi-program grid carried no new arithmetic, only more chances to get the masking wrong across two aligned input loads and one store — and omitting that masking entirely was shown to produce not a subtle wrong number but an invalid access whose visible outcome is not guaranteed in this book's own interpreter environment, honestly captured rather than glossed over (Section 16.2). Wiring the resulting kernel into `TritonGELU.forward`/`backward` required no changes to the autograd machinery Chapter 15 already built; what it did surface was a genuinely new precision question distinct from Chapter 13.3's accumulation-loop lesson — `fp16` storage costs real precision on every load and store regardless of the arithmetic's own precision, and Triton's own `tl.math.erf` refuses `fp16` operands outright rather than silently degrading (Section 16.3).
 
 ## Self-Check Questions
 
@@ -874,7 +877,7 @@ A backward kernel is not a new kind of Triton program — GELU's derivative, `Φ
 
 1. `.sum().backward()` calls `backward` with `grad_output` implicitly equal to a tensor of all `1.0`s — under that specific condition, `grad_output * d_gelu` and `d_gelu` alone are numerically identical, since multiplying by `1` changes nothing. `(2 * y).sum().backward()` calls `backward` with `grad_output` equal to `2.0` everywhere instead; the correct kernel scales its output by that factor and matches the oracle, while the buggy kernel still returns the untouched local derivative — exactly half the correct answer, as Worked Example 16.1.2 demonstrated directly.
 2. Three: two masked loads (`x` and `grad_out`) and one masked store (`grad_in`), versus the forward kernel's one masked load and one masked store. The backward kernel reads two aligned input tensors instead of one, and both must be indexed and masked identically, or the elements being multiplied together at each lane would come from mismatched positions.
-3. The process crashes outright — a genuine, reproducible segmentation fault (captured as exit code 139), not a Python exception and not a wrong-but-printable number, because the tail program's unmasked load and store reach past the end of every tensor's allocated memory. It is excluded from `04_standalone_complete.py` because a hard process crash cannot be safely combined with other code in the same script — it would kill the entire file's execution and destroy every other section's output along with it, which is exactly why the chapter documents it separately, run once, in isolation.
+3. The historical run was reported to crash — an author-reported segmentation fault in that historical run (captured as exit code 139), not a Python exception and not a wrong-but-printable number, because the tail program's unmasked load and store reach past the end of every tensor's allocated memory. It is excluded from `04_standalone_complete.py` because a hard process crash cannot be safely combined with other code in the same script — it would kill the entire file's execution and destroy every other section's output along with it, which is exactly why the chapter documents it separately, run once, in isolation.
 4. What changed: `forward` now calls `triton_gelu_forward` (a genuine masked, multi-program Triton launch) instead of Chapter 15's single-block wrapper, and `backward` now calls `triton_gelu_backward` (another genuine masked, multi-program Triton kernel implementing the analytical derivative) instead of four lines of plain `torch.erf`/`torch.exp` arithmetic. What did not change: the `torch.autograd.Function` scaffolding itself — `ctx.save_for_backward(x)`, the `@staticmethod` structure, and the resulting `TritonGELUBackward` graph node all work identically regardless of what `forward` and `backward` compute internally, because autograd only cares that the two methods exist and are consistent with each other, not what's inside them.
 5. It came entirely from storage, not arithmetic: converting the input to `fp16` rounds it to roughly three decimal digits of precision before the load; `tl.load` reads that already-rounded value, and `.to(tl.float32)` cannot restore the lost bits, and every `tl.store` back into an `fp16` output tensor rounds the fully-precise `fp32` result down to `fp16` on the way out. The arithmetic in between ran at full `fp32` precision in both versions of the test — the roughly 6,000x accuracy gap is the cost of `fp16`'s limited storage precision alone, a genuinely different mechanism from Chapter 13.3's accumulation-precision loss, which came from summing many low-precision partial products across loop iterations rather than from storing a single value.
 

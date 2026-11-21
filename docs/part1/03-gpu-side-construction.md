@@ -20,6 +20,9 @@
 - Chapter 5's `tl.zeros`-as-accumulator pattern — reused here to show precisely what it does and doesn't allocate
 - If you've read the Mojo edition, this chapter directly answers the two remaining pieces of Mojo's Chapter 6 this book hasn't yet addressed: `Tensor[dtype]`'s factory functions (`.zeros()`, `.ones()`, `.full()`) and `DeviceTensor`, which tracks host-vs-GPU memory placement as part of the type
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 8.1 Kernels Don't Allocate: Every Buffer Exists Before the Kernel Runs `[FOUNDATIONAL]`
 
 ### Intuition
@@ -45,7 +48,7 @@ out = torch.empty_like(x)   # allocated on the host, in Python, BEFORE the kerne
 add_kernel[(1,)](x, y, out, 4, BLOCK=4)
 ```
 
-Every kernel since Chapter 1 has quietly done exactly this — `out = torch.empty_like(x)` (or `torch.empty(...)`) has appeared, unremarked, before every single launch. Genuinely captured:
+Every kernel since Chapter 1 has quietly done exactly this — `out = torch.empty_like(x)` (or `torch.empty(...)`) has appeared, unremarked, before every single launch. historical illustrated output:
 
 ```
 out (pre-allocated by torch.empty_like, then filled by the kernel): [11.0, 22.0, 33.0, 44.0]
@@ -60,7 +63,7 @@ bad_out = None
 add_kernel[(1,)](x, y, bad_out, 4, BLOCK=4)
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 passing None as the output buffer -> InterpreterError: AttributeError("'NoneType' object has no attribute 'type'")
@@ -78,7 +81,7 @@ def local_zeros_kernel(out_ptr, BLOCK: tl.constexpr):
     tl.store(out_ptr + tl.arange(0, BLOCK), local)  # must be explicitly stored to survive
 ```
 
-`tl.zeros((BLOCK,), dtype=tl.float32)` — used already in Chapter 5 as a wide reduction accumulator — creates a `BLOCK`-shaped tensor of registers, initialized to zero, that exists only for the duration of this kernel instance's execution. It is not a pointer, it does not correspond to any address in GPU global memory, and nothing outside this one kernel launch can ever see it unless it is explicitly written out through `tl.store`. Genuinely captured:
+`tl.zeros((BLOCK,), dtype=tl.float32)` — used already in Chapter 5 as a wide reduction accumulator — creates a `BLOCK`-shaped tensor of registers, initialized to zero, that exists only for the duration of this kernel instance's execution. It is not a pointer, it does not correspond to any address in GPU global memory, and nothing outside this one kernel launch can ever see it unless it is explicitly written out through `tl.store`. historical illustrated output:
 
 ```
 value only survives because it was explicitly tl.store'd: [1.0, 1.0, 1.0, 1.0]
@@ -132,7 +135,7 @@ def triton_full(shape, value, dtype=torch.float32, device="cpu"):
     return out
 ```
 
-Genuinely captured, compared directly against calling PyTorch's own `torch.full` with the same arguments:
+historical illustrated output, compared directly against calling PyTorch's own `torch.full` with the same arguments:
 
 ```
 triton_full((6,), 7.0) -> [7.0, 7.0, 7.0, 7.0, 7.0, 7.0]
@@ -169,7 +172,7 @@ torch.cuda.is_available()   # False
 t = torch.tensor([1.0, 2.0], device="cuda")
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 torch.cuda.is_available(): False
@@ -186,14 +189,14 @@ out = torch.empty_like(x_cpu)
 add_one_kernel[(1,)](x_cpu, out, 3, BLOCK=4)
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 x_cpu.device: cpu
 interpreter ran a plain CPU tensor with no complaint: [2.0, 3.0, 4.0]
 ```
 
-Every kernel in this book, in every chapter so far, has been launched exactly this way — against ordinary CPU tensors, because `TRITON_INTERPRET=1` runs kernel logic as a Python-level simulation on the CPU regardless of what device a tensor claims. This is consistent with Chapter 1's opening disclosure and worth restating precisely here: the interpreter validates kernel *logic*, and device placement is not part of that logic in any sense the interpreter checks — it's enforced entirely by the real CUDA compilation and launch path this book cannot exercise.
+The original illustrations used CPU tensors with the interpreter. The November 21 rerun left a GPU visible, so this chapter's factory/device probes could create CUDA tensors and take different branches. Triton's compiled launcher checks pointer accessibility before launch; that is distinct from a language-level tensor type carrying device metadata. The raw differences are listed in the rerun report.
 
 > `[COMMON TRAP]` It would be easy to read this section and conclude "Triton doesn't care about devices." The precise statement is narrower and more important: the Triton *language* has no device-tracking construct comparable to Mojo's `DeviceTensor`, but the *system* a real compiled kernel launches into absolutely does enforce device placement, strictly, at the CUDA level — a real GPU build launched against a CPU tensor fails before any kernel logic runs at all. This book's interpreter's silence on device placement is a limitation of the interpreter, disclosed here exactly as Chapter 1 disclosed it for performance and Chapter 7 disclosed it for alignment hints — not evidence that device placement is actually optional.
 
@@ -476,7 +479,7 @@ Chapter 8 established that a kernel is handed pointers to memory that already ex
 
 **2.** `torch.zeros(...)` allocates new memory in PyTorch's allocator that persists and can be handed to any other part of the program — it is a real, addressable tensor. `tl.zeros(...)` produces a block of registers that exists only for the duration of the single kernel instance currently executing; it has no address outside that kernel, and it does not persist past the kernel's completion unless its contents are explicitly written out to a real pointer via `tl.store`, as Worked Example 8.1.3 demonstrated directly.
 
-**3.** It would be true specifically when the fill/zero-initialization is fused into a larger kernel that is also doing other, genuinely expensive computation at the same time — avoiding a second, separate memory pass over the data (a pattern later chapters build directly, particularly Chapter 20's fused kernels). It would just add overhead in the standalone case Worked Example 8.2.1 tested: a Triton kernel that does nothing but fill a buffer with a constant is strictly more work than `torch.full(...)` doing the identical allocation-and-fill in one already-optimized call, with a full trace-and-compile-and-launch cycle added on top for no additional benefit.
+**3.** It would be true specifically when the fill/zero-initialization is fused into a larger kernel that is also doing other, genuinely expensive computation at the same time — avoiding a second, separate memory pass over the data (a pattern later chapters build directly, particularly Chapter 20's fused kernels). It would just add overhead in the standalone case Worked Example 8.2.1 tested: a standalone fill kernel is not automatically faster than torch.full; the comparison needs actual compiled measurements, including launch/allocation scope, with a full trace-and-compile-and-launch cycle added on top for no additional benefit.
 
 **4.** A real, compiled Triton build launches its kernel through the CUDA runtime, which genuinely cannot execute GPU code against memory that lives on the host CPU — the failure is enforced by the surrounding CUDA machinery, not by anything in the Triton language itself checking device placement (Triton has no `DeviceTensor`-style type-level tracking, unlike Mojo). This book's `TRITON_INTERPRET=1` interpreter runs all kernel logic as a Python-level CPU simulation regardless of what device a tensor claims to be on, so there is no CUDA runtime present at all to enforce the mismatch — Worked Example 8.3.2 showed it running a plain CPU tensor without any complaint.
 

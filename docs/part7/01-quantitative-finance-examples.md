@@ -6,12 +6,15 @@
 
 > A closed-form price, a rolling statistic, and a simulated estimate are three different ways of answering the same kind of question, and each one demands a different way of checking whether the answer is right.
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## What you will understand by the end of this chapter
 
 - How to implement the Black-Scholes option pricing formula as a genuine elementwise Triton kernel, reusing Chapter 12's `erf`-based normal CDF computation for an entirely different purpose than GELU
 - Why forgetting Black-Scholes's discount factor doesn't produce a fixed-percentage error, but one that grows with time-to-expiry and interest rate — and how to verify that growth directly
 - How to compute a genuinely new access pattern — a sliding window per output position, rather than a single row or a single element — for rolling-window financial statistics, and why its correct variance convention is the *opposite* of Chapter 20's LayerNorm convention
-- Why Monte Carlo simulation requires a fundamentally different verification method than every other kernel in this book: a statistical comparison of the estimated price against a known price and standard error, plus deterministic checks of payoffs for fixed random inputs, because the algorithm itself is only ever approximately correct by design
+- Why Monte Carlo simulation requires a fundamentally different verification method than every other kernel in this book: a statistical comparison of the estimated price against a known price and standard error, with deterministic fixed-draw payoff checks recommended as an additional validation step, because the algorithm itself is only ever approximately correct by design
 - Why an estimate that looks "close" in absolute or percentage terms can still be decisively, statistically wrong — and why the right tolerance for a Monte Carlo result is never a fixed number chosen by eye
 
 ## What you need to know first
@@ -82,7 +85,7 @@ A plausible-looking but wrong version omits the discount factor on the strike te
 call = S * n_d1 - K * n_d2   # BUG: forgot the exp(-r*T) discount factor on K
 ```
 
-On the same six contracts, genuinely captured:
+On the same six contracts, historical illustrated output:
 
 ```
 wrong kernel: [ 7.7212944 13.942852  10.052292   6.2935467 20.761658   0.7976227]
@@ -90,7 +93,7 @@ oracle:       [10.45058502 15.4859655  12.55715237  7.57823016 25.29602214  0.82
 relative diffs (%): [-26.12  -9.96  -19.95  -16.95  -17.93  -3.07]
 ```
 
-This is not a fixed-percentage error — it ranges from roughly `-3%` (the shortest maturity, `T=0.01`) to roughly `-26%` (the first contract, `T=1.0`); the third contract has `T=2.0` and about `-19.95%` error. The discount factor `exp(-rT)` shrinks the strike's contribution more as `r` and `T` grow, so omitting it entirely understates the option's price by an amount that scales with exactly those two variables — a contract expiring in a few days is barely affected, while a two-year contract is affected dramatically.
+This is not a fixed-percentage error — it ranges from roughly `-3%` (the shortest maturity, `T=0.01`) to roughly `-26%` (the first contract, `T=1.0`); the third contract has `T=2.0` and about `-19.95%` error. The discount factor `exp(-rT)` shrinks the strike's contribution more as `r` and `T` grow, so omitting it entirely understates the option's price by an amount depending on K, N(d2), r and T together; an r*T-only monotonic comparison requires other inputs held fixed — a contract expiring in a few days is barely affected, while a two-year contract is affected dramatically.
 
 ### ASCII Diagram
 
@@ -104,7 +107,7 @@ Black-Scholes call price:
   Omit it entirely (multiply by 1 instead):
   error magnitude = K * N(d2) * (1 - exp(-r*T))
                                   ^^^^^^^^^^^^^^
-                                  grows with r*T -- NOT a fixed percentage,
+                                  discount term varies with r*T; K and N(d2) vary too,
                                   worse for longer-dated, higher-rate contracts
 ```
 
@@ -200,7 +203,7 @@ Window W=5, output position i:
 
 ### Intuition
 
-Every kernel verified so far in this book — through Section 22.2 — computes an exact mathematical function, and `torch.allclose` checks that the kernel's answer matches an independent computation of that same exact function to ordinary floating-point tolerance. Monte Carlo simulation is different in kind: it doesn't compute the option price exactly at all — it simulates many random possible future price paths under geometric Brownian motion, averages the resulting payoffs, and discounts that average back to today. The algorithm is only ever *approximately* correct by design, with an error that shrinks as more simulations are run but never reaches exactly zero. Comparing a Monte Carlo estimate to an analytic price needs a statistical tolerance rather than only a floating-point tolerance. Separately, fixing the same random draws lets `torch.allclose` check payoff and reduction arithmetic against a CPU implementation — the right question isn't "does this match exactly," but "is this within the range Monte Carlo's own statistics say it should be."
+Every kernel verified so far in this book — through Section 22.2 — computes an exact mathematical function, and `torch.allclose` checks that the kernel's answer matches an independent computation of that same exact function to ordinary floating-point tolerance. Monte Carlo simulation is different in kind: it doesn't compute the option price exactly at all — it simulates many random possible future price paths under geometric Brownian motion, averages the resulting payoffs, and discounts that average back to today. The algorithm is only ever *approximately* correct by design, with an error that shrinks as more simulations are run but never reaches exactly zero. Comparing a Monte Carlo estimate to an analytic price needs a statistical tolerance rather than only a floating-point tolerance. Separately, fixing the same random draws would let an additional deterministic test use `torch.allclose` for payoff and reduction arithmetic against a CPU implementation; the corrected current files now add this fixed-draw oracle, but the new assertion has not been executed; the captured older files did not contain it — the right question isn't "does this match exactly," but "is this within the range Monte Carlo's own statistics say it should be."
 
 That range has a name: the *standard error* of the simulation, computed from the sample standard deviation of the individual payoffs divided by the square root of the number of simulations. A correct Monte Carlo implementation should land within a few standard errors of the true price essentially all of the time — not always exactly, since it's a genuine random estimate, but predictably and verifiably close, in a way this chapter's earlier sections' `allclose` checks and their fixed tolerances never had to account for.
 
@@ -489,6 +492,10 @@ def monte_carlo_call_price(S0, K, T, r, sigma, n_sims, seed=0, BLOCK=1024, disco
     payoffs = torch.empty(n_sims)
     grid = (triton.cdiv(n_sims, BLOCK),)
     gbm_call_payoff_kernel[grid](z, payoffs, n_sims, S0, K, T, r, sigma, BLOCK=BLOCK)
+    # Independent fixed-draw oracle: validate arithmetic before statistical pricing.
+    reference = torch.clamp(S0 * torch.exp((r - 0.5 * sigma ** 2) * T
+                            + sigma * (T ** 0.5) * z.double()) - K, min=0.0)
+    torch.testing.assert_close(payoffs.double(), reference, rtol=3e-5, atol=3e-4)
     mean_payoff = payoffs.mean()
     se = payoffs.std(unbiased=True) / (n_sims ** 0.5)
     discount_factor = np.exp(-r * T) if discount else 1.0
@@ -658,6 +665,10 @@ def section_22_3():
     payoffs = torch.empty(n_sims)
     BLOCK = 1024
     gbm_call_payoff_kernel[(triton.cdiv(n_sims, BLOCK),)](z, payoffs, n_sims, S0, K, T, r, sigma, BLOCK=BLOCK)
+    # Independent fixed-draw oracle: validate arithmetic before statistical pricing.
+    reference = torch.clamp(S0 * torch.exp((r - 0.5 * sigma ** 2) * T
+                            + sigma * (T ** 0.5) * z.double()) - K, min=0.0)
+    torch.testing.assert_close(payoffs.double(), reference, rtol=3e-5, atol=3e-4)
     mean_payoff = payoffs.mean()
     se = payoffs.std(unbiased=True) / (n_sims ** 0.5)
     mc_price = np.exp(-r * T) * mean_payoff.item()
@@ -699,7 +710,7 @@ As with Chapter 19's timing chapter, Section 22.3's exact numbers involve genuin
 
 ## Chapter Summary
 
-Black-Scholes turned out to be, mechanically, an elementwise kernel of exactly the same shape as Chapter 12's GELU, sharing its `erf`-based normal CDF computation for a different purpose, and forgetting its discount factor produced an error whose magnitude grows systematically with time-to-expiry and interest rate rather than sitting at some fixed percentage (Section 22.1). Rolling-window volatility introduced a genuinely new access pattern — a sliding window per output position rather than a whole-row reduction — with a leading edge that is honestly undefined (`NaN`) rather than merely masked, and required the *opposite* variance convention from Chapter 20's LayerNorm, a reminder that "biased or unbiased" is a domain-specific choice, never a universal default (Section 22.2). And Monte Carlo option pricing closed the chapter — and this book's methodology — by introducing a genuinely different verification standard: not `torch.allclose` against a fixed tolerance, but a statistical comparison in units of standard error, which revealed that an estimate looking merely "5% off" by eye can in fact be `14` standard errors from correct — decisively, verifiably wrong by the only yardstick that actually respects what a random estimate is (Section 22.3).
+Black-Scholes turned out to be, mechanically, an elementwise kernel of exactly the same shape as Chapter 12's GELU, sharing its `erf`-based normal CDF computation for a different purpose, and forgetting its discount factor produced an error whose magnitude grows systematically with time-to-expiry and interest rate rather than sitting at some fixed percentage (Section 22.1). Rolling-window volatility introduced a genuinely new access pattern — a sliding window per output position rather than a whole-row reduction — with a leading edge that is honestly undefined (`NaN`) rather than merely masked, and required the *opposite* variance convention from Chapter 20's LayerNorm, a reminder that "biased or unbiased" is a domain-specific choice, never a universal default (Section 22.2). And Monte Carlo option pricing closed the chapter — and this book's methodology — by introducing a genuinely different verification standard: not only an arithmetic allclose check against a fixed tolerance, but a statistical comparison in units of standard error, which revealed that an estimate looking merely "5% off" by eye can in fact be `14` standard errors from correct — decisively, verifiably wrong by the only yardstick that actually respects what a random estimate is (Section 22.3).
 
 ## Self-Check Questions
 
@@ -716,10 +727,14 @@ This chapter closes the book's core content, having carried Chapter 1's earliest
 ## Worked Solutions
 
 1. `N(x) = 0.5 * (1 + erf(x / sqrt(2)))`, the standard normal cumulative distribution function, is identical in both kernels. In GELU (Chapter 12), it represents `Φ(x)`, used to compute how much of an activation `x` to let through as part of `x * Φ(x)`. In Black-Scholes (this chapter), the same function represents `N(d1)` and `N(d2)` with different meanings: `N(d1)` is the no-dividend call delta, while `N(d2)` is the risk-neutral exercise probability. They weight the spot and discounted strike respectively. See the [Black–Scholes derivation](https://book.derivative-securities.org/Chapter_BlackScholes.html).
-2. The bug is omitting the entire discount factor `exp(-r*T)`, and the size of the resulting error is exactly `K * N(d2) * (1 - exp(-r*T))` — a quantity that depends directly on `r*T`. For the short-dated option (`T=0.01`), `r*T` is tiny, so `exp(-r*T)` is very close to `1` already, and omitting it changes almost nothing. The largest relative error in this six-contract set is the first contract, T=1. For the third, longer-dated option (`T=2.0`), `r*T` is much larger, `exp(-r*T)` is meaningfully less than `1`, and omitting it discards a much larger fraction of the strike's discounted value — the identical formula produces a dramatically different-sized error purely because the inputs it's evaluated on differ.
+2. The bug is omitting the entire discount factor `exp(-r*T)`, and the size of the resulting error is exactly `K * N(d2) * (1 - exp(-r*T))` — a quantity depending on K, N(d2) and the discount term together. For the short-dated option (`T=0.01`), `r*T` is tiny, so `exp(-r*T)` is very close to `1` already, and omitting it changes almost nothing. The largest relative error in this six-contract set is the first contract, T=1. For the third, longer-dated option (`T=2.0`), `r*T` is much larger, `exp(-r*T)` is meaningfully less than `1`, and omitting it discards a much larger fraction of the strike's discounted value — the identical formula produces a dramatically different-sized error because K, N(d2), rate and maturity differ together, not because these six contracts form a controlled monotonic maturity sweep.
 3. It means there is no correct numerical answer to compute at all for those positions — "the standard deviation of the last 5 days" is a meaningless question on day 2, because only 3 days of history exist. This differs fundamentally from Chapter 9's masking, where an out-of-bounds lane is excluded from a computation that still produces a perfectly valid, meaningful result for every position that *is* in bounds; here, the entire concept of "this position's rolling volatility" doesn't yet exist, and `NaN` honestly communicates that rather than silently substituting a shorter, non-comparable window or a placeholder value like `0`.
 4. No — both chapters are correctly implementing their own domain's standard convention, and those conventions genuinely differ. LayerNorm's mathematical definition, as specified by its original paper and every standard deep-learning framework's implementation (including PyTorch's own `torch.nn.LayerNorm`), uses the biased (divide-by-`N`) variance. Estimating the volatility of a financial return series from a finite historical sample is conventionally done with the unbiased (divide-by-`N-1`) estimator, matching `pandas`'s own default and standard statistical practice for sample variance. There is no single "more correct" choice between the two in general — the correct choice is always whatever the specific formula or convention being implemented actually specifies, which is exactly why Chapter 20 and this chapter, applying two different domains' conventions, arrived at opposite answers.
 5. A percentage or absolute comparison ignores the estimate's own precision entirely — it treats "5% off" as equally concerning regardless of whether the simulation's standard error is `0.03` or `3.0`. With `200,000` simulated paths, this particular Monte Carlo estimator's standard error was small enough (`~0.03`) that a `0.49`-unit absolute gap corresponds to roughly `14` standard errors — a discrepancy that a correctly implemented estimator would produce by chance with a probability far below one in a billion. The two facts aren't in tension: an estimate can be numerically "close" in absolute or percentage terms while still being astronomically unlikely to have arisen from a correct implementation, once judged against the actual precision that implementation claims to have.
+
+### Tail accuracy and simulation scope
+
+The FP32 erf-based CDF in this teaching kernel is not robust for very deep out-of-the-money contracts: subtractive cancellation can dominate the tiny price. Use a stable complementary-tail formulation such as 0.5*erfc(-d/sqrt(2)) and an FP64 reference, then validate both CDF and final-price cancellation for the intended domain. No broad tail-accuracy claim follows from these six moderate contracts. The simulation kernel maps host-generated normal draws to payoffs; it does not implement an in-kernel RNG or variance reduction. Greek/put, tree and risk-measure implementations are outside the current chapter.
 
 ### Domain and statistical assumptions
 

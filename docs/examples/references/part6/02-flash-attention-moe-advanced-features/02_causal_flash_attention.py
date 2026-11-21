@@ -84,10 +84,10 @@ def flash_attn_causal_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
     tl.store(out_ptrs, acc, mask=row_mask[:, None] & d_mask[None, :])
 
 
-def _run(kernel, q, k, v, BLOCK_M=4, BLOCK_N=4):
+def _run(kernel, q, k, v, BLOCK_M=16, BLOCK_N=16):
     M, D = q.shape
     N, _ = k.shape
-    BLOCK_D = triton.next_power_of_2(D)
+    BLOCK_D = max(16, triton.next_power_of_2(D))
     scale = 1.0 / math.sqrt(D)
     out = torch.empty((M, D), dtype=torch.float32)
     grid = (triton.cdiv(M, BLOCK_M),)

@@ -17,6 +17,38 @@ def online(scores, values, block):
 
 
 class WorkedMath(unittest.TestCase):
+    def test_masked_leading_chunk_and_all_masked_policy(self):
+        def normalize(values,block):
+            maximum=-math.inf;denominator=0.0
+            for start in range(0,len(values),block):
+                chunk=values[start:start+block];new=max(maximum,max(chunk))
+                safe=0.0 if new==-math.inf else new
+                alpha=0.0 if maximum==-math.inf else math.exp(maximum-safe)
+                denominator=denominator*alpha+sum(math.exp(v-safe) for v in chunk)
+                maximum=new
+            if denominator==0:return [0.0]*len(values)
+            return [math.exp(v-maximum)/denominator for v in values]
+        got=normalize([-math.inf]*4+[0,math.log(2)],4)
+        self.assertEqual(got[:4],[0.0]*4)
+        self.assertAlmostEqual(got[4],1/3);self.assertAlmostEqual(got[5],2/3)
+        self.assertEqual(normalize([-math.inf]*8,4),[0.0]*8)
+
+    def test_wide_normalization_requires_wide_sum(self):
+        import struct
+        self.assertGreater(4096*20,65504)
+        with self.assertRaises(OverflowError):struct.pack('e',float(4096*20))
+        mean=math.fsum([20.0]*4096)/4096
+        variance=math.fsum((20.0-mean)**2 for _ in range(4096))/4096
+        self.assertTrue(math.isfinite(mean));self.assertEqual(variance,0.0)
+        self.assertEqual((20.0-mean)/math.sqrt(variance+1e-5),0.0)
+
+    def test_forward_signature_requires_ctx_and_input(self):
+        class SignatureOnly:
+            @staticmethod
+            def forward(ctx,x):return x
+        with self.assertRaises(TypeError):SignatureOnly.forward(1)
+        self.assertEqual(SignatureOnly.forward(None,1),1)
+
     def test_sector_requests_versus_unique_footprint(self):
         fields=[3,4,5,6]
         requests=[{(i*28+field*4)//32 for i in range(32)} for field in fields]

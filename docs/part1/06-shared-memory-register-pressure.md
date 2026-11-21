@@ -19,6 +19,9 @@
 - Chapter 10's finding that `num_warps`/`num_stages` are accepted by the interpreter but never acted on — Section 11.2 extends the identical pattern to register pressure
 - Chapter 4's `[[19, 22], [43, 50]]` 2×2 matrix multiplication example — reused directly in Section 11.3
 
+!!! info "Output provenance and rerun scope"
+    Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The [execution record](../execution-2026-11-21.md) links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.
+
 ## 11.1 The Kernel Cache, Inspected: `JITFunction` vs. `InterpretedFunction` `[FOUNDATIONAL]`
 
 ### Intuition
@@ -50,7 +53,7 @@ def add_kernel(x_ptr, y_ptr, out_ptr, n, BLOCK: tl.constexpr):
 type(add_kernel)          # differs entirely depending on TRITON_INTERPRET
 ```
 
-Genuinely captured, inspecting the identical source under both settings:
+historical illustrated output, inspecting the identical source under both settings:
 
 ```
 without TRITON_INTERPRET:
@@ -115,7 +118,7 @@ for BLOCK in [4, 4096, 65536]:
     copy_kernel[(1,)](x, out, n, BLOCK=BLOCK)
 ```
 
-Genuinely captured:
+historical illustrated output:
 
 ```
 BLOCK=     4 -> correct? True  (no resource error of any kind)
@@ -163,7 +166,7 @@ def matmul_tile_kernel(a_ptr, b_ptr, c_ptr, M, N, K,
     tl.store(c_ptrs, acc, mask=(rows[:, None] < M) & (cols[None, :] < N))
 ```
 
-Against the same `2×2` matrices Chapter 4 first used — `A = [[1,2],[3,4]]`, `B = [[5,6],[7,8]]` — genuinely captured:
+Against the same `2×2` matrices Chapter 4 first used — `A = [[1,2],[3,4]]`, `B = [[5,6],[7,8]]` — historical illustrated output:
 
 ```
 tl.dot result:
@@ -404,7 +407,7 @@ Every number here was independently hand-traced or cross-checked earlier in this
 
 ## Chapter Summary
 
-Chapter 1's caching claim — traced and compiled once per signature, reused from a cache on repeat launches — is accurate, and describes a real `JITFunction`'s `device_caches`; it is not, and was never, something this book's `TRITON_INTERPRET=1`-based `InterpretedFunction` objects could demonstrate directly, because they have no cache attribute at all, only direct re-execution of the kernel body every single launch (Section 11.1). `BLOCK` size directly controls real per-thread register usage on genuine hardware, with consequences ranging from reduced occupancy to spilling to outright compilation failure — none of which this book's interpreter, having no concept of registers or threads, can show you, as Section 11.2's uneventful runs at `BLOCK=65536` demonstrated directly. And Triton exposes no shared-memory primitive anywhere in its public language — the entire decision of how to stage tiles through fast on-chip memory for an operation like `tl.dot` belongs to the compiler alone, leaving `BLOCK_M`/`BLOCK_N`/`BLOCK_K` as the only (indirect) lever a kernel author has over it (Section 11.3). All three findings are the same shape this book has now shown repeatedly since Chapter 1: something real and consequential happens on genuine hardware, and this book's honest, interpreter-based verification approach — chosen because no GPU exists anywhere in this environment — validates a kernel's logic without being able to show you that thing directly.
+Compiled specialization caches, physical register pressure and shared-memory staging are different mechanisms. The historical .cache attribute probe does not establish the layout of JITFunction's version-specific device_caches. BLOCK shapes influence allocation through compiler layout/liveness; they do not directly equal per-thread registers. Classic-language compiler lowering chooses storage and instructions from the target, shapes, dtypes and options. Interpreter execution alone demonstrates none of those resource properties. The later H100 smoke has its own limited scope and raw record.
 
 ## Self-Check Questions
 
@@ -424,7 +427,7 @@ Part 1 is complete: eleven chapters have established, in careful and sometimes u
 
 **2.** BLOCK is a logical extent per program, not a per-thread register count. For an illustrative even distribution over four NVIDIA warps (128 threads), 65,536 values average 512 values per thread before considering compiler layout, liveness, packing or optimization. Actual register allocation, spills and launch legality require compiled resource reports; interpreter success establishes none of them.
 
-**3.** The accurate answer is that there isn't one — `triton.language` has no shared-memory primitive anywhere in its public API (a direct check finds zero `shared`-related names among its 149 public attributes). The only parameters a Triton kernel author actually controls that influence the compiler's shared-memory staging decisions are the same block-shape `tl.constexpr` values already used for register-pressure trade-offs — `BLOCK_M`, `BLOCK_N`, `BLOCK_K` for operations like `tl.dot`, plus `num_stages` from Chapter 10 — with every actual decision about what gets staged, when, and how left entirely to the compiler.
+**3.** The accurate answer is that there isn't one — `triton.language` has no shared-memory primitive anywhere in its public API (a direct check finds zero `shared`-related names among its version-dependent public attributes). The only parameters a Triton kernel author actually controls that influence the compiler's shared-memory staging decisions are the same block-shape `tl.constexpr` values already used for register-pressure trade-offs — `BLOCK_M`, `BLOCK_N`, `BLOCK_K` for operations like `tl.dot`, plus `num_stages` from Chapter 10 — with every actual decision about what gets staged, when, and how left entirely to the compiler.
 
 **4.** It confirms that `tl.dot`'s *result* is numerically correct — this book's interpreter genuinely computed the matrix product and got the right answer, matching both PyTorch's own `@` operator and Chapter 4's independent hand trace. It specifically does not confirm anything about *how* a genuinely compiled version of this kernel would execute on real hardware — whether it would stage `a` and `b`'s tiles through shared memory at all for a tile this small, what tensor-core instructions it might use, or what a larger, realistic block-shape configuration's actual shared-memory footprint would be. The interpreter computes `tl.dot` as a plain array multiplication, with the entire real hardware execution strategy invisible to it.
 

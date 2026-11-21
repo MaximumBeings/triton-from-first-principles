@@ -9,6 +9,9 @@ from book_examples import ROOT, examples
 
 
 def main():
+    foundation=(ROOT/'docs/part0/01-types-and-the-jit-boundary.md').read_text()
+    if 'No — see Section 1.4' in foundation or 'Runtime values cannot size `tl.arange`, but scalar control flow is supported' not in foundation:
+        raise ValueError('Incorrect runtime-control-flow contract')
     pages=sorted((ROOT/'docs').glob('part*/*.md'))
     chapters=[]
     for p in pages:
@@ -34,6 +37,8 @@ def main():
     if len(rows)!=84:raise ValueError('Complete source inventory changed; review the manifest')
     for row in rows:ast.parse(row['code'],filename=row['download'])
     source=ROOT/'docs/examples/gpu_smoke.py';ast.parse(source.read_text(),filename=str(source))
+    for source in (ROOT/'docs/examples/migrations').glob('*.py'):
+        ast.parse(source.read_text(),filename=str(source))
     # Stop the known control-flow error from returning to current attention sources.
     attention=[r for r in rows if r['page'].endswith('02-flash-attention-moe-advanced-features.md')]
     if any(isinstance(n,ast.Continue)for r in attention for n in ast.walk(ast.parse(r['code']))):
