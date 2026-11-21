@@ -2370,6 +2370,7 @@
 
 
 <h1 id="chapter-13-the-blocked-matmul-kernel">Chapter 13: The Blocked Matmul Kernel<a class="headerlink" href="#chapter-13-the-blocked-matmul-kernel" title="Permanent link">&para;</a></h1>
+<p><a href="../../images/chapter-openers/13.svg"><img alt="Chapter 13: Tile the product. Accumulate K." src="../../images/chapter-openers/13.svg" /></a></p>
 <p><a href="../../images/ch13/01-concept.svg"><img alt="Every output sums the complete K dimension" src="../../images/ch13/01-concept.svg" /></a></p>
 <blockquote>
 <p>"Every kernel through Chapter 12 computed each output position from exactly one corresponding input position — masking kept a launch honest at its edges, but no output ever depended on more than a handful of nearby inputs. A matmul breaks that completely: every single output element depends on an entire row of one matrix and an entire column of the other, and the only way to compute it without reading the whole thing back from memory over and over is to accumulate across tiles, in a loop, inside the kernel itself."</p>

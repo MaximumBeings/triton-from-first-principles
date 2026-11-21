@@ -2480,6 +2480,7 @@
 
 
 <h1 id="chapter-21-flash-attention-moe-and-advanced-features">Chapter 21: Flash Attention, MoE, and Advanced Features<a class="headerlink" href="#chapter-21-flash-attention-moe-and-advanced-features" title="Permanent link">&para;</a></h1>
+<p><a href="../../images/chapter-openers/21.svg"><img alt="Chapter 21: Stream scores. Keep the state." src="../../images/chapter-openers/21.svg" /></a></p>
 <p><a href="../../images/ch21/01-concept.svg"><img alt="Stream attention without storing the whole score matrix" src="../../images/ch21/01-concept.svg" /></a></p>
 <blockquote>
 <p>Every kernel through Chapter 20 computed each output independently of every other. Attention breaks that assumption on purpose — every query genuinely depends on every key and value in its sequence — and the entire trick of Flash Attention is computing that dependency without ever materializing the matrix it implies.</p>

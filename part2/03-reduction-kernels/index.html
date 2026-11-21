@@ -2336,6 +2336,7 @@
 
 
 <h1 id="chapter-14-reduction-kernels">Chapter 14: Reduction Kernels<a class="headerlink" href="#chapter-14-reduction-kernels" title="Permanent link">&para;</a></h1>
+<p><a href="../../images/chapter-openers/14.svg"><img alt="Chapter 14: Many lanes. One answer." src="../../images/chapter-openers/14.svg" /></a></p>
 <p><a href="../../images/ch14/01-concept.svg"><img alt="Padding needs the reduction identity" src="../../images/ch14/01-concept.svg" /></a></p>
 <blockquote>
 <p>"Chapter 13's matmul kernel accumulated a genuine reduction — a sum over K — inside every single output tile, and hid the whole thing behind one call to <code>tl.dot</code>. This chapter takes the wrapping paper off: sums and maxes written out explicitly, and softmax, where the reduction itself is unstable if you compute it the naive way, no black-box primitive available to hide that instability from you."</p>
