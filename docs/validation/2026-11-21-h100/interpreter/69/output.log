@@ -1,0 +1,8 @@
+=== Section 19.2: a genuine, repeatable warmup effect ===
+first 5 calls (seconds): ['0.043979', '0.042473', '0.041312', '0.041819', '0.041429']
+first call vs. later calls -- first is measurably slower: False
+
+=== Section 19.2: median vs. mean with a synthetic labeled outlier ===
+20 real trials: median=136.60ms  mean=137.45ms
+same 20 + 1 synthetic 3.0s outlier: median=136.60ms  mean=273.76ms
+median shifted by 0.000ms; mean shifted by 136.31ms

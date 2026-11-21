@@ -1,0 +1,7 @@
+=== Section 22.2: rolling volatility vs. pandas rolling().std() ===
+NaN positions match? True
+valid positions allclose? True
+
+=== Section 22.2: the opposite-convention trap (biased vs. unbiased) ===
+relative diff of biased vs. unbiased (%): [-10.56 -10.56 -10.56 -10.56 -10.56 -10.56 -10.56 -10.56]
+expected constant relative diff for W=5: -10.56%

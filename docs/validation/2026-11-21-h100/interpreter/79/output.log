@@ -1,0 +1,13 @@
+=== Section 21.1: Flash Attention core loop vs. naive full attention ===
+allclose to naive full attention? True
+
+=== Section 21.2: causal Flash Attention, and a correct kernel on the wrong task ===
+causal kernel allclose to causal oracle? True
+non-causal kernel allclose to CAUSAL oracle? False
+non-causal kernel allclose to NON-causal oracle? True
+
+=== Section 21.3: top-2 MoE gating vs. torch.topk, and the renormalization trap ===
+indices match torch.topk? True
+weights allclose to oracle? True
+w0+w1 == 1 for all rows? True
+mean raw (non-renormalized) top-2 weight sum: 0.5583722591400146

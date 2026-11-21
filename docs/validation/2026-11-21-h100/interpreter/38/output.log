@@ -1,0 +1,5 @@
+=== Section 11.3: tl.dot, with zero visibility into real shared-memory staging ===
+tl.dot result:
+ tensor([[19., 22.],
+        [43., 50.]])
+matches A @ B? True

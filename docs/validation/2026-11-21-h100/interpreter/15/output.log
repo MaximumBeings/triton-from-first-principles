@@ -1,0 +1,15 @@
+=== Section 5.1: BLOCK must be a power of 2 ===
+BLOCK=7 -> InterpreterError: ValueError("arange's range must be a power of 2")
+BLOCK=8 (next power of 2, masked down to n=7): [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0]
+
+=== Section 5.2: one masked kernel handles the 'remainder' automatically ===
+n=10, BLOCK=8, grid=(2,) -> one kernel, no separate remainder kernel
+result: [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0] correct? True
+
+=== Section 5.3: accumulate wide, reduce narrow ===
+N=1000, BLOCK=128, NUM_CHUNKS=8
+triton sum: 499500.0 torch sum: 499500.0
+
+=== Section 5.4: SPMD block transpose, one program per tile ===
+grid (programs): (2, 3) = 6 programs total
+matches A.t()? True

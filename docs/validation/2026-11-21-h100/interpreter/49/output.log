@@ -1,0 +1,12 @@
+/usr/lib/python3/dist-packages/triton/runtime/interpreter.py:544: RuntimeWarning: overflow encountered in exp
+  return TensorHandle(op(arg.data), arg.dtype.scalar)
+/usr/lib/python3/dist-packages/triton/runtime/interpreter.py:453: RuntimeWarning: invalid value encountered in divide
+  return TensorHandle(op(lhs.data, rhs.data), lhs.dtype.scalar)
+=== Section 14.2: ordinary values -- naive and stable agree ===
+naive allclose? True
+stable allclose? True
+
+=== Section 14.2: large values -- naive overflows to nan ===
+naive result: [[nan, nan, 0.0, 0.0]]
+naive has NaN? True
+stable allclose to oracle? True

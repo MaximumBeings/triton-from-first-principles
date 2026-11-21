@@ -5,7 +5,7 @@
 **Building Production GPU Kernels in OpenAI Triton, One Layer at a Time**
 
 !!! info "Scope and testing status"
-    All 22 chapters are present. Existing example outputs are interpreter references, not GPU benchmark records. This edition adds original SVGs and an offline technical review; compiled GPU validation remains pending. See the [review record](review-and-testing.md).
+    All 22 chapters are present. Existing example outputs are interpreter references, not GPU benchmark records. This edition adds original SVGs and an offline technical review; 12 compiled H100 smoke cases have now passed, and all 84 complete references exited zero in interpreter mode. Full compiled chapter coverage remains pending. See the [dated execution record](execution-2026-11-21.md) and [review record](review-and-testing.md).
 
 > "A kernel is not finished when it computes the right answer once. It is finished when you can tell the compiler exactly which memory it may touch, which values it may assume never change, and how many threads get to look at each byte at the same time — and PyTorch's own autograd engine can still find its way through it."
 

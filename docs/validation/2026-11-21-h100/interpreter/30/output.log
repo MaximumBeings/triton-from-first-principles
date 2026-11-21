@@ -1,0 +1,7 @@
+=== Section 9.3: a per-row bound instead of a shared n ===
+padded tensor:
+ tensor([[  1.,   2.,   3.,   4.],
+        [ 10.,  20., 999., 999.],
+        [  5.,   5.,   5., 999.]])
+lengths: [4, 2, 3]
+ragged row sums (ignoring padding): [10.0, 30.0, 15.0]

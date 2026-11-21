@@ -1,0 +1,4 @@
+=== Section 16.2: masked multi-program launch, n=10000, BLOCK=1024 ===
+triton.cdiv(n, BLOCK) = 10 programs
+forward allclose to oracle? True
+backward allclose to oracle? True

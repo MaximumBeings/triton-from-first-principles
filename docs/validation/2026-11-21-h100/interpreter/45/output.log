@@ -1,0 +1,12 @@
+=== Section 13.2: correct three-way masking, awkward dimensions ===
+M,K,N = 5,7,6 (none divisible by BLOCK=4)
+matches torch matmul? True
+
+=== Section 13.2: omitting the K mask, made visible with a sentinel ===
+correct kernel matches? True
+buggy kernel matches?   False
+buggy kernel result (should be dramatically wrong):
+ tensor([[2994004.0000, 2994004.2500, 2994004.5000, 2994004.5000],
+        [2994006.2500, 2994006.5000, 2994006.7500, 2994007.2500],
+        [2994008.2500, 2994009.0000, 2994009.5000, 2994010.0000],
+        [2994010.2500, 2994011.0000, 2994012.0000, 2994012.7500]])

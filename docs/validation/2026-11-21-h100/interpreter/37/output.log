@@ -1,0 +1,4 @@
+=== Section 11.2: does a huge BLOCK size raise any complaint under the interpreter? ===
+BLOCK=     4 -> correct? True  (no resource error of any kind)
+BLOCK=  4096 -> correct? True  (no resource error of any kind)
+BLOCK= 65536 -> correct? True  (no resource error of any kind)

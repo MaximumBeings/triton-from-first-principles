@@ -1,0 +1,10 @@
+=== Section 10.1: hardware queries without a GPU ===
+
+=== Section 10.2: num_warps / num_stages ===
+num_warps=1 -> [11.0, 22.0, 33.0, 44.0]
+num_warps=4 -> [11.0, 22.0, 33.0, 44.0]
+num_warps=8 -> [11.0, 22.0, 33.0, 44.0]
+
+=== Section 10.3: constexpr hardware branching ===
+compute_capability=90 -> [2.0, 4.0, 6.0, 8.0]
+compute_capability=80 -> [2.0, 4.0, 6.0, 8.0]

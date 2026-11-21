@@ -1,0 +1,18 @@
+=== Section 7.1: broadcasting ===
+broadcast result (row+col):
+ tensor([[0, 1, 2, 3],
+        [1, 2, 3, 4],
+        [2, 3, 4, 5]], dtype=torch.int32)
+InterpreterError: ValueError('Cannot make_shape_compatible: incompatible dimensions at index 0: 4 and 8')
+forgot-None result: [0, 2, 4, 6]
+
+=== Section 7.2: alignment hints ===
+hinted kernel result matches x*2? True
+
+=== Section 7.3: block pointers ===
+correct block_ptr shape/strides -> matches? True
+LIED shape (4,3) via block_ptr, result:
+ tensor([[ 0.,  1.,  2.],
+        [ 3.,  4.,  5.],
+        [ 6.,  7.,  8.],
+        [ 9., 10., 11.]])

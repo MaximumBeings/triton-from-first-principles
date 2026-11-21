@@ -67,7 +67,7 @@ unset TRITON_INTERPRET
 python docs/examples/gpu_smoke.py
 ```
 
-The script refuses interpreter mode and a missing CUDA device. It checks a masked strided vector operation, ragged GEMM and causal/non-causal attention against independent CPU references. It uses supported physical dot tile extents and explicit FP32 precision. **GPU execution of this new script is pending.** A syntax check alone does not validate it, and no output here is presented as a captured GPU run.
+The script refuses interpreter mode and a missing CUDA device. It checks a masked strided vector operation, ragged GEMM and causal/non-causal attention against independent CPU references. It uses supported physical dot tile extents and explicit FP32 precision. **All twelve GPU smoke cases passed on H100 on November 21, 2026**, using the provider’s PyTorch 2.7.0/Triton 3.3.0 stack. See the [captured output, exact dates and source hash](execution-2026-11-21.md). This does not validate the separate installation target or every chapter on the compiled backend.
 
 The hand-sized `BLOCK=4` dot examples elsewhere deliberately trace interpreter arithmetic. They cannot simply be launched on the NVIDIA compiled backend unchanged. CUDA allocation, valid physical tile shapes and the specified dtype/precision contract all matter.
 

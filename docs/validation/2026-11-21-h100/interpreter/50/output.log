@@ -1,0 +1,6 @@
+=== Section 14.3: online softmax, a row wider than one block ===
+N=10, BLOCK_N=4 -> 3 chunks per row
+allclose? True
+
+=== Section 14.3: online softmax with large values spanning multiple chunks ===
+allclose? True

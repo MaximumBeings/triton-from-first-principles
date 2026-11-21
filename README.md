@@ -5,7 +5,7 @@ autograd integration, measurement, attention and financial-computing examples.
 
 [Published book](https://maximumbeings.github.io/triton-from-first-principles/)
 · [Installation](docs/getting-started.md)
-· [Offline review and pending GPU tests](docs/review-and-testing.md)
+· [Review and execution scope](docs/review-and-testing.md)
 
 The printed historical outputs are interpreter references. They do not establish
 compiled GPU correctness or performance. The current edition exports all 84
@@ -19,6 +19,7 @@ python3 -m venv .venv-docs
 source .venv-docs/bin/activate
 python -m pip install -r requirements.txt
 python tools/verify_book.py
+python tools/verify_execution.py
 python tools/verify_svg_readability.py
 mkdocs build --strict
 python tools/verify_site_links.py

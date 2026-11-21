@@ -1,0 +1,15 @@
+=== Section 7.1: broadcasting a (BLOCK_M,1) column against a (1,BLOCK_N) row ===
+row_col shape: ['constexpr[4]', 'constexpr[1]']
+col_row shape: ['constexpr[1]', 'constexpr[4]']
+combined shape: ['constexpr[4]', 'constexpr[4]']
+broadcast result (row+col):
+ tensor([[0, 1, 2, 3],
+        [1, 2, 3, 4],
+        [2, 3, 4, 5]], dtype=torch.int32)
+
+=== incompatible shapes, rejected at trace time ===
+InterpreterError: ValueError('Cannot make_shape_compatible: incompatible dimensions at index 0: 4 and 8')
+
+=== the trap: forgetting None-indexing on equal-length ranges ===
+combined shape (forgot None-indexing): ['constexpr[4]']
+forgot-None result (1D, NOT the 4x4 outer grid you probably wanted): [0, 2, 4, 6]

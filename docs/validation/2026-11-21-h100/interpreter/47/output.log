@@ -1,0 +1,9 @@
+=== Section 13.1: tiled matmul, 2x2 grid, 2 K-iterations ===
+matches torch? True
+
+=== Section 13.2: sentinel-based K-mask trap ===
+correct kernel matches? True
+buggy kernel matches?   False
+
+=== Section 13.3: fp32 vs fp16 accumulation ===
+fp16acc max abs diff vs exact: 0.001974425897060428

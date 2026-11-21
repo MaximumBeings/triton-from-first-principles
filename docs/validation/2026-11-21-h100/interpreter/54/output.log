@@ -1,0 +1,6 @@
+=== Section 15.3: save_for_backward detects the in-place mutation ===
+RuntimeError: one of the variables needed for gradient computation has been modified by an inplace operation: [torch.FloatTensor [1]] is at version 1; expected version 0 instead. Hint: enable anomaly detection to find the operation that failed to compute its gradient, with torch.autograd.set_detect_anomaly(True).
+
+=== Section 15.3: ctx.x bypasses the safety check entirely ===
+backward succeeded silently, x2.grad: tensor([60.])
+(correct gradient at x=3 would be 6.0 -- this used the mutated x=30 instead)

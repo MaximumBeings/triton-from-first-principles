@@ -1,0 +1,5 @@
+=== Section 20.1: fused Linear+bias+GELU vs. a real torch.nn.Linear module ===
+allclose to nn.Linear + gelu oracle? True
+
+=== Section 20.1: the bias-axis bug ===
+buggy kernel allclose to oracle? False

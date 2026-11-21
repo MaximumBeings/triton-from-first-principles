@@ -1,0 +1,10 @@
+=== Section 12.1: complete fused kernel ===
+fused result: [0.0, 0.0, 0.0, 1.0, 3.0]  match? True
+
+=== Section 12.2: fused vs. naive chain, identical result ===
+naive chain: [0.0, 0.0, 0.0, 1.0, 3.0]  identical to fused? True
+
+=== Section 12.3: GELU vs. oracle ===
+exact GELU allclose to oracle? True
+tanh-approx allclose to its own oracle? True
+tanh-approx max diff vs EXACT oracle: 0.00041294097900390625

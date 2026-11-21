@@ -1,0 +1,4 @@
+=== Section 12.1: a complete, assembled element-wise kernel ===
+fused kernel result: [0.0, 0.0, 0.0, 1.0, 3.0]
+unfused torch reference: [0.0, 0.0, 0.0, 1.0, 3.0]
+match? True

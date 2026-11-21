@@ -1,0 +1,19 @@
+=== Section 9.1: a correct causal (lower-triangular) mask ===
+input:
+ tensor([[ 1.,  2.,  3.,  4.],
+        [ 5.,  6.,  7.,  8.],
+        [ 9., 10., 11., 12.],
+        [13., 14., 15., 16.]])
+causal-masked (lower triangular, incl. diagonal):
+ tensor([[ 1.,  0.,  0.,  0.],
+        [ 5.,  6.,  0.,  0.],
+        [ 9., 10., 11.,  0.],
+        [13., 14., 15., 16.]])
+matches torch.tril(x)? True
+
+=== the off-by-one trap: < instead of <= excludes the diagonal ===
+with < instead of <=:
+ tensor([[ 0.,  0.,  0.,  0.],
+        [ 5.,  0.,  0.,  0.],
+        [ 9., 10.,  0.,  0.],
+        [13., 14., 15.,  0.]])

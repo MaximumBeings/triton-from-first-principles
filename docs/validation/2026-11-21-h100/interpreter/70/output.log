@@ -1,0 +1,6 @@
+=== Section 19.3: BLOCK=256 (256 programs) vs. BLOCK=4096 (16 programs) ===
+BLOCK=  256  n_programs= 256  median=137.4810ms  min=135.4926ms  max=146.7721ms
+BLOCK= 4096  n_programs=  16  median=16.9323ms  min=16.8200ms  max=20.5215ms
+ratio (BLOCK=256 median / BLOCK=4096 median): 8.12x
+This ratio reflects Python-level per-program interpreter overhead,
+NOT a real GPU's occupancy/parallelism trade-off -- see Section 19.3's COMMON TRAP.

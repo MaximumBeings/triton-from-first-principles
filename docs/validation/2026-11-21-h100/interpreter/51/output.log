@@ -1,0 +1,14 @@
+/usr/lib/python3/dist-packages/triton/runtime/interpreter.py:544: RuntimeWarning: overflow encountered in exp
+  return TensorHandle(op(arg.data), arg.dtype.scalar)
+/usr/lib/python3/dist-packages/triton/runtime/interpreter.py:453: RuntimeWarning: invalid value encountered in divide
+  return TensorHandle(op(lhs.data, rhs.data), lhs.dtype.scalar)
+=== Section 14.1: row sum and row max ===
+sums match? True
+maxes match? True
+
+=== Section 14.2: naive vs. stable softmax on large values ===
+naive has NaN? True
+stable allclose to oracle? True
+
+=== Section 14.3: online softmax, multi-chunk row ===
+allclose? True

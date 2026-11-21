@@ -1,0 +1,6 @@
+=== Section 17.1: TritonGELU chained inside w = 2*z + 1, loss = w.sum() ===
+grad_output that arrived at TritonGELU's node (dL/dz): tensor([2., 2., 2., 2., 2., 2.])
+x.grad allclose to oracle? True
+
+=== Section 17.1: the buggy kernel inside the SAME chain, no hand-injected grad_output ===
+buggy chain matches oracle? False

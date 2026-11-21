@@ -1,0 +1,16 @@
+=== Section 16.1: invisible at grad_output=1, exposed at grad_output=2 ===
+grad_output=1.0: correct matches oracle? True  buggy matches oracle? True
+grad_output=2.0: correct matches oracle? True  buggy matches oracle? False
+
+=== Section 16.2: n=10000, BLOCK=1024, 10 programs (last one masked) ===
+forward allclose to oracle? True
+backward allclose to oracle? True
+
+=== Section 16.3: TritonGELU wired end-to-end, n=5000 ===
+forward allclose to oracle? True
+x.grad allclose to oracle?  True
+
+=== Section 16.3: fp16 vs. fp32 storage precision (fp32 math throughout) ===
+fp32-in/fp32-out max abs diff from fp64 ground truth: 2.360000217471736e-07
+fp16-in/fp16-out (fp32 math internally) max abs diff: 0.0015156170082177844
+ratio (fp16 path error / fp32 path error): 6422.105375233661

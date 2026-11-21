@@ -1,0 +1,17 @@
+=== Section 17.1: chained expression, and the chain-rule bug surfacing on its own ===
+grad_output at TritonGELU's node: tensor([2., 2., 2., 2., 2., 2.])
+correct chain x.grad allclose to oracle? True
+buggy chain x.grad allclose to oracle?   False
+
+=== Section 17.2: graph structure and backward call order ===
+y.grad_fn is TritonSquareBackward? True
+z.grad_fn is TritonGELUBackward?   True
+y.grad_fn.next_functions[0][0] is z.grad_fn? True
+backward call order: ['TritonSquare.backward', 'TritonGELU.backward']
+x.grad allclose to oracle? True
+
+=== Section 17.3: fan-in accumulation ===
+used once  -> grad_output: tensor([1., 1., 1., 1.])
+used twice -> grad_output: tensor([2., 2., 2., 2.])  (backward called 1 time(s))
+two different consumers (2x + 3x) -> grad_output: tensor([5., 5., 5., 5.])
+x3.grad allclose to oracle? True

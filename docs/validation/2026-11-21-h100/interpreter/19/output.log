@@ -1,0 +1,27 @@
+=== Section 6.1: what actually crosses into the kernel ===
+host-side: x.shape = torch.Size([4])  x.stride() = (1,)  x.dtype = torch.float32
+x_ptr type: [319337792]
+x_ptr.shape as seen inside the kernel: []
+(the real tensor's shape is [4] -- compare against what the kernel saw above)
+
+=== Section 6.2: lying about the shape/stride arguments ===
+real tensor (3x4):
+ tensor([[ 0.,  1.,  2.,  3.],
+        [ 4.,  5.,  6.,  7.],
+        [ 8.,  9., 10., 11.]])
+correct M,N,strides -> matches? True
+LIED shape (4,3) on a real (3,4) tensor, result:
+ tensor([[ 0.,  1.,  2.],
+        [ 3.,  4.,  5.],
+        [ 6.,  7.,  8.],
+        [ 9., 10., 11.]])
+
+=== Section 6.3: dtype triggers its own specialization, automatically ===
+compiled specialization for dtype: fp32
+compiled specialization for dtype: fp16
+compiled specialization for dtype: int32
+
+=== Section 6.4: the wrapper function is the real composition site ===
+add(a, b) = [11.0, 22.0, 33.0, 44.0]
+AssertionError: shape mismatch: torch.Size([4]) vs torch.Size([3])
+add_unchecked(a, d) where a has 4 elements, d has 2: [101.0, 202.0, 3.0, 4.0]

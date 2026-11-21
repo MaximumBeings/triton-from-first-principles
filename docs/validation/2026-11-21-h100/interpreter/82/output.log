@@ -1,0 +1,9 @@
+=== Section 22.3: Monte Carlo GBM pricing vs. Black-Scholes closed form ===
+Black-Scholes closed-form price: 10.4506
+Monte Carlo price: 10.4059 +/- 0.0328, gap = 1.36 standard errors
+within 3 standard errors? True
+
+=== Section 22.3: forgetting the discount factor ===
+undiscounted 'price': 10.9394, gap = 14.2 standard errors
+within 3 standard errors? False
+absolute % difference from true price: 4.7% (looks small; the standard-error gap says otherwise)

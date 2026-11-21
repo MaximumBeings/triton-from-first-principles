@@ -1,0 +1,5 @@
+=== Section 6.1: what actually crosses into the kernel ===
+host-side: x.shape = torch.Size([4])  x.stride() = (1,)  x.dtype = torch.float32
+x_ptr type: [625451392]
+x_ptr.shape as seen inside the kernel: []
+(the real tensor's shape is [4] -- compare against what the kernel saw above)

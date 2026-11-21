@@ -1,0 +1,5 @@
+=== Section 8.2: a hand-written 'factory function' wrapper ===
+triton_full((6,), 7.0) -> [7.0, 7.0, 7.0, 7.0, 7.0, 7.0]
+
+compare against just using torch's own factory function directly:
+torch.full((6,), 7.0)  -> [7.0, 7.0, 7.0, 7.0, 7.0, 7.0]

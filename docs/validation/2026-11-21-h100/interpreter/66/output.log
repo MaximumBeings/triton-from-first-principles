@@ -1,0 +1,7 @@
+=== Section 18.3: manual sweep across candidate configs ===
+BLOCK=  256 num_warps=2 num_stages=1  allclose to oracle? True
+BLOCK=  512 num_warps=4 num_stages=2  allclose to oracle? True
+BLOCK= 1024 num_warps=8 num_stages=3  allclose to oracle? True
+BLOCK= 2048 num_warps=8 num_stages=4  allclose to oracle? True
+
+BLOCK=256 output equals BLOCK=1024 output bit-for-bit? True

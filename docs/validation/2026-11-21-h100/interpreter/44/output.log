@@ -1,0 +1,3 @@
+=== Section 13.1: a real multi-tile matmul, requiring a K-loop and a 2D grid ===
+M,K,N = 8 8 8  grid = (2, 2)  K-iterations per tile = 2
+matches torch matmul? True

@@ -1,0 +1,11 @@
+=== Section 15.1: invisible to autograd ===
+y.grad_fn: None
+backward -> RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn
+
+=== Section 15.2: wired into a real graph node ===
+y.grad_fn: <torch.autograd.function.TritonGELUBackward object at 0x75c112785e10>
+gradients match torch's own GELU? True
+
+=== Section 15.3: save_for_backward vs. ctx.x ===
+safe version -> RuntimeError (mutation caught)
+unsafe version -> silently wrong grad: 60.0 (correct would be 6.0)
