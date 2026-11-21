@@ -1,0 +1,19 @@
+/* Diagrams fit the reading column; enlargement never leaves the chapter. */
+.md-typeset img { max-width: 100%; height: auto; border-radius: .7rem; }
+.md-typeset a:has(> img) { display: block; margin: 1.5rem 0; }
+.md-typeset pre > code { white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 4; }
+.book-image-viewer { position: fixed; inset: 0; margin: auto; width: 96vw;
+  max-width: 96vw; max-height: 96dvh; padding: 0; border: 1px solid #5b83b5;
+  border-radius: .7rem; background: #102c46; color: #fff; overflow: auto;
+  box-sizing: border-box; box-shadow: 0 1rem 4rem #0006; }
+.book-image-viewer::backdrop { background: #06152acc; }
+.book-image-viewer__toolbar { position: sticky; top: 0; z-index: 1;
+  display: flex; justify-content: flex-end; gap: .5rem; padding: .6rem;
+  background: #102c46; }
+.book-image-viewer button { min-height: 44px; padding: .5rem .8rem;
+  color: #fff; background: #16457e; border: 1px solid #8ed5c4;
+  border-radius: .3rem; font: 600 16px/1.2 system-ui, sans-serif; cursor: pointer; }
+.book-image-viewer button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.book-image-viewer img { display: block; width: 100%; height: auto; max-width: 100%; }
+.book-image-viewer[data-fit="whole"] img { height: calc(96dvh - 5rem); object-fit: contain; }
+.book-image-viewer p { padding: 1rem; }

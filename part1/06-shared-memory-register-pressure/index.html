@@ -12,6 +12,8 @@
         <meta name="author" content="Oluwaseyi Awoga">
       
       
+        <link rel="canonical" href="https://maximumbeings.github.io/triton-from-first-principles/part1/06-shared-memory-register-pressure/">
+      
       
         <link rel="prev" href="../05-targeting-hardware/">
       
@@ -23,18 +25,18 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
-        <title>11. Shared Memory and the Kernel Cache - Triton From First Principles — Under Development</title>
+        <title>11. Shared Memory and the Kernel Cache - Triton From First Principles</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -52,6 +54,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../../stylesheets/reader.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -94,7 +98,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Triton From First Principles — Under Development" class="md-header__button md-logo" aria-label="Triton From First Principles — Under Development" data-md-component="logo">
+    <a href="../.." title="Triton From First Principles" class="md-header__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
@@ -108,7 +112,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Triton From First Principles — Under Development
+            Triton From First Principles
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -195,6 +199,18 @@
       
     
     
+      <div class="md-header__source">
+        <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
   </nav>
   
 </header>
@@ -220,14 +236,26 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Triton From First Principles — Under Development" class="md-nav__button md-logo" aria-label="Triton From First Principles — Under Development" data-md-component="logo">
+    <a href="../.." title="Triton From First Principles" class="md-nav__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
 
     </a>
-    Triton From First Principles — Under Development
+    Triton From First Principles
   </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
   
   <ul class="md-nav__list" data-md-scrollfix>
     
@@ -291,6 +319,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../review-and-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Review & Testing Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -307,10 +362,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -328,8 +383,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -508,10 +563,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -529,8 +584,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1032,6 +1087,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Worked Solutions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-scope-and-physical-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API scope and physical storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1072,10 +1144,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -1093,8 +1165,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1217,10 +1289,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -1238,8 +1310,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1306,10 +1378,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -1327,8 +1399,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1423,10 +1495,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
             
   
   
@@ -1444,8 +1516,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1540,10 +1612,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
             
   
   
@@ -1561,8 +1633,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1657,10 +1729,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
             
   
   
@@ -1678,8 +1750,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1746,10 +1818,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
         
           
-          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
             
   
   
@@ -1767,8 +1839,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_11">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2209,6 +2281,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Worked Solutions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-scope-and-physical-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API scope and physical storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -2227,8 +2316,12 @@
                   
 
 
+  
+  
+
 
 <h1 id="chapter-11-shared-memory-and-the-kernel-cache">Chapter 11: Shared Memory and the Kernel Cache<a class="headerlink" href="#chapter-11-shared-memory-and-the-kernel-cache" title="Permanent link">&para;</a></h1>
+<p><a href="../../images/ch11/01-concept.svg"><img alt="Balance live values against resident work" src="../../images/ch11/01-concept.svg" /></a></p>
 <blockquote>
 <p>"Part 1 has spent five chapters asking what a kernel actually receives, and one honest answer keeps recurring: less than it looks like, with the rest managed silently on your behalf. This closing chapter applies that same question to the two resources every real GPU kernel depends on most — the compiled binary sitting in a cache somewhere, and the fast on-chip memory a tiled kernel needs to be fast at all — and finds the same answer both times."</p>
 </blockquote>
@@ -2236,7 +2329,7 @@
 <ul>
 <li>What <code>@triton.jit</code> actually returns under normal, compiled operation (a <code>JITFunction</code>, with a real per-device compilation cache) versus under this book's <code>TRITON_INTERPRET=1</code> setup (an <code>InterpretedFunction</code>, with no cache at all) — and why every prior chapter's "compiled once, reused on repeat launches" claims describe the former, not something this book's tests have ever literally exercised</li>
 <li>Why <code>BLOCK</code> size is not a free parameter: every block-shaped value in a kernel body occupies real per-thread registers on genuine hardware, and this book's interpreter — which has no notion of threads or registers at all — cannot show you where that cost actually bites</li>
-<li>Why Triton has no shared-memory primitive whatsoever in its public language — no equivalent of CUDA's <code>__shared__</code> — and how <code>tl.dot</code>, the one operation where shared memory usage matters most, hides that entire decision inside the compiler</li>
+<li>Why the classic <code>triton.language</code> examples do not declare CUDA-style shared arrays — no equivalent of CUDA's <code>__shared__</code> — and how operations such as <code>tl.dot</code> and reductions, whose lowering can use shared memory, hides that entire decision inside the compiler</li>
 <li>How this chapter closes Part 1's running theme — pointer-only kernel arguments (Ch. 6), unverified shape/stride promises (Ch. 6–7), silent interpreter permissiveness (Ch. 1, 7, 8, 10) — by showing the same pattern one last time for compilation and on-chip memory</li>
 </ul>
 <p><strong>What you need to know first:</strong></p>
@@ -2248,7 +2341,7 @@
 <h2 id="111-the-kernel-cache-inspected-jitfunction-vs-interpretedfunction-foundational">11.1 The Kernel Cache, Inspected: <code>JITFunction</code> vs. <code>InterpretedFunction</code> <code>[FOUNDATIONAL]</code><a class="headerlink" href="#111-the-kernel-cache-inspected-jitfunction-vs-interpretedfunction-foundational" title="Permanent link">&para;</a></h2>
 <h3 id="intuition">Intuition<a class="headerlink" href="#intuition" title="Permanent link">&para;</a></h3>
 <p>A restaurant's claim that "we only cook a dish from scratch the first time it's ordered, then keep a prepared batch ready for repeat orders" is a real, verifiable claim about a real kitchen — you could walk into that kitchen and find the prepared batch sitting in a warmer. A stage recreation of the same restaurant, built entirely for a demonstration and using none of the kitchen's actual equipment, can <em>say</em> the identical line, in exactly the same words, without there being any warmer, any prepared batch, or any actual mechanism behind the claim at all.</p>
-<p>Chapter 1, Section 1.1 made a real, verifiable claim about <code>@triton.jit</code>: a kernel is traced and compiled once per distinct combination of dtypes, shapes, and <code>tl.constexpr</code> values, then reused from a cache on repeat launches with the same signature. That claim describes a genuine <code>JITFunction</code> object, compiled and run on real hardware. Every kernel this book has actually launched, however, ran through <code>TRITON_INTERPRET=1</code>, which produces a completely different kind of object — an <code>InterpretedFunction</code> — and this section inspects, directly, what that object does and doesn't have.</p>
+<p>Chapter 1, Section 1.1 made a real, verifiable claim about <code>@triton.jit</code>: a kernel is traced and compiled once per distinct combination of argument types, constexpr values, target/options and specialization attributes, then reused from a cache on repeat launches with the same signature. That claim describes a genuine <code>JITFunction</code> object, compiled and run on real hardware. Every kernel this book has actually launched, however, ran through <code>TRITON_INTERPRET=1</code>, which produces a completely different kind of object — an <code>InterpretedFunction</code> — and this section inspects, directly, what that object does and doesn't have.</p>
 <h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -2294,12 +2387,12 @@
 </code></pre></div>
 <p>Genuinely captured, inspecting the identical source under both settings:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>without TRITON_INTERPRET:
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>type: &lt;class &#39;triton.runtime.jit.JITFunction&#39;&gt;
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>type: &lt;class 'triton.runtime.jit.JITFunction'&gt;
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>device_caches before any launch: defaultdict(&lt;bound method JITFunction.create_binder ...&gt;, {})
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>with TRITON_INTERPRET=1:
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>type: &lt;class &#39;triton.runtime.interpreter.InterpretedFunction&#39;&gt;
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>AttributeError: &#39;InterpretedFunction&#39; object has no attribute &#39;cache&#39;
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>type: &lt;class 'triton.runtime.interpreter.InterpretedFunction'&gt;
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>AttributeError: 'InterpretedFunction' object has no attribute 'cache'
 </code></pre></div>
 <p>The genuine <code>JITFunction</code>'s <code>device_caches</code> is a real, inspectable <code>defaultdict</code> — empty here only because this book's environment (Chapter 10) has no driver to ever launch against and populate it with. The <code>InterpretedFunction</code> used by every kernel this book has actually run doesn't have a cache attribute to be empty <em>or</em> full — there is no compilation step for a cache to sit downstream of, only a direct, repeated execution of the kernel body as ordinary Python.</p>
 <h3 id="ascii-diagram-where-the-claim-in-chapter-1-actually-lives">ASCII Diagram — where the claim in Chapter 1 actually lives<a class="headerlink" href="#ascii-diagram-where-the-claim-in-chapter-1-actually-lives" title="Permanent link">&para;</a></h3>
@@ -2327,7 +2420,7 @@
 <h2 id="112-register-pressure-what-block-size-actually-costs-invisibly-foundational">11.2 Register Pressure: What <code>BLOCK</code> Size Actually Costs, Invisibly <code>[FOUNDATIONAL]</code><a class="headerlink" href="#112-register-pressure-what-block-size-actually-costs-invisibly-foundational" title="Permanent link">&para;</a></h2>
 <h3 id="intuition_1">Intuition<a class="headerlink" href="#intuition_1" title="Permanent link">&para;</a></h3>
 <p>A worker given a single small desk can keep every tool they need for one task within arm's reach; a worker given the exact same job but required to keep a hundred tools laid out at once has to start stacking things on the floor, walking further to reach some of them, and generally working slower even though the job itself didn't change. A GPU's register file is that desk: a fixed, finite amount of extremely fast per-thread storage, shared out among however many threads are resident on a streaming multiprocessor at once.</p>
-<p>Every block-shaped value inside a kernel body — every <code>tl.arange(0, BLOCK)</code>, every intermediate result computed from it — occupies real registers on genuine hardware, and <code>BLOCK</code> directly controls how many. A larger <code>BLOCK</code> means more live values per thread, which means either fewer threads can be scheduled concurrently (the register file has to be divided among them) or, past a hard limit, values get "spilled" to slower local memory, or, past an even harder limit, the kernel simply fails to compile at all with a resource-exhaustion error. None of this is a Triton-language concept — it's a physical constraint of the hardware a compiled kernel targets — and Chapter 10 already established that this book's interpreter has no concept of threads, registers, or hardware resource limits whatsoever.</p>
+<p>Block-shaped values are logical arrays distributed across the program's participating threads by a compiler layout. A larger BLOCK can increase live values and resource demand, but it is not a per-thread register count. The peak live set, layout, vectorization and lowering determine actual registers; shared memory and other limits also affect residency. Excess demand can reduce occupancy, spill or fail compilation. None of those outcomes can be measured from interpreter execution alone.</p>
 <h3 id="background_1">Background<a class="headerlink" href="#background_1" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -2340,7 +2433,7 @@
 <tbody>
 <tr>
 <td>What <code>BLOCK</code> controls</td>
-<td>How many live values (registers) each thread holds for this kernel</td>
+<td>Logical tile extent; per-thread live allocation depends on layout and lowering</td>
 <td>Nothing resource-related — it's just an array size for a Python-level computation</td>
 </tr>
 <tr>
@@ -2372,7 +2465,7 @@
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>BLOCK=  4096 -&gt; correct? True  (no resource error of any kind)
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>BLOCK= 65536 -&gt; correct? True  (no resource error of any kind)
 </code></pre></div>
-<p><code>BLOCK=65536</code> asks a single (simulated) program instance to hold 65,536 live float values at once. On real hardware, this would very plausibly exceed the register budget available to a single thread outright — GPUs typically allow on the order of a few hundred 32-bit registers per thread, not tens of thousands — and a genuine compiled build would likely refuse to compile this kernel at all, or silently fall back to heavy register spilling with a severe performance cost. This book's interpreter, having no concept of a register file to exhaust, runs all three sizes identically, correctly, and without any indication that one of them would be a serious problem on the hardware this book's kernels are actually written for.</p>
+<p><code>BLOCK=65536</code> describes 65,536 logical values in one program, not 65,536 registers in one thread. With four NVIDIA warps there are 128 participating threads; a simple even distribution would give 512 values per thread before considering masks, reuse and compiler optimization. That estimate alone still does not predict the live register allocation: the compiler can change layouts, schedule live ranges or eliminate dead work where the program permits it. Inspect compiled register/shared-memory metadata and measure occupancy or spills rather than inferring resource failure from the logical array extent. The interpreter cannot supply those measurements.</p>
 <blockquote>
 <p><code>[COMMON TRAP]</code> A <code>BLOCK</code> size that this book's interpreter accepts without complaint should never be read as a <code>BLOCK</code> size that's fine to use in production. This is exactly the same shape of trap Chapter 10 identified for <code>num_warps</code> and <code>num_stages</code>: the interpreter's silence reflects what it doesn't model, not what's actually safe on real hardware. Choosing a reasonable <code>BLOCK</code> — large enough to amortize per-launch overhead, small enough to avoid register pressure or spilling — is a genuine, consequential decision in real Triton development, and it's precisely the kind of decision Chapter 18's autotuning exists to make empirically rather than by guesswork, on hardware that can actually report back what happened.</p>
 </blockquote>
@@ -2393,7 +2486,7 @@
 <tr>
 <td>Explicit shared-memory declaration</td>
 <td><code>__shared__ float tile[...]</code>, placed and sized by hand</td>
-<td>No primitive exists — checked directly: zero <code>shared</code>-related names anywhere in <code>triton.language</code>'s 149 public attributes</td>
+<td>Classic triton.language does not expose a CUDA-style shared-array declaration; an attribute count is not a version-independent API contract</td>
 </tr>
 <tr>
 <td>Who decides what gets staged through shared memory</td>
@@ -2424,7 +2517,7 @@
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">b_ptrs</span> <span class="o">=</span> <span class="n">b_ptr</span> <span class="o">+</span> <span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">stride_bk</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">stride_bn</span>
 <a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="n">a</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">a_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">rows</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">),</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 <a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">b_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">),</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>   <span class="c1"># on real hardware: tensor cores + compiler-managed shared memory tiling</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">input_precision</span><span class="o">=</span><span class="s2">"ieee"</span><span class="p">)</span>   <span class="c1"># on real hardware: tensor cores + compiler-managed shared memory tiling</span>
 <a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="n">c_ptrs</span> <span class="o">=</span> <span class="n">c_ptr</span> <span class="o">+</span> <span class="n">rows</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">stride_cm</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">stride_cn</span>
 <a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">c_ptrs</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">rows</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">))</span>
 </code></pre></div>
@@ -2455,6 +2548,7 @@
 <h2 id="114-complete-runnable-code">11.4 Complete Runnable Code<a class="headerlink" href="#114-complete-runnable-code" title="Permanent link">&para;</a></h2>
 <p>Sections 11.1–11.3 built up this chapter's findings as isolated probes. The files below are the actual, complete, run-in-order source. <code>04_standalone_complete.py</code> combines everything from Sections 11.1 through 11.3 into a single script; its output is reproduced in full afterward. All were run exactly as shown, with <code>TRITON_INTERPRET=1</code> set except where noted, per Chapter 1's opening disclosure.</p>
 <h3 id="file-01_kernel_cachepy-section-111">File: <code>01_kernel_cache.py</code> — Section 11.1<a class="headerlink" href="#file-01_kernel_cachepy-section-111" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part1/06-shared-memory-register-pressure/01_kernel_cache.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
 <p><strong>Execution:</strong> <code>python3 01_kernel_cache.py</code> (run once with <code>TRITON_INTERPRET=1</code> unset, once with it set — see the script's own prints)</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton.language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
@@ -2471,22 +2565,23 @@
 <a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>
 <a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>
 <a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_kernel_cache</span><span class="p">():</span>
-<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>    <span class="n">interpreted</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TRITON_INTERPRET&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span>
-<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;=== Section 11.1: type(add_kernel) under TRITON_INTERPRET=</span><span class="si">{</span><span class="s1">&#39;1&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">interpreted</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;(unset)&#39;</span><span class="si">}</span><span class="s2"> ===&quot;</span><span class="p">)</span>
-<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;type:&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">add_kernel</span><span class="p">))</span>
-<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">add_kernel</span><span class="p">,</span> <span class="s2">&quot;device_caches&quot;</span><span class="p">):</span>
-<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;device_caches before any launch:&quot;</span><span class="p">,</span> <span class="n">add_kernel</span><span class="o">.</span><span class="n">device_caches</span><span class="p">)</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>    <span class="n">interpreted</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"TRITON_INTERPRET"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"1"</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"=== Section 11.1: type(add_kernel) under TRITON_INTERPRET=</span><span class="si">{</span><span class="s1">'1'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">interpreted</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'(unset)'</span><span class="si">}</span><span class="s2"> ==="</span><span class="p">)</span>
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"type:"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">add_kernel</span><span class="p">))</span>
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">add_kernel</span><span class="p">,</span> <span class="s2">"device_caches"</span><span class="p">):</span>
+<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"device_caches before any launch:"</span><span class="p">,</span> <span class="n">add_kernel</span><span class="o">.</span><span class="n">device_caches</span><span class="p">)</span>
 <a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>    <span class="k">else</span><span class="p">:</span>
 <a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a>        <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a>            <span class="n">add_kernel</span><span class="o">.</span><span class="n">cache</span>
 <a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a>        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no cache attribute at all -&gt; AttributeError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no cache attribute at all -&gt; AttributeError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a>
 <a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a>
-<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a>    <span class="n">demo_kernel_cache</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="file-02_register_pressurepy-section-112">File: <code>02_register_pressure.py</code> — Section 11.2<a class="headerlink" href="#file-02_register_pressurepy-section-112" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part1/06-shared-memory-register-pressure/02_register_pressure.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
 <p><strong>Execution:</strong> <code>TRITON_INTERPRET=1 python3 02_register_pressure.py</code></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
@@ -2502,19 +2597,20 @@
 <a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>
 <a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>
 <a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_register_pressure</span><span class="p">():</span>
-<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 11.2: does a huge BLOCK size raise any complaint under the interpreter? ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 11.2: does a huge BLOCK size raise any complaint under the interpreter? ==="</span><span class="p">)</span>
 <a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>    <span class="k">for</span> <span class="n">BLOCK</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4096</span><span class="p">,</span> <span class="mi">65536</span><span class="p">]:</span>
 <a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>        <span class="n">n</span> <span class="o">=</span> <span class="n">BLOCK</span>
 <a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>        <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 <a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>        <span class="n">copy_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="n">BLOCK</span><span class="p">)</span>
-<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;BLOCK=</span><span class="si">{</span><span class="n">BLOCK</span><span class="si">:</span><span class="s2">&gt;6</span><span class="si">}</span><span class="s2"> -&gt; correct? </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s2">  (no resource error of any kind)&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"BLOCK=</span><span class="si">{</span><span class="n">BLOCK</span><span class="si">:</span><span class="s2">&gt;6</span><span class="si">}</span><span class="s2"> -&gt; correct? </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s2">  (no resource error of any kind)"</span><span class="p">)</span>
 <a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>
 <a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>
-<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a>    <span class="n">demo_register_pressure</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="file-03_shared_memory_dotpy-section-113">File: <code>03_shared_memory_dot.py</code> — Section 11.3<a class="headerlink" href="#file-03_shared_memory_dotpy-section-113" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part1/06-shared-memory-register-pressure/03_shared_memory_dot.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
 <p><strong>Execution:</strong> <code>TRITON_INTERPRET=1 python3 03_shared_memory_dot.py</code></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
@@ -2532,27 +2628,28 @@
 <a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>    <span class="n">b_ptrs</span> <span class="o">=</span> <span class="n">b_ptr</span> <span class="o">+</span> <span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">stride_bk</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">stride_bn</span>
 <a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>    <span class="n">a</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">a_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">rows</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">),</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 <a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">b_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">),</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">input_precision</span><span class="o">=</span><span class="s2">"ieee"</span><span class="p">)</span>
 <a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>    <span class="n">c_ptrs</span> <span class="o">=</span> <span class="n">c_ptr</span> <span class="o">+</span> <span class="n">rows</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">stride_cm</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">stride_cn</span>
 <a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">c_ptrs</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">rows</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">))</span>
 <a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>
 <a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>
 <a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_shared_memory_via_dot</span><span class="p">():</span>
-<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 11.3: tl.dot, with zero visibility into real shared-memory staging ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 11.3: tl.dot, with zero visibility into real shared-memory staging ==="</span><span class="p">)</span>
 <a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a>    <span class="n">A</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]])</span>
 <a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a>    <span class="n">B</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">]])</span>
 <a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a>    <span class="n">C</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a>    <span class="n">matmul_tile_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
 <a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a>                              <span class="n">A</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">A</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">B</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">B</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">C</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">C</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
 <a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a>                              <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">BLOCK_K</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;tl.dot result:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
-<a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;matches A @ B?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">A</span> <span class="o">@</span> <span class="n">B</span><span class="p">))</span>
+<a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"tl.dot result:</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+<a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"matches A @ B?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">A</span> <span class="o">@</span> <span class="n">B</span><span class="p">))</span>
 <a id="__codelineno-10-32" name="__codelineno-10-32" href="#__codelineno-10-32"></a>
 <a id="__codelineno-10-33" name="__codelineno-10-33" href="#__codelineno-10-33"></a>
-<a id="__codelineno-10-34" name="__codelineno-10-34" href="#__codelineno-10-34"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-10-34" name="__codelineno-10-34" href="#__codelineno-10-34"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-10-35" name="__codelineno-10-35" href="#__codelineno-10-35"></a>    <span class="n">demo_shared_memory_via_dot</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="file-04_standalone_completepy-the-full-chapter-one-program">File: <code>04_standalone_complete.py</code> — the full chapter, one program<a class="headerlink" href="#file-04_standalone_completepy-the-full-chapter-one-program" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part1/06-shared-memory-register-pressure/04_standalone_complete.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
 <p><strong>Execution:</strong> <code>TRITON_INTERPRET=1 python3 04_standalone_complete.py</code></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
@@ -2578,46 +2675,46 @@
 <a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>    <span class="n">b_ptrs</span> <span class="o">=</span> <span class="n">b_ptr</span> <span class="o">+</span> <span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">stride_bk</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">stride_bn</span>
 <a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>    <span class="n">a</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">a_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">rows</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">),</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 <a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">b_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">),</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">input_precision</span><span class="o">=</span><span class="s2">"ieee"</span><span class="p">)</span>
 <a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>    <span class="n">c_ptrs</span> <span class="o">=</span> <span class="n">c_ptr</span> <span class="o">+</span> <span class="n">rows</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">stride_cm</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">stride_cn</span>
 <a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">c_ptrs</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">rows</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">))</span>
 <a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>
 <a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a>
 <a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 11.1: type(add_kernel) under the interpreter ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 11.1: type(add_kernel) under the interpreter ==="</span><span class="p">)</span>
 <a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;type:&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">copy_kernel</span><span class="p">))</span>
+<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"type:"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">copy_kernel</span><span class="p">))</span>
 <a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a>    <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a>        <span class="n">copy_kernel</span><span class="o">.</span><span class="n">cache</span>
 <a id="__codelineno-11-36" name="__codelineno-11-36" href="#__codelineno-11-36"></a>    <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no cache attribute -&gt; AttributeError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no cache attribute -&gt; AttributeError: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <a id="__codelineno-11-38" name="__codelineno-11-38" href="#__codelineno-11-38"></a>
-<a id="__codelineno-11-39" name="__codelineno-11-39" href="#__codelineno-11-39"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Section 11.2: BLOCK sizes spanning four orders of magnitude ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-39" name="__codelineno-11-39" href="#__codelineno-11-39"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Section 11.2: BLOCK sizes spanning four orders of magnitude ==="</span><span class="p">)</span>
 <a id="__codelineno-11-40" name="__codelineno-11-40" href="#__codelineno-11-40"></a>    <span class="k">for</span> <span class="n">BLOCK</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4096</span><span class="p">,</span> <span class="mi">65536</span><span class="p">]:</span>
 <a id="__codelineno-11-41" name="__codelineno-11-41" href="#__codelineno-11-41"></a>        <span class="n">n</span> <span class="o">=</span> <span class="n">BLOCK</span>
 <a id="__codelineno-11-42" name="__codelineno-11-42" href="#__codelineno-11-42"></a>        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-11-43" name="__codelineno-11-43" href="#__codelineno-11-43"></a>        <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 <a id="__codelineno-11-44" name="__codelineno-11-44" href="#__codelineno-11-44"></a>        <span class="n">copy_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="n">BLOCK</span><span class="p">)</span>
-<a id="__codelineno-11-45" name="__codelineno-11-45" href="#__codelineno-11-45"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;BLOCK=</span><span class="si">{</span><span class="n">BLOCK</span><span class="si">:</span><span class="s2">&gt;6</span><span class="si">}</span><span class="s2"> -&gt; correct? </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-45" name="__codelineno-11-45" href="#__codelineno-11-45"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"BLOCK=</span><span class="si">{</span><span class="n">BLOCK</span><span class="si">:</span><span class="s2">&gt;6</span><span class="si">}</span><span class="s2"> -&gt; correct? </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <a id="__codelineno-11-46" name="__codelineno-11-46" href="#__codelineno-11-46"></a>
-<a id="__codelineno-11-47" name="__codelineno-11-47" href="#__codelineno-11-47"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Section 11.3: tl.dot ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-47" name="__codelineno-11-47" href="#__codelineno-11-47"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Section 11.3: tl.dot ==="</span><span class="p">)</span>
 <a id="__codelineno-11-48" name="__codelineno-11-48" href="#__codelineno-11-48"></a>    <span class="n">A</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]])</span>
 <a id="__codelineno-11-49" name="__codelineno-11-49" href="#__codelineno-11-49"></a>    <span class="n">B</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">]])</span>
 <a id="__codelineno-11-50" name="__codelineno-11-50" href="#__codelineno-11-50"></a>    <span class="n">C</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <a id="__codelineno-11-51" name="__codelineno-11-51" href="#__codelineno-11-51"></a>    <span class="n">matmul_tile_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
 <a id="__codelineno-11-52" name="__codelineno-11-52" href="#__codelineno-11-52"></a>                              <span class="n">A</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">A</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">B</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">B</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">C</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">C</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
 <a id="__codelineno-11-53" name="__codelineno-11-53" href="#__codelineno-11-53"></a>                              <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">BLOCK_K</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<a id="__codelineno-11-54" name="__codelineno-11-54" href="#__codelineno-11-54"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;tl.dot result:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
-<a id="__codelineno-11-55" name="__codelineno-11-55" href="#__codelineno-11-55"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;matches A @ B?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">A</span> <span class="o">@</span> <span class="n">B</span><span class="p">))</span>
+<a id="__codelineno-11-54" name="__codelineno-11-54" href="#__codelineno-11-54"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"tl.dot result:</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+<a id="__codelineno-11-55" name="__codelineno-11-55" href="#__codelineno-11-55"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"matches A @ B?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">A</span> <span class="o">@</span> <span class="n">B</span><span class="p">))</span>
 <a id="__codelineno-11-56" name="__codelineno-11-56" href="#__codelineno-11-56"></a>
 <a id="__codelineno-11-57" name="__codelineno-11-57" href="#__codelineno-11-57"></a>
-<a id="__codelineno-11-58" name="__codelineno-11-58" href="#__codelineno-11-58"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-11-58" name="__codelineno-11-58" href="#__codelineno-11-58"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-11-59" name="__codelineno-11-59" href="#__codelineno-11-59"></a>    <span class="n">main</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="expected-output-for-04_standalone_completepy">Expected Output for <code>04_standalone_complete.py</code><a class="headerlink" href="#expected-output-for-04_standalone_completepy" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>=== Section 11.1: type(add_kernel) under the interpreter ===
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>type: &lt;class &#39;triton.runtime.interpreter.InterpretedFunction&#39;&gt;
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>no cache attribute -&gt; AttributeError: &#39;InterpretedFunction&#39; object has no attribute &#39;cache&#39;
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>type: &lt;class 'triton.runtime.interpreter.InterpretedFunction'&gt;
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>no cache attribute -&gt; AttributeError: 'InterpretedFunction' object has no attribute 'cache'
 <a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
 <a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>=== Section 11.2: BLOCK sizes spanning four orders of magnitude ===
 <a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>BLOCK=     4 -&gt; correct? True
@@ -2649,6 +2746,8 @@
 <p><strong>3.</strong> The accurate answer is that there isn't one — <code>triton.language</code> has no shared-memory primitive anywhere in its public API (a direct check finds zero <code>shared</code>-related names among its 149 public attributes). The only parameters a Triton kernel author actually controls that influence the compiler's shared-memory staging decisions are the same block-shape <code>tl.constexpr</code> values already used for register-pressure trade-offs — <code>BLOCK_M</code>, <code>BLOCK_N</code>, <code>BLOCK_K</code> for operations like <code>tl.dot</code>, plus <code>num_stages</code> from Chapter 10 — with every actual decision about what gets staged, when, and how left entirely to the compiler.</p>
 <p><strong>4.</strong> It confirms that <code>tl.dot</code>'s <em>result</em> is numerically correct — this book's interpreter genuinely computed the matrix product and got the right answer, matching both PyTorch's own <code>@</code> operator and Chapter 4's independent hand trace. It specifically does not confirm anything about <em>how</em> a genuinely compiled version of this kernel would execute on real hardware — whether it would stage <code>a</code> and <code>b</code>'s tiles through shared memory at all for a tile this small, what tensor-core instructions it might use, or what a larger, realistic block-shape configuration's actual shared-memory footprint would be. The interpreter computes <code>tl.dot</code> as a plain array multiplication, with the entire real hardware execution strategy invisible to it.</p>
 <p><strong>5.</strong> The common underlying reason, tying back to Chapter 1's opening disclosure, is that this book's entire environment has no GPU anywhere — not the cloud workspace running this book's tests, not the machine it's authored on — which is exactly why every kernel in this book runs through <code>TRITON_INTERPRET=1</code>, a CPU-based Python-level simulation of kernel <em>logic</em> rather than genuine compilation and execution on real hardware. The kernel cache (Section 11.1), register pressure (Section 11.2), and shared-memory staging (Section 11.3) are all real, hardware-level or compiled-artifact-level facts about genuine Triton — and all three are, for the same underlying reason, outside what a logic-only interpreter can ever be made to show directly, no matter how the demonstration is constructed.</p>
+<h3 id="api-scope-and-physical-storage">API scope and physical storage<a class="headerlink" href="#api-scope-and-physical-storage" title="Permanent link">&para;</a></h3>
+<p>This chapter describes the classic <code>triton.language</code> interface. Experimental Gluon exposes lower-level layout/shared-memory control; it is a separate API, not evidence that classic <code>tl.dot</code> exposes an explicit shared-array declaration. Shared memory can also be generated for reductions and layout conversions. Increasing BLOCK does not necessarily increase the simultaneously live per-thread state in direct proportion.</p>
 
 
 
@@ -2764,10 +2863,12 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+        <script src="../../javascripts/image-viewer.js"></script>
       
     
   </body>

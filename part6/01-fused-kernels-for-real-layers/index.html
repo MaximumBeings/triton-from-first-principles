@@ -12,6 +12,8 @@
         <meta name="author" content="Oluwaseyi Awoga">
       
       
+        <link rel="canonical" href="https://maximumbeings.github.io/triton-from-first-principles/part6/01-fused-kernels-for-real-layers/">
+      
       
         <link rel="prev" href="../../part5/02-benchmarking-correctly/">
       
@@ -23,18 +25,18 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
-        <title>20. Fused Kernels for Real Layers - Triton From First Principles — Under Development</title>
+        <title>20. Fused Kernels for Real Layers - Triton From First Principles</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -52,6 +54,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../../stylesheets/reader.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -94,7 +98,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Triton From First Principles — Under Development" class="md-header__button md-logo" aria-label="Triton From First Principles — Under Development" data-md-component="logo">
+    <a href="../.." title="Triton From First Principles" class="md-header__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
@@ -108,7 +112,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Triton From First Principles — Under Development
+            Triton From First Principles
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -195,6 +199,18 @@
       
     
     
+      <div class="md-header__source">
+        <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
   </nav>
   
 </header>
@@ -220,14 +236,26 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Triton From First Principles — Under Development" class="md-nav__button md-logo" aria-label="Triton From First Principles — Under Development" data-md-component="logo">
+    <a href="../.." title="Triton From First Principles" class="md-nav__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
 
     </a>
-    Triton From First Principles — Under Development
+    Triton From First Principles
   </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
   
   <ul class="md-nav__list" data-md-scrollfix>
     
@@ -291,6 +319,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../review-and-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Review & Testing Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -307,10 +362,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -328,8 +383,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -508,10 +563,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -529,8 +584,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -737,10 +792,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -758,8 +813,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -882,10 +937,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -903,8 +958,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -971,10 +1026,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -992,8 +1047,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1088,10 +1143,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
             
   
   
@@ -1109,8 +1164,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1205,10 +1260,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
             
   
   
@@ -1226,8 +1281,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1712,10 +1767,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
             
   
   
@@ -1733,8 +1788,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1801,10 +1856,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
         
           
-          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
             
   
   
@@ -1822,8 +1877,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_11">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2337,8 +2392,12 @@
                   
 
 
+  
+  
+
 
 <h1 id="chapter-20-fused-kernels-for-real-layers">Chapter 20: Fused Kernels for Real Layers<a class="headerlink" href="#chapter-20-fused-kernels-for-real-layers" title="Permanent link">&para;</a></h1>
+<p><a href="../../images/ch20/01-concept.svg"><img alt="Layer normalization reduces within each row" src="../../images/ch20/01-concept.svg" /></a></p>
 <blockquote>
 <p><code>torch.nn.Linear</code> followed by an activation, or <code>torch.nn.LayerNorm</code> on its own, are each three or four separate memory round trips when built from ordinary PyTorch operators. A real fused kernel reads its input once and writes its output once, no matter how many logical steps sit in between.</p>
 </blockquote>
@@ -2413,7 +2472,7 @@
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        <span class="n">b_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">)</span>
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>        <span class="n">a</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">a_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">a_mask</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 <a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">b_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">b_mask</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        <span class="n">acc</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        <span class="n">acc</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">input_precision</span><span class="o">=</span><span class="s2">"ieee"</span><span class="p">)</span>
 <a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
 <a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="c1"># fused epilogue: bias add (broadcast per output COLUMN), then exact GELU</span>
 <a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="n">bias</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bias_ptr</span> <span class="o">+</span> <span class="n">cols</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">cols</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
@@ -2521,7 +2580,7 @@
 <a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>var allclose to x.var(unbiased=True) [WRONG comparison]? False
 <a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>max abs diff vs unbiased: 0.2560422420501709
 <a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>kernel&#39;s own var values:    tensor([0.8021, 0.8585, 1.0370, 0.3780, 2.3044])
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>kernel's own var values:    tensor([0.8021, 0.8585, 1.0370, 0.3780, 2.3044])
 <a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>biased (/N) oracle values:  tensor([0.8021, 0.8585, 1.0370, 0.3780, 2.3044])
 <a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>unbiased (/(N-1)) oracle:  tensor([0.8912, 0.9539, 1.1522, 0.4200, 2.5604])
 </code></pre></div>
@@ -2532,9 +2591,9 @@
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>PASS 1:  mean = sum(x_i) / N
 <a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>PASS 2:  var = sum((x_i - mean)^2) / N     &lt;-- BIASED: divide by N   (what LayerNorm uses)
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>     vs. var = sum((x_i - mean)^2) / (N-1) &lt;-- UNBIASED: divide by N-1 (torch.var()&#39;s DEFAULT)
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>     vs. var = sum((x_i - mean)^2) / (N-1) &lt;-- UNBIASED: divide by N-1 (torch.var()'s DEFAULT)
 <a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>         Both are &quot;the variance&quot; -- they are simply two different,
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>         Both are "the variance" -- they are simply two different,
 <a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>         equally standard conventions, and comparing a kernel built
 <a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>         for one against an oracle computing the other looks exactly
 <a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>         like a genuine bug.
@@ -2631,6 +2690,7 @@
 <h2 id="204-complete-runnable-code">20.4 Complete Runnable Code<a class="headerlink" href="#204-complete-runnable-code" title="Permanent link">&para;</a></h2>
 <p>The three files below build up the chapter in order: the fused Linear+bias+GELU matmul epilogue and its bias-axis trap (20.1), the row-wise mean/variance reduction and the biased-vs-unbiased variance distinction (20.2), and the complete fused LayerNorm kernel with its eps-placement trap (20.3) — plus one standalone file combining all three with a single documented <code>Expected Output</code> block.</p>
 <h3 id="file-01_fused_linear_gelupy">File: <code>01_fused_linear_gelu.py</code><a class="headerlink" href="#file-01_fused_linear_gelupy" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part6/01-fused-kernels-for-real-layers/01_fused_linear_gelu.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
 <a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton.language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
@@ -2654,7 +2714,7 @@
 <a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a>        <span class="n">b_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">)</span>
 <a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a>        <span class="n">a</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">a_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">a_mask</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 <a id="__codelineno-15-23" name="__codelineno-15-23" href="#__codelineno-15-23"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">b_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">b_mask</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-<a id="__codelineno-15-24" name="__codelineno-15-24" href="#__codelineno-15-24"></a>        <span class="n">acc</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-15-24" name="__codelineno-15-24" href="#__codelineno-15-24"></a>        <span class="n">acc</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">input_precision</span><span class="o">=</span><span class="s2">"ieee"</span><span class="p">)</span>
 <a id="__codelineno-15-25" name="__codelineno-15-25" href="#__codelineno-15-25"></a>
 <a id="__codelineno-15-26" name="__codelineno-15-26" href="#__codelineno-15-26"></a>    <span class="n">bias</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bias_ptr</span> <span class="o">+</span> <span class="n">cols</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">cols</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 <a id="__codelineno-15-27" name="__codelineno-15-27" href="#__codelineno-15-27"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">bias</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
@@ -2685,7 +2745,7 @@
 <a id="__codelineno-15-52" name="__codelineno-15-52" href="#__codelineno-15-52"></a>        <span class="n">b_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">)</span>
 <a id="__codelineno-15-53" name="__codelineno-15-53" href="#__codelineno-15-53"></a>        <span class="n">a</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">a_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">a_mask</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 <a id="__codelineno-15-54" name="__codelineno-15-54" href="#__codelineno-15-54"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">b_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">b_mask</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-<a id="__codelineno-15-55" name="__codelineno-15-55" href="#__codelineno-15-55"></a>        <span class="n">acc</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-15-55" name="__codelineno-15-55" href="#__codelineno-15-55"></a>        <span class="n">acc</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">input_precision</span><span class="o">=</span><span class="s2">"ieee"</span><span class="p">)</span>
 <a id="__codelineno-15-56" name="__codelineno-15-56" href="#__codelineno-15-56"></a>
 <a id="__codelineno-15-57" name="__codelineno-15-57" href="#__codelineno-15-57"></a>    <span class="n">bias</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bias_ptr</span> <span class="o">+</span> <span class="n">rows</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">rows</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>  <span class="c1"># BUG: wrong axis AND wrong bound</span>
 <a id="__codelineno-15-58" name="__codelineno-15-58" href="#__codelineno-15-58"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">bias</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
@@ -2713,28 +2773,29 @@
 <a id="__codelineno-15-80" name="__codelineno-15-80" href="#__codelineno-15-80"></a>
 <a id="__codelineno-15-81" name="__codelineno-15-81" href="#__codelineno-15-81"></a>
 <a id="__codelineno-15-82" name="__codelineno-15-82" href="#__codelineno-15-82"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_20_1</span><span class="p">():</span>
-<a id="__codelineno-15-83" name="__codelineno-15-83" href="#__codelineno-15-83"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 20.1: fused Linear+bias+GELU vs. a real torch.nn.Linear module ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-83" name="__codelineno-15-83" href="#__codelineno-15-83"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 20.1: fused Linear+bias+GELU vs. a real torch.nn.Linear module ==="</span><span class="p">)</span>
 <a id="__codelineno-15-84" name="__codelineno-15-84" href="#__codelineno-15-84"></a>    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <a id="__codelineno-15-85" name="__codelineno-15-85" href="#__codelineno-15-85"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">16</span>
 <a id="__codelineno-15-86" name="__codelineno-15-86" href="#__codelineno-15-86"></a>    <span class="n">layer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
 <a id="__codelineno-15-87" name="__codelineno-15-87" href="#__codelineno-15-87"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
 <a id="__codelineno-15-88" name="__codelineno-15-88" href="#__codelineno-15-88"></a>    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-<a id="__codelineno-15-89" name="__codelineno-15-89" href="#__codelineno-15-89"></a>        <span class="n">oracle</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">gelu</span><span class="p">(</span><span class="n">layer</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">approximate</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-89" name="__codelineno-15-89" href="#__codelineno-15-89"></a>        <span class="n">oracle</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">gelu</span><span class="p">(</span><span class="n">layer</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">approximate</span><span class="o">=</span><span class="s2">"none"</span><span class="p">)</span>
 <a id="__codelineno-15-90" name="__codelineno-15-90" href="#__codelineno-15-90"></a>
 <a id="__codelineno-15-91" name="__codelineno-15-91" href="#__codelineno-15-91"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">fused_linear_gelu</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">layer</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
-<a id="__codelineno-15-92" name="__codelineno-15-92" href="#__codelineno-15-92"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;allclose to nn.Linear + gelu oracle?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-15-92" name="__codelineno-15-92" href="#__codelineno-15-92"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"allclose to nn.Linear + gelu oracle?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-15-93" name="__codelineno-15-93" href="#__codelineno-15-93"></a>
 <a id="__codelineno-15-94" name="__codelineno-15-94" href="#__codelineno-15-94"></a>    <span class="nb">print</span><span class="p">()</span>
-<a id="__codelineno-15-95" name="__codelineno-15-95" href="#__codelineno-15-95"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 20.1: the bias-axis bug ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-95" name="__codelineno-15-95" href="#__codelineno-15-95"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 20.1: the bias-axis bug ==="</span><span class="p">)</span>
 <a id="__codelineno-15-96" name="__codelineno-15-96" href="#__codelineno-15-96"></a>    <span class="n">out_buggy</span> <span class="o">=</span> <span class="n">fused_linear_gelu</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">layer</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
 <a id="__codelineno-15-97" name="__codelineno-15-97" href="#__codelineno-15-97"></a>                                   <span class="n">kernel</span><span class="o">=</span><span class="n">fused_linear_gelu_kernel_buggy_bias_axis</span><span class="p">)</span>
-<a id="__codelineno-15-98" name="__codelineno-15-98" href="#__codelineno-15-98"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;buggy kernel allclose to oracle?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out_buggy</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-15-98" name="__codelineno-15-98" href="#__codelineno-15-98"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"buggy kernel allclose to oracle?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out_buggy</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-15-99" name="__codelineno-15-99" href="#__codelineno-15-99"></a>
 <a id="__codelineno-15-100" name="__codelineno-15-100" href="#__codelineno-15-100"></a>
-<a id="__codelineno-15-101" name="__codelineno-15-101" href="#__codelineno-15-101"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-15-101" name="__codelineno-15-101" href="#__codelineno-15-101"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-15-102" name="__codelineno-15-102" href="#__codelineno-15-102"></a>    <span class="n">section_20_1</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="file-02_row_mean_varpy">File: <code>02_row_mean_var.py</code><a class="headerlink" href="#file-02_row_mean_varpy" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part6/01-fused-kernels-for-real-layers/02_row_mean_var.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
 <a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton.language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
@@ -2767,7 +2828,7 @@
 <a id="__codelineno-16-30" name="__codelineno-16-30" href="#__codelineno-16-30"></a>
 <a id="__codelineno-16-31" name="__codelineno-16-31" href="#__codelineno-16-31"></a>
 <a id="__codelineno-16-32" name="__codelineno-16-32" href="#__codelineno-16-32"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_20_2</span><span class="p">():</span>
-<a id="__codelineno-16-33" name="__codelineno-16-33" href="#__codelineno-16-33"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 20.2: row-wise mean/variance vs. x.mean()/x.var() ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-33" name="__codelineno-16-33" href="#__codelineno-16-33"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 20.2: row-wise mean/variance vs. x.mean()/x.var() ==="</span><span class="p">)</span>
 <a id="__codelineno-16-34" name="__codelineno-16-34" href="#__codelineno-16-34"></a>    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <a id="__codelineno-16-35" name="__codelineno-16-35" href="#__codelineno-16-35"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span>
 <a id="__codelineno-16-36" name="__codelineno-16-36" href="#__codelineno-16-36"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
@@ -2777,16 +2838,17 @@
 <a id="__codelineno-16-40" name="__codelineno-16-40" href="#__codelineno-16-40"></a>    <span class="n">oracle_var_biased</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">unbiased</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <a id="__codelineno-16-41" name="__codelineno-16-41" href="#__codelineno-16-41"></a>    <span class="n">oracle_var_unbiased</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">unbiased</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <a id="__codelineno-16-42" name="__codelineno-16-42" href="#__codelineno-16-42"></a>
-<a id="__codelineno-16-43" name="__codelineno-16-43" href="#__codelineno-16-43"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mean allclose to x.mean(dim=-1)?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">oracle_mean</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
-<a id="__codelineno-16-44" name="__codelineno-16-44" href="#__codelineno-16-44"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;var allclose to x.var(unbiased=False)?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">oracle_var_biased</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
-<a id="__codelineno-16-45" name="__codelineno-16-45" href="#__codelineno-16-45"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;var allclose to x.var(unbiased=True) [WRONG comparison]?&quot;</span><span class="p">,</span>
+<a id="__codelineno-16-43" name="__codelineno-16-43" href="#__codelineno-16-43"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"mean allclose to x.mean(dim=-1)?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">oracle_mean</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
+<a id="__codelineno-16-44" name="__codelineno-16-44" href="#__codelineno-16-44"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"var allclose to x.var(unbiased=False)?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">oracle_var_biased</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
+<a id="__codelineno-16-45" name="__codelineno-16-45" href="#__codelineno-16-45"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"var allclose to x.var(unbiased=True) [WRONG comparison]?"</span><span class="p">,</span>
 <a id="__codelineno-16-46" name="__codelineno-16-46" href="#__codelineno-16-46"></a>          <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">oracle_var_unbiased</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
 <a id="__codelineno-16-47" name="__codelineno-16-47" href="#__codelineno-16-47"></a>
 <a id="__codelineno-16-48" name="__codelineno-16-48" href="#__codelineno-16-48"></a>
-<a id="__codelineno-16-49" name="__codelineno-16-49" href="#__codelineno-16-49"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-16-49" name="__codelineno-16-49" href="#__codelineno-16-49"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-16-50" name="__codelineno-16-50" href="#__codelineno-16-50"></a>    <span class="n">section_20_2</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="file-03_fused_layernormpy">File: <code>03_fused_layernorm.py</code><a class="headerlink" href="#file-03_fused_layernormpy" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part6/01-fused-kernels-for-real-layers/03_fused_layernorm.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
 <a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton.language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
@@ -2847,7 +2909,7 @@
 <a id="__codelineno-17-58" name="__codelineno-17-58" href="#__codelineno-17-58"></a>
 <a id="__codelineno-17-59" name="__codelineno-17-59" href="#__codelineno-17-59"></a>
 <a id="__codelineno-17-60" name="__codelineno-17-60" href="#__codelineno-17-60"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_20_3</span><span class="p">():</span>
-<a id="__codelineno-17-61" name="__codelineno-17-61" href="#__codelineno-17-61"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 20.3: fused LayerNorm vs. a real torch.nn.LayerNorm module ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-17-61" name="__codelineno-17-61" href="#__codelineno-17-61"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 20.3: fused LayerNorm vs. a real torch.nn.LayerNorm module ==="</span><span class="p">)</span>
 <a id="__codelineno-17-62" name="__codelineno-17-62" href="#__codelineno-17-62"></a>    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <a id="__codelineno-17-63" name="__codelineno-17-63" href="#__codelineno-17-63"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">17</span>
 <a id="__codelineno-17-64" name="__codelineno-17-64" href="#__codelineno-17-64"></a>    <span class="n">ln</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
@@ -2855,10 +2917,10 @@
 <a id="__codelineno-17-66" name="__codelineno-17-66" href="#__codelineno-17-66"></a>    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
 <a id="__codelineno-17-67" name="__codelineno-17-67" href="#__codelineno-17-67"></a>        <span class="n">oracle</span> <span class="o">=</span> <span class="n">ln</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <a id="__codelineno-17-68" name="__codelineno-17-68" href="#__codelineno-17-68"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">triton_layernorm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ln</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">eps</span><span class="o">=</span><span class="n">ln</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
-<a id="__codelineno-17-69" name="__codelineno-17-69" href="#__codelineno-17-69"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;allclose to nn.LayerNorm?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-17-69" name="__codelineno-17-69" href="#__codelineno-17-69"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"allclose to nn.LayerNorm?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-17-70" name="__codelineno-17-70" href="#__codelineno-17-70"></a>
 <a id="__codelineno-17-71" name="__codelineno-17-71" href="#__codelineno-17-71"></a>    <span class="nb">print</span><span class="p">()</span>
-<a id="__codelineno-17-72" name="__codelineno-17-72" href="#__codelineno-17-72"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 20.3: the eps-placement trap ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-17-72" name="__codelineno-17-72" href="#__codelineno-17-72"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 20.3: the eps-placement trap ==="</span><span class="p">)</span>
 <a id="__codelineno-17-73" name="__codelineno-17-73" href="#__codelineno-17-73"></a>    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <a id="__codelineno-17-74" name="__codelineno-17-74" href="#__codelineno-17-74"></a>    <span class="n">x_typical</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 <a id="__codelineno-17-75" name="__codelineno-17-75" href="#__codelineno-17-75"></a>    <span class="n">ln2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
@@ -2867,8 +2929,8 @@
 <a id="__codelineno-17-78" name="__codelineno-17-78" href="#__codelineno-17-78"></a>    <span class="n">correct_typical</span> <span class="o">=</span> <span class="n">triton_layernorm</span><span class="p">(</span><span class="n">x_typical</span><span class="p">,</span> <span class="n">ln2</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln2</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">eps</span><span class="o">=</span><span class="n">ln2</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
 <a id="__codelineno-17-79" name="__codelineno-17-79" href="#__codelineno-17-79"></a>    <span class="n">wrong_typical</span> <span class="o">=</span> <span class="n">triton_layernorm</span><span class="p">(</span><span class="n">x_typical</span><span class="p">,</span> <span class="n">ln2</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln2</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">eps</span><span class="o">=</span><span class="n">ln2</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span>
 <a id="__codelineno-17-80" name="__codelineno-17-80" href="#__codelineno-17-80"></a>                                      <span class="n">kernel</span><span class="o">=</span><span class="n">layernorm_forward_kernel_wrong_eps</span><span class="p">)</span>
-<a id="__codelineno-17-81" name="__codelineno-17-81" href="#__codelineno-17-81"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;typical row: correct allclose?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">correct_typical</span><span class="p">,</span> <span class="n">oracle_typical</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">),</span>
-<a id="__codelineno-17-82" name="__codelineno-17-82" href="#__codelineno-17-82"></a>          <span class="s2">&quot; wrong-eps allclose?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">wrong_typical</span><span class="p">,</span> <span class="n">oracle_typical</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-17-81" name="__codelineno-17-81" href="#__codelineno-17-81"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"typical row: correct allclose?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">correct_typical</span><span class="p">,</span> <span class="n">oracle_typical</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">),</span>
+<a id="__codelineno-17-82" name="__codelineno-17-82" href="#__codelineno-17-82"></a>          <span class="s2">" wrong-eps allclose?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">wrong_typical</span><span class="p">,</span> <span class="n">oracle_typical</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-17-83" name="__codelineno-17-83" href="#__codelineno-17-83"></a>
 <a id="__codelineno-17-84" name="__codelineno-17-84" href="#__codelineno-17-84"></a>    <span class="n">x_flat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1e-6</span><span class="p">,</span> <span class="o">-</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">2e-6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2e-6</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1e-6</span><span class="p">]])</span>
 <a id="__codelineno-17-85" name="__codelineno-17-85" href="#__codelineno-17-85"></a>    <span class="n">ln3</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
@@ -2877,19 +2939,20 @@
 <a id="__codelineno-17-88" name="__codelineno-17-88" href="#__codelineno-17-88"></a>    <span class="n">correct_flat</span> <span class="o">=</span> <span class="n">triton_layernorm</span><span class="p">(</span><span class="n">x_flat</span><span class="p">,</span> <span class="n">ln3</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln3</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">eps</span><span class="o">=</span><span class="n">ln3</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
 <a id="__codelineno-17-89" name="__codelineno-17-89" href="#__codelineno-17-89"></a>    <span class="n">wrong_flat</span> <span class="o">=</span> <span class="n">triton_layernorm</span><span class="p">(</span><span class="n">x_flat</span><span class="p">,</span> <span class="n">ln3</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln3</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">eps</span><span class="o">=</span><span class="n">ln3</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span>
 <a id="__codelineno-17-90" name="__codelineno-17-90" href="#__codelineno-17-90"></a>                                   <span class="n">kernel</span><span class="o">=</span><span class="n">layernorm_forward_kernel_wrong_eps</span><span class="p">)</span>
-<a id="__codelineno-17-91" name="__codelineno-17-91" href="#__codelineno-17-91"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;near-constant row: correct allclose?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">correct_flat</span><span class="p">,</span> <span class="n">oracle_flat</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">),</span>
-<a id="__codelineno-17-92" name="__codelineno-17-92" href="#__codelineno-17-92"></a>          <span class="s2">&quot; wrong-eps allclose?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">wrong_flat</span><span class="p">,</span> <span class="n">oracle_flat</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-17-91" name="__codelineno-17-91" href="#__codelineno-17-91"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"near-constant row: correct allclose?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">correct_flat</span><span class="p">,</span> <span class="n">oracle_flat</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">),</span>
+<a id="__codelineno-17-92" name="__codelineno-17-92" href="#__codelineno-17-92"></a>          <span class="s2">" wrong-eps allclose?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">wrong_flat</span><span class="p">,</span> <span class="n">oracle_flat</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-17-93" name="__codelineno-17-93" href="#__codelineno-17-93"></a>
 <a id="__codelineno-17-94" name="__codelineno-17-94" href="#__codelineno-17-94"></a>
-<a id="__codelineno-17-95" name="__codelineno-17-95" href="#__codelineno-17-95"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-17-95" name="__codelineno-17-95" href="#__codelineno-17-95"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-17-96" name="__codelineno-17-96" href="#__codelineno-17-96"></a>    <span class="n">section_20_3</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="file-04_standalone_completepy">File: <code>04_standalone_complete.py</code><a class="headerlink" href="#file-04_standalone_completepy" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="sd">&quot;&quot;&quot;</span>
+<p><a href="../../examples/references/part6/01-fused-kernels-for-real-layers/04_standalone_complete.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="sd">"""</span>
 <a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="sd">Chapter 20 standalone: fusing a matmul epilogue with bias+GELU, the row-wise</span>
 <a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="sd">mean/variance reduction LayerNorm needs, and the complete fused LayerNorm</span>
 <a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="sd">kernel with its eps-placement trap.</span>
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="sd">"""</span>
 <a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
 <a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton.language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
@@ -2917,7 +2980,7 @@
 <a id="__codelineno-18-30" name="__codelineno-18-30" href="#__codelineno-18-30"></a>        <span class="n">b_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">)</span>
 <a id="__codelineno-18-31" name="__codelineno-18-31" href="#__codelineno-18-31"></a>        <span class="n">a</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">a_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">a_mask</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 <a id="__codelineno-18-32" name="__codelineno-18-32" href="#__codelineno-18-32"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">b_ptrs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">b_mask</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-<a id="__codelineno-18-33" name="__codelineno-18-33" href="#__codelineno-18-33"></a>        <span class="n">acc</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-18-33" name="__codelineno-18-33" href="#__codelineno-18-33"></a>        <span class="n">acc</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">input_precision</span><span class="o">=</span><span class="s2">"ieee"</span><span class="p">)</span>
 <a id="__codelineno-18-34" name="__codelineno-18-34" href="#__codelineno-18-34"></a>
 <a id="__codelineno-18-35" name="__codelineno-18-35" href="#__codelineno-18-35"></a>    <span class="n">bias</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bias_ptr</span> <span class="o">+</span> <span class="n">cols</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">cols</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 <a id="__codelineno-18-36" name="__codelineno-18-36" href="#__codelineno-18-36"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">bias</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
@@ -2945,15 +3008,15 @@
 <a id="__codelineno-18-58" name="__codelineno-18-58" href="#__codelineno-18-58"></a>
 <a id="__codelineno-18-59" name="__codelineno-18-59" href="#__codelineno-18-59"></a>
 <a id="__codelineno-18-60" name="__codelineno-18-60" href="#__codelineno-18-60"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_20_1</span><span class="p">():</span>
-<a id="__codelineno-18-61" name="__codelineno-18-61" href="#__codelineno-18-61"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 20.1: fused Linear+bias+GELU vs. a real torch.nn.Linear module ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-18-61" name="__codelineno-18-61" href="#__codelineno-18-61"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 20.1: fused Linear+bias+GELU vs. a real torch.nn.Linear module ==="</span><span class="p">)</span>
 <a id="__codelineno-18-62" name="__codelineno-18-62" href="#__codelineno-18-62"></a>    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <a id="__codelineno-18-63" name="__codelineno-18-63" href="#__codelineno-18-63"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">16</span>
 <a id="__codelineno-18-64" name="__codelineno-18-64" href="#__codelineno-18-64"></a>    <span class="n">layer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
 <a id="__codelineno-18-65" name="__codelineno-18-65" href="#__codelineno-18-65"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
 <a id="__codelineno-18-66" name="__codelineno-18-66" href="#__codelineno-18-66"></a>    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-<a id="__codelineno-18-67" name="__codelineno-18-67" href="#__codelineno-18-67"></a>        <span class="n">oracle</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">gelu</span><span class="p">(</span><span class="n">layer</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">approximate</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+<a id="__codelineno-18-67" name="__codelineno-18-67" href="#__codelineno-18-67"></a>        <span class="n">oracle</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">gelu</span><span class="p">(</span><span class="n">layer</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">approximate</span><span class="o">=</span><span class="s2">"none"</span><span class="p">)</span>
 <a id="__codelineno-18-68" name="__codelineno-18-68" href="#__codelineno-18-68"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">fused_linear_gelu</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">layer</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
-<a id="__codelineno-18-69" name="__codelineno-18-69" href="#__codelineno-18-69"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;allclose to nn.Linear + gelu oracle?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-18-69" name="__codelineno-18-69" href="#__codelineno-18-69"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"allclose to nn.Linear + gelu oracle?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-18-70" name="__codelineno-18-70" href="#__codelineno-18-70"></a>
 <a id="__codelineno-18-71" name="__codelineno-18-71" href="#__codelineno-18-71"></a>
 <a id="__codelineno-18-72" name="__codelineno-18-72" href="#__codelineno-18-72"></a><span class="c1"># ---------------------------------------------------------------------------</span>
@@ -2976,7 +3039,7 @@
 <a id="__codelineno-18-89" name="__codelineno-18-89" href="#__codelineno-18-89"></a>
 <a id="__codelineno-18-90" name="__codelineno-18-90" href="#__codelineno-18-90"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_20_2</span><span class="p">():</span>
 <a id="__codelineno-18-91" name="__codelineno-18-91" href="#__codelineno-18-91"></a>    <span class="nb">print</span><span class="p">()</span>
-<a id="__codelineno-18-92" name="__codelineno-18-92" href="#__codelineno-18-92"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 20.2: row-wise mean/variance vs. biased and unbiased oracles ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-18-92" name="__codelineno-18-92" href="#__codelineno-18-92"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 20.2: row-wise mean/variance vs. biased and unbiased oracles ==="</span><span class="p">)</span>
 <a id="__codelineno-18-93" name="__codelineno-18-93" href="#__codelineno-18-93"></a>    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <a id="__codelineno-18-94" name="__codelineno-18-94" href="#__codelineno-18-94"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span>
 <a id="__codelineno-18-95" name="__codelineno-18-95" href="#__codelineno-18-95"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
@@ -2985,10 +3048,10 @@
 <a id="__codelineno-18-98" name="__codelineno-18-98" href="#__codelineno-18-98"></a>    <span class="n">var</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
 <a id="__codelineno-18-99" name="__codelineno-18-99" href="#__codelineno-18-99"></a>    <span class="n">row_mean_var_kernel</span><span class="p">[(</span><span class="n">M</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="n">BLOCK_N</span><span class="p">)</span>
 <a id="__codelineno-18-100" name="__codelineno-18-100" href="#__codelineno-18-100"></a>
-<a id="__codelineno-18-101" name="__codelineno-18-101" href="#__codelineno-18-101"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mean allclose to x.mean(dim=-1)?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
-<a id="__codelineno-18-102" name="__codelineno-18-102" href="#__codelineno-18-102"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;var allclose to x.var(unbiased=False)?&quot;</span><span class="p">,</span>
+<a id="__codelineno-18-101" name="__codelineno-18-101" href="#__codelineno-18-101"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"mean allclose to x.mean(dim=-1)?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
+<a id="__codelineno-18-102" name="__codelineno-18-102" href="#__codelineno-18-102"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"var allclose to x.var(unbiased=False)?"</span><span class="p">,</span>
 <a id="__codelineno-18-103" name="__codelineno-18-103" href="#__codelineno-18-103"></a>          <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">unbiased</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
-<a id="__codelineno-18-104" name="__codelineno-18-104" href="#__codelineno-18-104"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;var allclose to x.var(unbiased=True) [WRONG comparison]?&quot;</span><span class="p">,</span>
+<a id="__codelineno-18-104" name="__codelineno-18-104" href="#__codelineno-18-104"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"var allclose to x.var(unbiased=True) [WRONG comparison]?"</span><span class="p">,</span>
 <a id="__codelineno-18-105" name="__codelineno-18-105" href="#__codelineno-18-105"></a>          <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">unbiased</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
 <a id="__codelineno-18-106" name="__codelineno-18-106" href="#__codelineno-18-106"></a>
 <a id="__codelineno-18-107" name="__codelineno-18-107" href="#__codelineno-18-107"></a>
@@ -3046,7 +3109,7 @@
 <a id="__codelineno-18-159" name="__codelineno-18-159" href="#__codelineno-18-159"></a>
 <a id="__codelineno-18-160" name="__codelineno-18-160" href="#__codelineno-18-160"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_20_3</span><span class="p">():</span>
 <a id="__codelineno-18-161" name="__codelineno-18-161" href="#__codelineno-18-161"></a>    <span class="nb">print</span><span class="p">()</span>
-<a id="__codelineno-18-162" name="__codelineno-18-162" href="#__codelineno-18-162"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 20.3: fused LayerNorm vs. a real torch.nn.LayerNorm module ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-18-162" name="__codelineno-18-162" href="#__codelineno-18-162"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 20.3: fused LayerNorm vs. a real torch.nn.LayerNorm module ==="</span><span class="p">)</span>
 <a id="__codelineno-18-163" name="__codelineno-18-163" href="#__codelineno-18-163"></a>    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <a id="__codelineno-18-164" name="__codelineno-18-164" href="#__codelineno-18-164"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">17</span>
 <a id="__codelineno-18-165" name="__codelineno-18-165" href="#__codelineno-18-165"></a>    <span class="n">ln</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
@@ -3054,10 +3117,10 @@
 <a id="__codelineno-18-167" name="__codelineno-18-167" href="#__codelineno-18-167"></a>    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
 <a id="__codelineno-18-168" name="__codelineno-18-168" href="#__codelineno-18-168"></a>        <span class="n">oracle</span> <span class="o">=</span> <span class="n">ln</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <a id="__codelineno-18-169" name="__codelineno-18-169" href="#__codelineno-18-169"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">_run_layernorm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ln</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span> <span class="n">layernorm_forward_kernel</span><span class="p">)</span>
-<a id="__codelineno-18-170" name="__codelineno-18-170" href="#__codelineno-18-170"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;allclose to nn.LayerNorm?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-18-170" name="__codelineno-18-170" href="#__codelineno-18-170"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"allclose to nn.LayerNorm?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-18-171" name="__codelineno-18-171" href="#__codelineno-18-171"></a>
 <a id="__codelineno-18-172" name="__codelineno-18-172" href="#__codelineno-18-172"></a>    <span class="nb">print</span><span class="p">()</span>
-<a id="__codelineno-18-173" name="__codelineno-18-173" href="#__codelineno-18-173"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 20.3: the eps-placement trap ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-18-173" name="__codelineno-18-173" href="#__codelineno-18-173"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 20.3: the eps-placement trap ==="</span><span class="p">)</span>
 <a id="__codelineno-18-174" name="__codelineno-18-174" href="#__codelineno-18-174"></a>    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <a id="__codelineno-18-175" name="__codelineno-18-175" href="#__codelineno-18-175"></a>    <span class="n">x_typical</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 <a id="__codelineno-18-176" name="__codelineno-18-176" href="#__codelineno-18-176"></a>    <span class="n">ln2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
@@ -3067,8 +3130,8 @@
 <a id="__codelineno-18-180" name="__codelineno-18-180" href="#__codelineno-18-180"></a>                                      <span class="n">layernorm_forward_kernel</span><span class="p">)</span>
 <a id="__codelineno-18-181" name="__codelineno-18-181" href="#__codelineno-18-181"></a>    <span class="n">wrong_typical</span> <span class="o">=</span> <span class="n">_run_layernorm</span><span class="p">(</span><span class="n">x_typical</span><span class="p">,</span> <span class="n">ln2</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln2</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln2</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span>
 <a id="__codelineno-18-182" name="__codelineno-18-182" href="#__codelineno-18-182"></a>                                    <span class="n">layernorm_forward_kernel_wrong_eps</span><span class="p">)</span>
-<a id="__codelineno-18-183" name="__codelineno-18-183" href="#__codelineno-18-183"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;typical row: correct allclose?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">correct_typical</span><span class="p">,</span> <span class="n">oracle_typical</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">),</span>
-<a id="__codelineno-18-184" name="__codelineno-18-184" href="#__codelineno-18-184"></a>          <span class="s2">&quot; wrong-eps allclose?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">wrong_typical</span><span class="p">,</span> <span class="n">oracle_typical</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-18-183" name="__codelineno-18-183" href="#__codelineno-18-183"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"typical row: correct allclose?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">correct_typical</span><span class="p">,</span> <span class="n">oracle_typical</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">),</span>
+<a id="__codelineno-18-184" name="__codelineno-18-184" href="#__codelineno-18-184"></a>          <span class="s2">" wrong-eps allclose?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">wrong_typical</span><span class="p">,</span> <span class="n">oracle_typical</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-18-185" name="__codelineno-18-185" href="#__codelineno-18-185"></a>
 <a id="__codelineno-18-186" name="__codelineno-18-186" href="#__codelineno-18-186"></a>    <span class="n">x_flat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1e-6</span><span class="p">,</span> <span class="o">-</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">2e-6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2e-6</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1e-6</span><span class="p">]])</span>
 <a id="__codelineno-18-187" name="__codelineno-18-187" href="#__codelineno-18-187"></a>    <span class="n">ln3</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
@@ -3078,11 +3141,11 @@
 <a id="__codelineno-18-191" name="__codelineno-18-191" href="#__codelineno-18-191"></a>                                   <span class="n">layernorm_forward_kernel</span><span class="p">)</span>
 <a id="__codelineno-18-192" name="__codelineno-18-192" href="#__codelineno-18-192"></a>    <span class="n">wrong_flat</span> <span class="o">=</span> <span class="n">_run_layernorm</span><span class="p">(</span><span class="n">x_flat</span><span class="p">,</span> <span class="n">ln3</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln3</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">ln3</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span>
 <a id="__codelineno-18-193" name="__codelineno-18-193" href="#__codelineno-18-193"></a>                                 <span class="n">layernorm_forward_kernel_wrong_eps</span><span class="p">)</span>
-<a id="__codelineno-18-194" name="__codelineno-18-194" href="#__codelineno-18-194"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;near-constant row: correct allclose?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">correct_flat</span><span class="p">,</span> <span class="n">oracle_flat</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">),</span>
-<a id="__codelineno-18-195" name="__codelineno-18-195" href="#__codelineno-18-195"></a>          <span class="s2">&quot; wrong-eps allclose?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">wrong_flat</span><span class="p">,</span> <span class="n">oracle_flat</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-18-194" name="__codelineno-18-194" href="#__codelineno-18-194"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"near-constant row: correct allclose?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">correct_flat</span><span class="p">,</span> <span class="n">oracle_flat</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">),</span>
+<a id="__codelineno-18-195" name="__codelineno-18-195" href="#__codelineno-18-195"></a>          <span class="s2">" wrong-eps allclose?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">wrong_flat</span><span class="p">,</span> <span class="n">oracle_flat</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-18-196" name="__codelineno-18-196" href="#__codelineno-18-196"></a>
 <a id="__codelineno-18-197" name="__codelineno-18-197" href="#__codelineno-18-197"></a>
-<a id="__codelineno-18-198" name="__codelineno-18-198" href="#__codelineno-18-198"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-18-198" name="__codelineno-18-198" href="#__codelineno-18-198"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-18-199" name="__codelineno-18-199" href="#__codelineno-18-199"></a>    <span class="n">section_20_1</span><span class="p">()</span>
 <a id="__codelineno-18-200" name="__codelineno-18-200" href="#__codelineno-18-200"></a>    <span class="n">section_20_2</span><span class="p">()</span>
 <a id="__codelineno-18-201" name="__codelineno-18-201" href="#__codelineno-18-201"></a>    <span class="n">section_20_3</span><span class="p">()</span>
@@ -3238,10 +3301,12 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+        <script src="../../javascripts/image-viewer.js"></script>
       
     
   </body>

@@ -12,6 +12,8 @@
         <meta name="author" content="Oluwaseyi Awoga">
       
       
+        <link rel="canonical" href="https://maximumbeings.github.io/triton-from-first-principles/part7/01-quantitative-finance-examples/">
+      
       
         <link rel="prev" href="../../part6/02-flash-attention-moe-advanced-features/">
       
@@ -23,18 +25,18 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
-        <title>22. Quantitative Finance Examples - Triton From First Principles — Under Development</title>
+        <title>22. Quantitative Finance Examples - Triton From First Principles</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -52,6 +54,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../../stylesheets/reader.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -94,7 +98,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Triton From First Principles — Under Development" class="md-header__button md-logo" aria-label="Triton From First Principles — Under Development" data-md-component="logo">
+    <a href="../.." title="Triton From First Principles" class="md-header__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
@@ -108,7 +112,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Triton From First Principles — Under Development
+            Triton From First Principles
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -195,6 +199,18 @@
       
     
     
+      <div class="md-header__source">
+        <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
   </nav>
   
 </header>
@@ -220,14 +236,26 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Triton From First Principles — Under Development" class="md-nav__button md-logo" aria-label="Triton From First Principles — Under Development" data-md-component="logo">
+    <a href="../.." title="Triton From First Principles" class="md-nav__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
 
     </a>
-    Triton From First Principles — Under Development
+    Triton From First Principles
   </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
   
   <ul class="md-nav__list" data-md-scrollfix>
     
@@ -291,6 +319,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../review-and-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Review & Testing Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -307,10 +362,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -328,8 +383,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -508,10 +563,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -529,8 +584,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -737,10 +792,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -758,8 +813,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -882,10 +937,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -903,8 +958,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -971,10 +1026,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -992,8 +1047,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1088,10 +1143,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
             
   
   
@@ -1109,8 +1164,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1205,10 +1260,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
             
   
   
@@ -1226,8 +1281,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1322,10 +1377,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" checked>
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
             
   
   
@@ -1343,8 +1398,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1772,6 +1827,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Worked Solutions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#domain-and-statistical-assumptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Domain and statistical assumptions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1812,10 +1884,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
         
           
-          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
             
   
   
@@ -1833,8 +1905,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_11">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2341,6 +2413,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Worked Solutions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#domain-and-statistical-assumptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Domain and statistical assumptions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -2359,8 +2448,12 @@
                   
 
 
+  
+  
+
 
 <h1 id="chapter-22-quantitative-finance-examples">Chapter 22: Quantitative Finance Examples<a class="headerlink" href="#chapter-22-quantitative-finance-examples" title="Permanent link">&para;</a></h1>
+<p><a href="../../images/ch22/01-concept.svg"><img alt="Monte Carlo pricing is a mean of discounted payoffs" src="../../images/ch22/01-concept.svg" /></a></p>
 <blockquote>
 <p>A closed-form price, a rolling statistic, and a simulated estimate are three different ways of answering the same kind of question, and each one demands a different way of checking whether the answer is right.</p>
 </blockquote>
@@ -2381,7 +2474,7 @@
 </ul>
 <h2 id="221-foundational-black-scholes-pricing-as-an-elementwise-kernel">22.1 [FOUNDATIONAL] Black-Scholes Pricing as an Elementwise Kernel<a class="headerlink" href="#221-foundational-black-scholes-pricing-as-an-elementwise-kernel" title="Permanent link">&para;</a></h2>
 <h3 id="intuition">Intuition<a class="headerlink" href="#intuition" title="Permanent link">&para;</a></h3>
-<p>The Black-Scholes formula for a European call option, <code>C = S*N(d1) - K*exp(-rT)*N(d2)</code>, is — mechanically — nothing but an elementwise function of five inputs (<code>S</code>, <code>K</code>, <code>T</code>, <code>r</code>, <code>sigma</code>), exactly the same shape of problem as Chapter 12's GELU. In fact it's a closer relative than it first appears: <code>N(d)</code>, the standard normal cumulative distribution function, is <em>precisely</em> the same <code>Φ(x) = 0.5*(1 + erf(x/sqrt(2)))</code> GELU's own <code>cdf</code> term computed — the identical mathematical building block, applied here to a term expressing "the probability, under the risk-neutral measure, that this option finishes in the money" rather than "how much of <code>x</code> to let through a nonlinearity." Everything else in the formula — computing <code>d1</code> and <code>d2</code> from the five inputs, and combining two <code>N(d)</code> terms with the discount factor <code>exp(-rT)</code> — is ordinary elementwise arithmetic, using nothing this book hasn't already built.</p>
+<p>The Black–Scholes formula for a European call is <code>C = S*N(d1) - K*exp(-r*T)*N(d2)</code> in the no-dividend model. It is an elementwise calculation over S, K, T, r and sigma. The normal CDF is the same <code>Phi(x) = (1+erf(x/sqrt(2)))/2</code> used by exact GELU. The two CDF terms have different meanings: N(d2) is the risk-neutral probability of exercise; N(d1) is the call delta in this model, not that same exercise probability. The implementation below evaluates the CDF terms and discounted strike separately.</p>
 <h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -2519,10 +2612,10 @@
 <a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="n">have_full_window</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 <a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="n">mean</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">W</span>
 <a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="n">diff</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="n">var</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>   <span class="c1"># unbiased -- the finance convention</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="n">var</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>   <span class="c1"># sample variance (ddof=1), matching the selected pandas oracle</span>
 <a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="n">std</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 <a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>
-<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">have_full_window</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">have_full_window</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">))</span>
 <a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </code></pre></div>
 <p>Verified against <code>pandas.Series(returns).rolling(W).std()</code> — pandas's own default, unbiased convention — on 12 days of returns with a 5-day window:</p>
@@ -2551,11 +2644,11 @@
 <a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>  i=6:        window = [r_2, r_3, r_4, r_5, r_6]            --&gt;  slides forward by one
 <a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>  ...
 <a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>  Ch. 20&#39;s LayerNorm:  var = sum((x-mean)^2) / N        &lt;-- biased,   whole row
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>  Ch. 20's LayerNorm:  var = sum((x-mean)^2) / N        &lt;-- biased,   whole row
 <a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>  This section:        var = sum((x-mean)^2) / (W-1)    &lt;-- unbiased, sliding window
 <a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
 <a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>                             the OPPOSITE convention choice, for a different reason:
-<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>                             pandas&#39; and finance&#39;s standard for a SAMPLE estimate
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>                             pandas' and finance's standard for a SAMPLE estimate
 </code></pre></div>
 <blockquote>
 <p>[COMMON TRAP] Chapter 20 established that a from-scratch reduction kernel must match its oracle's <em>specific</em> variance convention, and this section's finding is the mirror image of that lesson: there is no universally "correct" choice between biased and unbiased variance — LayerNorm's formula is defined with the biased version, while a rolling-window volatility <em>estimate</em> over a finite sample is conventionally computed with the unbiased version, matching <code>pandas</code>'s own default. Carrying Chapter 20's specific choice into this section's kernel without checking would silently introduce exactly this same class of mistake, in the opposite direction.</p>
@@ -2619,7 +2712,7 @@
 <p>A <code>1.36</code>-standard-error gap is an entirely unremarkable outcome for a correct Monte Carlo estimator — it's exactly the kind of small, random discrepancy the method is expected to produce, and would occur roughly this often (or more) purely by chance even with flawless code.</p>
 <h3 id="worked-example-2232-a-bug-that-looks-close-and-is-statistically-damning">Worked Example 22.3.2: a bug that "looks close" and is statistically damning<a class="headerlink" href="#worked-example-2232-a-bug-that-looks-close-and-is-statistically-damning" title="Permanent link">&para;</a></h3>
 <p>Forgetting the final discount factor when converting the average simulated payoff into a price:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>undiscounted MC &#39;price&#39;: 10.9394  +/- 0.0345
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>undiscounted MC 'price': 10.9394  +/- 0.0345
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>|undiscounted MC - BS| = 0.4888, which is 14.2 standard errors
 <a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>within 3 standard errors? False
 </code></pre></div>
@@ -2630,9 +2723,9 @@
 <a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>   -3 SE      -2 SE      -1 SE    TRUE PRICE   +1 SE      +2 SE      +3 SE
 <a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>     |          |           |          |          |          |          |
 <a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>     .......[#################RESULT#################].......
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>                              ^ this chapter&#39;s genuine estimate: 1.36 SE away (unremarkable)
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>                              ^ this chapter's genuine estimate: 1.36 SE away (unremarkable)
 <a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>  Undiscounted (buggy) estimator&#39;s result:  14.2 SE away
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>  Undiscounted (buggy) estimator's result:  14.2 SE away
 <a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>     |          |           |          |          |          |          |    ...    HERE (14.2 SE)
 <a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>     .......[#################............#################].......                  X
 <a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>                                                                    (this far out, by
@@ -2644,6 +2737,7 @@
 <h2 id="224-complete-runnable-code">22.4 Complete Runnable Code<a class="headerlink" href="#224-complete-runnable-code" title="Permanent link">&para;</a></h2>
 <p>The three files below build up the chapter in order: Black-Scholes as an elementwise kernel and its discount-factor trap (22.1), rolling-window volatility and its variance-convention trap (22.2), and Monte Carlo option pricing verified statistically against Black-Scholes (22.3) — plus one standalone file combining all three with a single documented <code>Expected Output</code> block.</p>
 <h3 id="file-01_black_scholespy">File: <code>01_black_scholes.py</code><a class="headerlink" href="#file-01_black_scholespy" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part7/01-quantitative-finance-examples/01_black_scholes.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton.language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
@@ -2703,7 +2797,7 @@
 <a id="__codelineno-13-57" name="__codelineno-13-57" href="#__codelineno-13-57"></a>
 <a id="__codelineno-13-58" name="__codelineno-13-58" href="#__codelineno-13-58"></a>
 <a id="__codelineno-13-59" name="__codelineno-13-59" href="#__codelineno-13-59"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_22_1</span><span class="p">():</span>
-<a id="__codelineno-13-60" name="__codelineno-13-60" href="#__codelineno-13-60"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 22.1: Black-Scholes kernel vs. scipy-based independent oracle ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-60" name="__codelineno-13-60" href="#__codelineno-13-60"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 22.1: Black-Scholes kernel vs. scipy-based independent oracle ==="</span><span class="p">)</span>
 <a id="__codelineno-13-61" name="__codelineno-13-61" href="#__codelineno-13-61"></a>    <span class="n">S</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">80.0</span><span class="p">,</span> <span class="mf">120.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">])</span>
 <a id="__codelineno-13-62" name="__codelineno-13-62" href="#__codelineno-13-62"></a>    <span class="n">K</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">,</span> <span class="mf">110.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">])</span>
 <a id="__codelineno-13-63" name="__codelineno-13-63" href="#__codelineno-13-63"></a>    <span class="n">T</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">])</span>
@@ -2717,21 +2811,22 @@
 <a id="__codelineno-13-71" name="__codelineno-13-71" href="#__codelineno-13-71"></a>    <span class="n">d2</span> <span class="o">=</span> <span class="n">d1</span> <span class="o">-</span> <span class="n">sigma_np</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T_np</span><span class="p">)</span>
 <a id="__codelineno-13-72" name="__codelineno-13-72" href="#__codelineno-13-72"></a>    <span class="n">oracle</span> <span class="o">=</span> <span class="n">S_np</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">d1</span><span class="p">)</span> <span class="o">-</span> <span class="n">K_np</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">r_np</span> <span class="o">*</span> <span class="n">T_np</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
 <a id="__codelineno-13-73" name="__codelineno-13-73" href="#__codelineno-13-73"></a>
-<a id="__codelineno-13-74" name="__codelineno-13-74" href="#__codelineno-13-74"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;allclose to scipy-based oracle?&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-13-74" name="__codelineno-13-74" href="#__codelineno-13-74"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"allclose to scipy-based oracle?"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-13-75" name="__codelineno-13-75" href="#__codelineno-13-75"></a>
 <a id="__codelineno-13-76" name="__codelineno-13-76" href="#__codelineno-13-76"></a>    <span class="nb">print</span><span class="p">()</span>
-<a id="__codelineno-13-77" name="__codelineno-13-77" href="#__codelineno-13-77"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 22.1: forgetting the discount factor ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-77" name="__codelineno-13-77" href="#__codelineno-13-77"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 22.1: forgetting the discount factor ==="</span><span class="p">)</span>
 <a id="__codelineno-13-78" name="__codelineno-13-78" href="#__codelineno-13-78"></a>    <span class="n">out_wrong</span> <span class="o">=</span> <span class="n">run_black_scholes</span><span class="p">(</span><span class="n">black_scholes_call_kernel_wrong_discount</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
 <a id="__codelineno-13-79" name="__codelineno-13-79" href="#__codelineno-13-79"></a>    <span class="n">rel_diff_pct</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">out_wrong</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">-</span> <span class="n">oracle</span><span class="p">)</span> <span class="o">/</span> <span class="n">oracle</span>
-<a id="__codelineno-13-80" name="__codelineno-13-80" href="#__codelineno-13-80"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;relative diffs (%):&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rel_diff_pct</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-<a id="__codelineno-13-81" name="__codelineno-13-81" href="#__codelineno-13-81"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;smallest |relative diff| (shortest maturity):&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rel_diff_pct</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rel_diff_pct</span><span class="p">))],</span> <span class="mi">2</span><span class="p">))</span>
-<a id="__codelineno-13-82" name="__codelineno-13-82" href="#__codelineno-13-82"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;largest |relative diff| (longest maturity):&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rel_diff_pct</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rel_diff_pct</span><span class="p">))],</span> <span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-13-80" name="__codelineno-13-80" href="#__codelineno-13-80"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"relative diffs (%):"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rel_diff_pct</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-13-81" name="__codelineno-13-81" href="#__codelineno-13-81"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"smallest |relative diff| (shortest maturity):"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rel_diff_pct</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rel_diff_pct</span><span class="p">))],</span> <span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-13-82" name="__codelineno-13-82" href="#__codelineno-13-82"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"largest |relative diff| (longest maturity):"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rel_diff_pct</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rel_diff_pct</span><span class="p">))],</span> <span class="mi">2</span><span class="p">))</span>
 <a id="__codelineno-13-83" name="__codelineno-13-83" href="#__codelineno-13-83"></a>
 <a id="__codelineno-13-84" name="__codelineno-13-84" href="#__codelineno-13-84"></a>
-<a id="__codelineno-13-85" name="__codelineno-13-85" href="#__codelineno-13-85"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-13-85" name="__codelineno-13-85" href="#__codelineno-13-85"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-13-86" name="__codelineno-13-86" href="#__codelineno-13-86"></a>    <span class="n">section_22_1</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="file-02_rolling_volatilitypy">File: <code>02_rolling_volatility.py</code><a class="headerlink" href="#file-02_rolling_volatilitypy" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part7/01-quantitative-finance-examples/02_rolling_volatility.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
 <a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton.language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
@@ -2755,7 +2850,7 @@
 <a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a>    <span class="n">var</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 <a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a>    <span class="n">std</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 <a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a>
-<a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">have_full_window</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>
+<a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">have_full_window</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">))</span>
 <a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 <a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a>
 <a id="__codelineno-14-27" name="__codelineno-14-27" href="#__codelineno-14-27"></a>
@@ -2775,7 +2870,7 @@
 <a id="__codelineno-14-41" name="__codelineno-14-41" href="#__codelineno-14-41"></a>    <span class="n">var</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">W</span>   <span class="c1"># BUG (for this convention): biased, divide by W</span>
 <a id="__codelineno-14-42" name="__codelineno-14-42" href="#__codelineno-14-42"></a>    <span class="n">std</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 <a id="__codelineno-14-43" name="__codelineno-14-43" href="#__codelineno-14-43"></a>
-<a id="__codelineno-14-44" name="__codelineno-14-44" href="#__codelineno-14-44"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">have_full_window</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>
+<a id="__codelineno-14-44" name="__codelineno-14-44" href="#__codelineno-14-44"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">have_full_window</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">))</span>
 <a id="__codelineno-14-45" name="__codelineno-14-45" href="#__codelineno-14-45"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 <a id="__codelineno-14-46" name="__codelineno-14-46" href="#__codelineno-14-46"></a>
 <a id="__codelineno-14-47" name="__codelineno-14-47" href="#__codelineno-14-47"></a>
@@ -2788,7 +2883,7 @@
 <a id="__codelineno-14-54" name="__codelineno-14-54" href="#__codelineno-14-54"></a>
 <a id="__codelineno-14-55" name="__codelineno-14-55" href="#__codelineno-14-55"></a>
 <a id="__codelineno-14-56" name="__codelineno-14-56" href="#__codelineno-14-56"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_22_2</span><span class="p">():</span>
-<a id="__codelineno-14-57" name="__codelineno-14-57" href="#__codelineno-14-57"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 22.2: rolling volatility vs. pandas rolling().std() ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-57" name="__codelineno-14-57" href="#__codelineno-14-57"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 22.2: rolling volatility vs. pandas rolling().std() ==="</span><span class="p">)</span>
 <a id="__codelineno-14-58" name="__codelineno-14-58" href="#__codelineno-14-58"></a>    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <a id="__codelineno-14-59" name="__codelineno-14-59" href="#__codelineno-14-59"></a>    <span class="n">n</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">5</span>
 <a id="__codelineno-14-60" name="__codelineno-14-60" href="#__codelineno-14-60"></a>    <span class="n">returns</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.02</span>
@@ -2798,23 +2893,24 @@
 <a id="__codelineno-14-64" name="__codelineno-14-64" href="#__codelineno-14-64"></a>
 <a id="__codelineno-14-65" name="__codelineno-14-65" href="#__codelineno-14-65"></a>    <span class="n">nan_match</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">oracle</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 <a id="__codelineno-14-66" name="__codelineno-14-66" href="#__codelineno-14-66"></a>    <span class="n">both_valid</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">oracle</span><span class="p">)</span>
-<a id="__codelineno-14-67" name="__codelineno-14-67" href="#__codelineno-14-67"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NaN positions match?&quot;</span><span class="p">,</span> <span class="n">nan_match</span><span class="p">)</span>
-<a id="__codelineno-14-68" name="__codelineno-14-68" href="#__codelineno-14-68"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;valid positions allclose?&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="n">both_valid</span><span class="p">],</span> <span class="n">oracle</span><span class="p">[</span><span class="n">both_valid</span><span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">))</span>
+<a id="__codelineno-14-67" name="__codelineno-14-67" href="#__codelineno-14-67"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"NaN positions match?"</span><span class="p">,</span> <span class="n">nan_match</span><span class="p">)</span>
+<a id="__codelineno-14-68" name="__codelineno-14-68" href="#__codelineno-14-68"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"valid positions allclose?"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="n">both_valid</span><span class="p">],</span> <span class="n">oracle</span><span class="p">[</span><span class="n">both_valid</span><span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">))</span>
 <a id="__codelineno-14-69" name="__codelineno-14-69" href="#__codelineno-14-69"></a>
 <a id="__codelineno-14-70" name="__codelineno-14-70" href="#__codelineno-14-70"></a>    <span class="nb">print</span><span class="p">()</span>
-<a id="__codelineno-14-71" name="__codelineno-14-71" href="#__codelineno-14-71"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 22.2: the opposite-convention trap (biased vs. unbiased) ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-71" name="__codelineno-14-71" href="#__codelineno-14-71"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 22.2: the opposite-convention trap (biased vs. unbiased) ==="</span><span class="p">)</span>
 <a id="__codelineno-14-72" name="__codelineno-14-72" href="#__codelineno-14-72"></a>    <span class="n">out_biased</span> <span class="o">=</span> <span class="n">rolling_std</span><span class="p">(</span><span class="n">returns</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="n">rolling_std_kernel_biased</span><span class="p">)</span>
 <a id="__codelineno-14-73" name="__codelineno-14-73" href="#__codelineno-14-73"></a>    <span class="n">valid</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
 <a id="__codelineno-14-74" name="__codelineno-14-74" href="#__codelineno-14-74"></a>    <span class="n">rel_diff</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">out_biased</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="n">valid</span><span class="p">]</span> <span class="o">-</span> <span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="n">valid</span><span class="p">])</span> <span class="o">/</span> <span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="n">valid</span><span class="p">]</span>
-<a id="__codelineno-14-75" name="__codelineno-14-75" href="#__codelineno-14-75"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;relative diff of biased vs. unbiased (%):&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rel_diff</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-14-75" name="__codelineno-14-75" href="#__codelineno-14-75"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"relative diff of biased vs. unbiased (%):"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rel_diff</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 <a id="__codelineno-14-76" name="__codelineno-14-76" href="#__codelineno-14-76"></a>    <span class="n">expected</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">W</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">W</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-14-77" name="__codelineno-14-77" href="#__codelineno-14-77"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;expected constant relative diff for W=</span><span class="si">{</span><span class="n">W</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">expected</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-77" name="__codelineno-14-77" href="#__codelineno-14-77"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"expected constant relative diff for W=</span><span class="si">{</span><span class="n">W</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">expected</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
 <a id="__codelineno-14-78" name="__codelineno-14-78" href="#__codelineno-14-78"></a>
 <a id="__codelineno-14-79" name="__codelineno-14-79" href="#__codelineno-14-79"></a>
-<a id="__codelineno-14-80" name="__codelineno-14-80" href="#__codelineno-14-80"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-14-80" name="__codelineno-14-80" href="#__codelineno-14-80"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-14-81" name="__codelineno-14-81" href="#__codelineno-14-81"></a>    <span class="n">section_22_2</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="file-03_monte_carlo_pricingpy">File: <code>03_monte_carlo_pricing.py</code><a class="headerlink" href="#file-03_monte_carlo_pricingpy" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part7/01-quantitative-finance-examples/03_monte_carlo_pricing.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
 <a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton.language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
@@ -2851,40 +2947,41 @@
 <a id="__codelineno-15-34" name="__codelineno-15-34" href="#__codelineno-15-34"></a>
 <a id="__codelineno-15-35" name="__codelineno-15-35" href="#__codelineno-15-35"></a>
 <a id="__codelineno-15-36" name="__codelineno-15-36" href="#__codelineno-15-36"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_22_3</span><span class="p">():</span>
-<a id="__codelineno-15-37" name="__codelineno-15-37" href="#__codelineno-15-37"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 22.3: Monte Carlo GBM pricing vs. Black-Scholes closed form ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-37" name="__codelineno-15-37" href="#__codelineno-15-37"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 22.3: Monte Carlo GBM pricing vs. Black-Scholes closed form ==="</span><span class="p">)</span>
 <a id="__codelineno-15-38" name="__codelineno-15-38" href="#__codelineno-15-38"></a>    <span class="n">S0</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.2</span>
 <a id="__codelineno-15-39" name="__codelineno-15-39" href="#__codelineno-15-39"></a>    <span class="n">d1</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">S0</span> <span class="o">/</span> <span class="n">K</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">r</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
 <a id="__codelineno-15-40" name="__codelineno-15-40" href="#__codelineno-15-40"></a>    <span class="n">d2</span> <span class="o">=</span> <span class="n">d1</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
 <a id="__codelineno-15-41" name="__codelineno-15-41" href="#__codelineno-15-41"></a>    <span class="n">bs_price</span> <span class="o">=</span> <span class="n">S0</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">d1</span><span class="p">)</span> <span class="o">-</span> <span class="n">K</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">r</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
-<a id="__codelineno-15-42" name="__codelineno-15-42" href="#__codelineno-15-42"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Black-Scholes closed-form price: </span><span class="si">{</span><span class="n">bs_price</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-42" name="__codelineno-15-42" href="#__codelineno-15-42"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Black-Scholes closed-form price: </span><span class="si">{</span><span class="n">bs_price</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <a id="__codelineno-15-43" name="__codelineno-15-43" href="#__codelineno-15-43"></a>
 <a id="__codelineno-15-44" name="__codelineno-15-44" href="#__codelineno-15-44"></a>    <span class="n">n_sims</span> <span class="o">=</span> <span class="mi">200_000</span>
 <a id="__codelineno-15-45" name="__codelineno-15-45" href="#__codelineno-15-45"></a>    <span class="n">mc_price</span><span class="p">,</span> <span class="n">mc_se</span> <span class="o">=</span> <span class="n">monte_carlo_call_price</span><span class="p">(</span><span class="n">S0</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">)</span>
 <a id="__codelineno-15-46" name="__codelineno-15-46" href="#__codelineno-15-46"></a>    <span class="n">diff_se</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mc_price</span> <span class="o">-</span> <span class="n">bs_price</span><span class="p">)</span> <span class="o">/</span> <span class="n">mc_se</span>
-<a id="__codelineno-15-47" name="__codelineno-15-47" href="#__codelineno-15-47"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Monte Carlo price: </span><span class="si">{</span><span class="n">mc_price</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> +/- </span><span class="si">{</span><span class="n">mc_se</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, gap = </span><span class="si">{</span><span class="n">diff_se</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> standard errors&quot;</span><span class="p">)</span>
-<a id="__codelineno-15-48" name="__codelineno-15-48" href="#__codelineno-15-48"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;within 3 standard errors?&quot;</span><span class="p">,</span> <span class="n">diff_se</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span>
+<a id="__codelineno-15-47" name="__codelineno-15-47" href="#__codelineno-15-47"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Monte Carlo price: </span><span class="si">{</span><span class="n">mc_price</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> +/- </span><span class="si">{</span><span class="n">mc_se</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, gap = </span><span class="si">{</span><span class="n">diff_se</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> standard errors"</span><span class="p">)</span>
+<a id="__codelineno-15-48" name="__codelineno-15-48" href="#__codelineno-15-48"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"within 3 standard errors?"</span><span class="p">,</span> <span class="n">diff_se</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span>
 <a id="__codelineno-15-49" name="__codelineno-15-49" href="#__codelineno-15-49"></a>
 <a id="__codelineno-15-50" name="__codelineno-15-50" href="#__codelineno-15-50"></a>    <span class="nb">print</span><span class="p">()</span>
-<a id="__codelineno-15-51" name="__codelineno-15-51" href="#__codelineno-15-51"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 22.3: forgetting the discount factor ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-51" name="__codelineno-15-51" href="#__codelineno-15-51"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 22.3: forgetting the discount factor ==="</span><span class="p">)</span>
 <a id="__codelineno-15-52" name="__codelineno-15-52" href="#__codelineno-15-52"></a>    <span class="n">mc_price_wrong</span><span class="p">,</span> <span class="n">mc_se_wrong</span> <span class="o">=</span> <span class="n">monte_carlo_call_price</span><span class="p">(</span><span class="n">S0</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">n_sims</span><span class="p">,</span> <span class="n">discount</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <a id="__codelineno-15-53" name="__codelineno-15-53" href="#__codelineno-15-53"></a>    <span class="n">diff_se_wrong</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mc_price_wrong</span> <span class="o">-</span> <span class="n">bs_price</span><span class="p">)</span> <span class="o">/</span> <span class="n">mc_se_wrong</span>
-<a id="__codelineno-15-54" name="__codelineno-15-54" href="#__codelineno-15-54"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;undiscounted &#39;price&#39;: </span><span class="si">{</span><span class="n">mc_price_wrong</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, gap = </span><span class="si">{</span><span class="n">diff_se_wrong</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> standard errors&quot;</span><span class="p">)</span>
-<a id="__codelineno-15-55" name="__codelineno-15-55" href="#__codelineno-15-55"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;within 3 standard errors?&quot;</span><span class="p">,</span> <span class="n">diff_se_wrong</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span>
-<a id="__codelineno-15-56" name="__codelineno-15-56" href="#__codelineno-15-56"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;absolute % difference from true price: </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">mc_price_wrong</span><span class="o">-</span><span class="n">bs_price</span><span class="p">)</span><span class="o">/</span><span class="n">bs_price</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% &quot;</span>
-<a id="__codelineno-15-57" name="__codelineno-15-57" href="#__codelineno-15-57"></a>          <span class="sa">f</span><span class="s2">&quot;(looks small; the standard-error gap says otherwise)&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-54" name="__codelineno-15-54" href="#__codelineno-15-54"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"undiscounted 'price': </span><span class="si">{</span><span class="n">mc_price_wrong</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, gap = </span><span class="si">{</span><span class="n">diff_se_wrong</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> standard errors"</span><span class="p">)</span>
+<a id="__codelineno-15-55" name="__codelineno-15-55" href="#__codelineno-15-55"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"within 3 standard errors?"</span><span class="p">,</span> <span class="n">diff_se_wrong</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span>
+<a id="__codelineno-15-56" name="__codelineno-15-56" href="#__codelineno-15-56"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"absolute % difference from true price: </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">mc_price_wrong</span><span class="o">-</span><span class="n">bs_price</span><span class="p">)</span><span class="o">/</span><span class="n">bs_price</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% "</span>
+<a id="__codelineno-15-57" name="__codelineno-15-57" href="#__codelineno-15-57"></a>          <span class="sa">f</span><span class="s2">"(looks small; the standard-error gap says otherwise)"</span><span class="p">)</span>
 <a id="__codelineno-15-58" name="__codelineno-15-58" href="#__codelineno-15-58"></a>
 <a id="__codelineno-15-59" name="__codelineno-15-59" href="#__codelineno-15-59"></a>
-<a id="__codelineno-15-60" name="__codelineno-15-60" href="#__codelineno-15-60"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-15-60" name="__codelineno-15-60" href="#__codelineno-15-60"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-15-61" name="__codelineno-15-61" href="#__codelineno-15-61"></a>    <span class="n">section_22_3</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="file-04_standalone_completepy">File: <code>04_standalone_complete.py</code><a class="headerlink" href="#file-04_standalone_completepy" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="sd">&quot;&quot;&quot;</span>
+<p><a href="../../examples/references/part7/01-quantitative-finance-examples/04_standalone_complete.py">Download the complete current reference</a> (interpreter mode; GPU portability is not established).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="sd">"""</span>
 <a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="sd">Chapter 22 standalone: Black-Scholes as an elementwise kernel (and its</span>
 <a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="sd">discount-factor trap), rolling-window volatility (and its variance-convention</span>
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="sd">trap), and Monte Carlo option pricing verified statistically against</span>
 <a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="sd">Black-Scholes (and its own discount-factor trap, now judged in standard</span>
 <a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="sd">errors rather than a fixed tolerance).</span>
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="sd">"""</span>
 <a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
 <a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="kn">import</span><span class="w"> </span><span class="nn">triton.language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tl</span>
@@ -2918,7 +3015,7 @@
 <a id="__codelineno-16-38" name="__codelineno-16-38" href="#__codelineno-16-38"></a>
 <a id="__codelineno-16-39" name="__codelineno-16-39" href="#__codelineno-16-39"></a>
 <a id="__codelineno-16-40" name="__codelineno-16-40" href="#__codelineno-16-40"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_22_1</span><span class="p">():</span>
-<a id="__codelineno-16-41" name="__codelineno-16-41" href="#__codelineno-16-41"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 22.1: Black-Scholes kernel vs. scipy-based independent oracle ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-41" name="__codelineno-16-41" href="#__codelineno-16-41"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 22.1: Black-Scholes kernel vs. scipy-based independent oracle ==="</span><span class="p">)</span>
 <a id="__codelineno-16-42" name="__codelineno-16-42" href="#__codelineno-16-42"></a>    <span class="n">S</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">80.0</span><span class="p">,</span> <span class="mf">120.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">])</span>
 <a id="__codelineno-16-43" name="__codelineno-16-43" href="#__codelineno-16-43"></a>    <span class="n">K</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">,</span> <span class="mf">110.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">])</span>
 <a id="__codelineno-16-44" name="__codelineno-16-44" href="#__codelineno-16-44"></a>    <span class="n">T</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">])</span>
@@ -2933,7 +3030,7 @@
 <a id="__codelineno-16-53" name="__codelineno-16-53" href="#__codelineno-16-53"></a>    <span class="n">d1</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">S_np</span> <span class="o">/</span> <span class="n">K_np</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">r_np</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sigma_np</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">T_np</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma_np</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T_np</span><span class="p">))</span>
 <a id="__codelineno-16-54" name="__codelineno-16-54" href="#__codelineno-16-54"></a>    <span class="n">d2</span> <span class="o">=</span> <span class="n">d1</span> <span class="o">-</span> <span class="n">sigma_np</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T_np</span><span class="p">)</span>
 <a id="__codelineno-16-55" name="__codelineno-16-55" href="#__codelineno-16-55"></a>    <span class="n">oracle</span> <span class="o">=</span> <span class="n">S_np</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">d1</span><span class="p">)</span> <span class="o">-</span> <span class="n">K_np</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">r_np</span> <span class="o">*</span> <span class="n">T_np</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
-<a id="__codelineno-16-56" name="__codelineno-16-56" href="#__codelineno-16-56"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;allclose to scipy-based oracle?&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
+<a id="__codelineno-16-56" name="__codelineno-16-56" href="#__codelineno-16-56"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"allclose to scipy-based oracle?"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-16-57" name="__codelineno-16-57" href="#__codelineno-16-57"></a>
 <a id="__codelineno-16-58" name="__codelineno-16-58" href="#__codelineno-16-58"></a>
 <a id="__codelineno-16-59" name="__codelineno-16-59" href="#__codelineno-16-59"></a><span class="c1"># ---------------------------------------------------------------------------</span>
@@ -2954,13 +3051,13 @@
 <a id="__codelineno-16-74" name="__codelineno-16-74" href="#__codelineno-16-74"></a>    <span class="n">diff</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 <a id="__codelineno-16-75" name="__codelineno-16-75" href="#__codelineno-16-75"></a>    <span class="n">var</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">W</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 <a id="__codelineno-16-76" name="__codelineno-16-76" href="#__codelineno-16-76"></a>    <span class="n">std</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
-<a id="__codelineno-16-77" name="__codelineno-16-77" href="#__codelineno-16-77"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">have_full_window</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>
+<a id="__codelineno-16-77" name="__codelineno-16-77" href="#__codelineno-16-77"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">have_full_window</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">))</span>
 <a id="__codelineno-16-78" name="__codelineno-16-78" href="#__codelineno-16-78"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 <a id="__codelineno-16-79" name="__codelineno-16-79" href="#__codelineno-16-79"></a>
 <a id="__codelineno-16-80" name="__codelineno-16-80" href="#__codelineno-16-80"></a>
 <a id="__codelineno-16-81" name="__codelineno-16-81" href="#__codelineno-16-81"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_22_2</span><span class="p">():</span>
 <a id="__codelineno-16-82" name="__codelineno-16-82" href="#__codelineno-16-82"></a>    <span class="nb">print</span><span class="p">()</span>
-<a id="__codelineno-16-83" name="__codelineno-16-83" href="#__codelineno-16-83"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 22.2: rolling volatility vs. pandas rolling().std() ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-83" name="__codelineno-16-83" href="#__codelineno-16-83"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 22.2: rolling volatility vs. pandas rolling().std() ==="</span><span class="p">)</span>
 <a id="__codelineno-16-84" name="__codelineno-16-84" href="#__codelineno-16-84"></a>    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <a id="__codelineno-16-85" name="__codelineno-16-85" href="#__codelineno-16-85"></a>    <span class="n">n</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">5</span>
 <a id="__codelineno-16-86" name="__codelineno-16-86" href="#__codelineno-16-86"></a>    <span class="n">returns</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.02</span>
@@ -2971,8 +3068,8 @@
 <a id="__codelineno-16-91" name="__codelineno-16-91" href="#__codelineno-16-91"></a>    <span class="n">oracle</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">returns</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">W</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
 <a id="__codelineno-16-92" name="__codelineno-16-92" href="#__codelineno-16-92"></a>    <span class="n">nan_match</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">oracle</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 <a id="__codelineno-16-93" name="__codelineno-16-93" href="#__codelineno-16-93"></a>    <span class="n">both_valid</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">oracle</span><span class="p">)</span>
-<a id="__codelineno-16-94" name="__codelineno-16-94" href="#__codelineno-16-94"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NaN positions match?&quot;</span><span class="p">,</span> <span class="n">nan_match</span><span class="p">)</span>
-<a id="__codelineno-16-95" name="__codelineno-16-95" href="#__codelineno-16-95"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;valid positions allclose?&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="n">both_valid</span><span class="p">],</span> <span class="n">oracle</span><span class="p">[</span><span class="n">both_valid</span><span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">))</span>
+<a id="__codelineno-16-94" name="__codelineno-16-94" href="#__codelineno-16-94"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"NaN positions match?"</span><span class="p">,</span> <span class="n">nan_match</span><span class="p">)</span>
+<a id="__codelineno-16-95" name="__codelineno-16-95" href="#__codelineno-16-95"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"valid positions allclose?"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="n">both_valid</span><span class="p">],</span> <span class="n">oracle</span><span class="p">[</span><span class="n">both_valid</span><span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">))</span>
 <a id="__codelineno-16-96" name="__codelineno-16-96" href="#__codelineno-16-96"></a>
 <a id="__codelineno-16-97" name="__codelineno-16-97" href="#__codelineno-16-97"></a>
 <a id="__codelineno-16-98" name="__codelineno-16-98" href="#__codelineno-16-98"></a><span class="c1"># ---------------------------------------------------------------------------</span>
@@ -2994,7 +3091,7 @@
 <a id="__codelineno-16-114" name="__codelineno-16-114" href="#__codelineno-16-114"></a>
 <a id="__codelineno-16-115" name="__codelineno-16-115" href="#__codelineno-16-115"></a><span class="k">def</span><span class="w"> </span><span class="nf">section_22_3</span><span class="p">():</span>
 <a id="__codelineno-16-116" name="__codelineno-16-116" href="#__codelineno-16-116"></a>    <span class="nb">print</span><span class="p">()</span>
-<a id="__codelineno-16-117" name="__codelineno-16-117" href="#__codelineno-16-117"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 22.3: Monte Carlo GBM pricing vs. Black-Scholes closed form ===&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-117" name="__codelineno-16-117" href="#__codelineno-16-117"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 22.3: Monte Carlo GBM pricing vs. Black-Scholes closed form ==="</span><span class="p">)</span>
 <a id="__codelineno-16-118" name="__codelineno-16-118" href="#__codelineno-16-118"></a>    <span class="n">S0</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.2</span>
 <a id="__codelineno-16-119" name="__codelineno-16-119" href="#__codelineno-16-119"></a>    <span class="n">d1</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">S0</span> <span class="o">/</span> <span class="n">K</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">r</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
 <a id="__codelineno-16-120" name="__codelineno-16-120" href="#__codelineno-16-120"></a>    <span class="n">d2</span> <span class="o">=</span> <span class="n">d1</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
@@ -3012,16 +3109,16 @@
 <a id="__codelineno-16-132" name="__codelineno-16-132" href="#__codelineno-16-132"></a>    <span class="n">mc_se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">r</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">se</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 <a id="__codelineno-16-133" name="__codelineno-16-133" href="#__codelineno-16-133"></a>    <span class="n">diff_se</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mc_price</span> <span class="o">-</span> <span class="n">bs_price</span><span class="p">)</span> <span class="o">/</span> <span class="n">mc_se</span>
 <a id="__codelineno-16-134" name="__codelineno-16-134" href="#__codelineno-16-134"></a>
-<a id="__codelineno-16-135" name="__codelineno-16-135" href="#__codelineno-16-135"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Black-Scholes price: </span><span class="si">{</span><span class="n">bs_price</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   Monte Carlo price: </span><span class="si">{</span><span class="n">mc_price</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> +/- </span><span class="si">{</span><span class="n">mc_se</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-16-136" name="__codelineno-16-136" href="#__codelineno-16-136"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gap in standard errors: </span><span class="si">{</span><span class="n">diff_se</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">   within 3 SE? </span><span class="si">{</span><span class="n">diff_se</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-135" name="__codelineno-16-135" href="#__codelineno-16-135"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Black-Scholes price: </span><span class="si">{</span><span class="n">bs_price</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   Monte Carlo price: </span><span class="si">{</span><span class="n">mc_price</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> +/- </span><span class="si">{</span><span class="n">mc_se</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-16-136" name="__codelineno-16-136" href="#__codelineno-16-136"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"gap in standard errors: </span><span class="si">{</span><span class="n">diff_se</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">   within 3 SE? </span><span class="si">{</span><span class="n">diff_se</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <a id="__codelineno-16-137" name="__codelineno-16-137" href="#__codelineno-16-137"></a>
 <a id="__codelineno-16-138" name="__codelineno-16-138" href="#__codelineno-16-138"></a>    <span class="n">mc_price_wrong</span> <span class="o">=</span> <span class="n">mean_payoff</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>  <span class="c1"># no discount</span>
 <a id="__codelineno-16-139" name="__codelineno-16-139" href="#__codelineno-16-139"></a>    <span class="n">mc_se_wrong</span> <span class="o">=</span> <span class="n">se</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 <a id="__codelineno-16-140" name="__codelineno-16-140" href="#__codelineno-16-140"></a>    <span class="n">diff_se_wrong</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mc_price_wrong</span> <span class="o">-</span> <span class="n">bs_price</span><span class="p">)</span> <span class="o">/</span> <span class="n">mc_se_wrong</span>
-<a id="__codelineno-16-141" name="__codelineno-16-141" href="#__codelineno-16-141"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;undiscounted gap in standard errors: </span><span class="si">{</span><span class="n">diff_se_wrong</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">   within 3 SE? </span><span class="si">{</span><span class="n">diff_se_wrong</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-141" name="__codelineno-16-141" href="#__codelineno-16-141"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"undiscounted gap in standard errors: </span><span class="si">{</span><span class="n">diff_se_wrong</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">   within 3 SE? </span><span class="si">{</span><span class="n">diff_se_wrong</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <a id="__codelineno-16-142" name="__codelineno-16-142" href="#__codelineno-16-142"></a>
 <a id="__codelineno-16-143" name="__codelineno-16-143" href="#__codelineno-16-143"></a>
-<a id="__codelineno-16-144" name="__codelineno-16-144" href="#__codelineno-16-144"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-16-144" name="__codelineno-16-144" href="#__codelineno-16-144"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
 <a id="__codelineno-16-145" name="__codelineno-16-145" href="#__codelineno-16-145"></a>    <span class="n">section_22_1</span><span class="p">()</span>
 <a id="__codelineno-16-146" name="__codelineno-16-146" href="#__codelineno-16-146"></a>    <span class="n">section_22_2</span><span class="p">()</span>
 <a id="__codelineno-16-147" name="__codelineno-16-147" href="#__codelineno-16-147"></a>    <span class="n">section_22_3</span><span class="p">()</span>
@@ -3060,6 +3157,10 @@
 <li>No — both chapters are correctly implementing their own domain's standard convention, and those conventions genuinely differ. LayerNorm's mathematical definition, as specified by its original paper and every standard deep-learning framework's implementation (including PyTorch's own <code>torch.nn.LayerNorm</code>), uses the biased (divide-by-<code>N</code>) variance. Estimating the volatility of a financial return series from a finite historical sample is conventionally done with the unbiased (divide-by-<code>N-1</code>) estimator, matching <code>pandas</code>'s own default and standard statistical practice for sample variance. There is no single "more correct" choice between the two in general — the correct choice is always whatever the specific formula or convention being implemented actually specifies, which is exactly why Chapter 20 and this chapter, applying two different domains' conventions, arrived at opposite answers.</li>
 <li>A percentage or absolute comparison ignores the estimate's own precision entirely — it treats "5% off" as equally concerning regardless of whether the simulation's standard error is <code>0.03</code> or <code>3.0</code>. With <code>200,000</code> simulated paths, this particular Monte Carlo estimator's standard error was small enough (<code>~0.03</code>) that a <code>0.49</code>-unit absolute gap corresponds to roughly <code>14</code> standard errors — a discrepancy that a correctly implemented estimator would produce by chance with a probability far below one in a billion. The two facts aren't in tension: an estimate can be numerically "close" in absolute or percentage terms while still being astronomically unlikely to have arisen from a correct implementation, once judged against the actual precision that implementation claims to have.</li>
 </ol>
+<h3 id="domain-and-statistical-assumptions">Domain and statistical assumptions<a class="headerlink" href="#domain-and-statistical-assumptions" title="Permanent link">&para;</a></h3>
+<p>The displayed Black–Scholes formula assumes a European call, no dividends, S&gt;0, K&gt;0, T&gt;0 and sigma&gt;0 with finite inputs. At expiry use max(S-K,0); at zero volatility use max(S-K<em>exp(-r</em>T),0). Do not pass those boundaries into the unguarded d1/d2 formula. A production wrapper must validate the domain or implement those limiting cases.</p>
+<p>The rolling example requires W&gt;=2 and uses sample variance, matching pandas' default <code>ddof=1</code>. This convention is a modeling choice, not the only correct financial convention; LayerNorm instead defines a population-style row variance. Its sqrt is a standard-deviation estimator and is not itself unbiased merely because the variance denominator is W-1. Annualization and return sampling frequency are separate choices.</p>
+<p>Monte Carlo comparisons need independent paths, a stated confidence interval and the same model assumptions. A finite sample can miss a nominal confidence interval without implying a code defect. Exact reuse of one random stream verifies arithmetic, not the randomness or statistical convergence of a different generator.</p>
 
 
 
@@ -3175,10 +3276,12 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+        <script src="../../javascripts/image-viewer.js"></script>
       
     
   </body>
