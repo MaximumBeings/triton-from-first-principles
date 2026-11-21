@@ -29,7 +29,7 @@
     
     
       
-        <title>21. Flash Attention, MoE, and Advanced Features - Triton From First Principles</title>
+        <title>21. Forward Attention and Top-2 MoE Gating - Triton From First Principles</title>
       
     
     
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#chapter-21-flash-attention-moe-and-advanced-features" class="md-skip">
+        <a href="#chapter-21-forward-attention-and-top-2-moe-gating" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              21. Flash Attention, MoE, and Advanced Features
+              21. Forward Attention and Top-2 MoE Gating
             
           </span>
         </div>
@@ -320,6 +320,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../version-and-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versions & Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../review-and-testing/" class="md-nav__link">
         
   
@@ -355,6 +382,60 @@
     
   
     Final Adversarial Review
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../opus-review-response-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Independent Review Response
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rerun-differences-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interpreter Rerun Differences
   
 
     
@@ -416,10 +497,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
             
   
   
@@ -437,8 +518,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -617,10 +698,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
             
   
   
@@ -638,8 +719,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -846,10 +927,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
             
   
   
@@ -867,8 +948,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -991,10 +1072,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
             
   
   
@@ -1012,8 +1093,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1080,10 +1161,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="">
             
   
   
@@ -1101,8 +1182,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1197,10 +1278,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_14" >
         
           
-          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="">
             
   
   
@@ -1218,8 +1299,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_11">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1314,10 +1395,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" checked>
         
           
-          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
             
   
   
@@ -1335,8 +1416,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_12">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_15">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1397,7 +1478,7 @@
   <span class="md-ellipsis">
     
   
-    21. Flash Attention, MoE, and Advanced Features
+    21. Forward Attention and Top-2 MoE Gating
   
 
     
@@ -1415,7 +1496,7 @@
   <span class="md-ellipsis">
     
   
-    21. Flash Attention, MoE, and Advanced Features
+    21. Forward Attention and Top-2 MoE Gating
   
 
     
@@ -1849,10 +1930,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_16" >
         
           
-          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="">
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
             
   
   
@@ -1870,8 +1951,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_13">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1938,10 +2019,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_14" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_17" >
         
           
-          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="">
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="">
             
   
   
@@ -1959,8 +2040,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_14">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_17">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2506,12 +2587,20 @@
   
 
 
-<h1 id="chapter-21-flash-attention-moe-and-advanced-features">Chapter 21: Flash Attention, MoE, and Advanced Features<a class="headerlink" href="#chapter-21-flash-attention-moe-and-advanced-features" title="Permanent link">&para;</a></h1>
+<h1 id="chapter-21-forward-attention-and-top-2-moe-gating">Chapter 21: Forward Attention and Top-2 MoE Gating<a class="headerlink" href="#chapter-21-forward-attention-and-top-2-moe-gating" title="Permanent link">&para;</a></h1>
 <p><a href="../../images/chapter-openers/21.svg"><img alt="Chapter 21: Stream scores. Keep the state." src="../../images/chapter-openers/21.svg" /></a></p>
 <p><a href="../../images/ch21/01-concept.svg"><img alt="Stream attention without storing the whole score matrix" src="../../images/ch21/01-concept.svg" /></a></p>
 <blockquote>
 <p>Every kernel through Chapter 20 computed each output independently of every other. Attention breaks that assumption on purpose — every query genuinely depends on every key and value in its sequence — and the entire trick of Flash Attention is computing that dependency without ever materializing the matrix it implies.</p>
 </blockquote>
+<div class="admonition info">
+<p class="admonition-title">Output provenance and rerun scope</p>
+<p>Historical output blocks below may be abridged, reformatted or manually illustrated; they are not promised verbatim raw captures. The <a href="../../execution-2026-11-21/">execution record</a> links untouched rerun logs and explains version/environment differences. Corrected sources marked pending are not validated by older logs.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Physical dot tiles corrected; rerun pending</p>
+<p>Current wrappers use BLOCK_M=BLOCK_N=16 and pad the feature extent to at least 16. Logical hand traces may still use four-wide tiles. The selected Triton 3.5.1 NVIDIA non-INT8 frontend permits small M/N but requires K&gt;=16; the captured 3.3.0-era backend has stricter M/N limits. The descriptor and minimum-dot rules are version-specific, not universal Triton rules. These revised chapter sources have not been GPU-rerun. They implement single-head FP32 forward attention and top-2 gating, not the full FlashAttention training stack.</p>
+</div>
 <h2 id="what-you-will-understand-by-the-end-of-this-chapter">What you will understand by the end of this chapter<a class="headerlink" href="#what-you-will-understand-by-the-end-of-this-chapter" title="Permanent link">&para;</a></h2>
 <ul>
 <li>How Chapter 14.3's online-softmax rescaling identity generalizes from a single row of numbers to a full attention computation — accumulating a running, correctly-weighted sum over <code>V</code> block by block, never materializing the full <code>(M, N)</code> attention matrix at once</li>
@@ -2692,7 +2781,7 @@
 <a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>                                     per-pair)
 <a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
 <a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>  "ALL VALID" blocks: causal_mask always true here, but col_mask (boundary) still applies
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>  "DIAGONAL" block: causal_mask varies per (row, col) pair -- the only block needing tl.where
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>  "DIAGONAL" block: causal_mask varies per (row, col) pair -- future-key exclusion varies within this diagonal tile; code may apply tl.where on every tile
 <a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>  "SKIPPED" blocks: never loaded at all -- entire block is beyond every query's reach
 </code></pre></div>
 <blockquote>
@@ -2775,7 +2864,7 @@
 </code></pre></div>
 <p>Every selected expert index matches PyTorch's own <code>topk</code>, and the renormalized weights sum to <code>1</code> within the stated tolerance for every token, as intended.</p>
 <h3 id="worked-example-2132-forgetting-to-renormalize">Worked Example 21.3.2: forgetting to renormalize<a class="headerlink" href="#worked-example-2132-forgetting-to-renormalize" title="Permanent link">&para;</a></h3>
-<p>Skipping the final division — using the raw softmax probabilities of the top-2 experts directly as mixture weights — looks like a harmless simplification, since each individual weight is still a genuine, correctly-computed probability. Genuinely captured, computing what those two raw probabilities sum to per token, on the same 6 tokens:</p>
+<p>Skipping the final division — using the raw softmax probabilities of the top-2 experts directly as mixture weights — looks like a harmless simplification, since each individual weight is still a genuine, correctly-computed probability. historical illustrated output, computing what those two raw probabilities sum to per token, on the same 6 tokens:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>raw (non-renormalized) top-2 weight sums per row: tensor([0.5978, 0.5059, 0.6346, 0.5354, 0.3600, 0.7166])
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>mean raw sum: 0.5583722591400146
 </code></pre></div>
@@ -2854,10 +2943,10 @@
 <a id="__codelineno-11-50" name="__codelineno-11-50" href="#__codelineno-11-50"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_ptrs</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">row_mask</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">d_mask</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span>
 <a id="__codelineno-11-51" name="__codelineno-11-51" href="#__codelineno-11-51"></a>
 <a id="__codelineno-11-52" name="__codelineno-11-52" href="#__codelineno-11-52"></a>
-<a id="__codelineno-11-53" name="__codelineno-11-53" href="#__codelineno-11-53"></a><span class="k">def</span><span class="w"> </span><span class="nf">flash_attention</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<a id="__codelineno-11-53" name="__codelineno-11-53" href="#__codelineno-11-53"></a><span class="k">def</span><span class="w"> </span><span class="nf">flash_attention</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
 <a id="__codelineno-11-54" name="__codelineno-11-54" href="#__codelineno-11-54"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span>
 <a id="__codelineno-11-55" name="__codelineno-11-55" href="#__codelineno-11-55"></a>    <span class="n">N</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">shape</span>
-<a id="__codelineno-11-56" name="__codelineno-11-56" href="#__codelineno-11-56"></a>    <span class="n">BLOCK_D</span> <span class="o">=</span> <span class="n">triton</span><span class="o">.</span><span class="n">next_power_of_2</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+<a id="__codelineno-11-56" name="__codelineno-11-56" href="#__codelineno-11-56"></a>    <span class="n">BLOCK_D</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">triton</span><span class="o">.</span><span class="n">next_power_of_2</span><span class="p">(</span><span class="n">D</span><span class="p">))</span>
 <a id="__codelineno-11-57" name="__codelineno-11-57" href="#__codelineno-11-57"></a>    <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
 <a id="__codelineno-11-58" name="__codelineno-11-58" href="#__codelineno-11-58"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-11-59" name="__codelineno-11-59" href="#__codelineno-11-59"></a>    <span class="n">grid</span> <span class="o">=</span> <span class="p">(</span><span class="n">triton</span><span class="o">.</span><span class="n">cdiv</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="p">),)</span>
@@ -2878,7 +2967,7 @@
 <a id="__codelineno-11-74" name="__codelineno-11-74" href="#__codelineno-11-74"></a>    <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
 <a id="__codelineno-11-75" name="__codelineno-11-75" href="#__codelineno-11-75"></a>
 <a id="__codelineno-11-76" name="__codelineno-11-76" href="#__codelineno-11-76"></a>    <span class="n">oracle</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">q</span> <span class="o">@</span> <span class="n">k</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">@</span> <span class="n">v</span>
-<a id="__codelineno-11-77" name="__codelineno-11-77" href="#__codelineno-11-77"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">flash_attention</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<a id="__codelineno-11-77" name="__codelineno-11-77" href="#__codelineno-11-77"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">flash_attention</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
 <a id="__codelineno-11-78" name="__codelineno-11-78" href="#__codelineno-11-78"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"allclose to naive full attention?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">oracle</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">))</span>
 <a id="__codelineno-11-79" name="__codelineno-11-79" href="#__codelineno-11-79"></a>
 <a id="__codelineno-11-80" name="__codelineno-11-80" href="#__codelineno-11-80"></a>
@@ -2973,10 +3062,10 @@
 <a id="__codelineno-12-84" name="__codelineno-12-84" href="#__codelineno-12-84"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_ptrs</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">row_mask</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">d_mask</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span>
 <a id="__codelineno-12-85" name="__codelineno-12-85" href="#__codelineno-12-85"></a>
 <a id="__codelineno-12-86" name="__codelineno-12-86" href="#__codelineno-12-86"></a>
-<a id="__codelineno-12-87" name="__codelineno-12-87" href="#__codelineno-12-87"></a><span class="k">def</span><span class="w"> </span><span class="nf">_run</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<a id="__codelineno-12-87" name="__codelineno-12-87" href="#__codelineno-12-87"></a><span class="k">def</span><span class="w"> </span><span class="nf">_run</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
 <a id="__codelineno-12-88" name="__codelineno-12-88" href="#__codelineno-12-88"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span>
 <a id="__codelineno-12-89" name="__codelineno-12-89" href="#__codelineno-12-89"></a>    <span class="n">N</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">shape</span>
-<a id="__codelineno-12-90" name="__codelineno-12-90" href="#__codelineno-12-90"></a>    <span class="n">BLOCK_D</span> <span class="o">=</span> <span class="n">triton</span><span class="o">.</span><span class="n">next_power_of_2</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+<a id="__codelineno-12-90" name="__codelineno-12-90" href="#__codelineno-12-90"></a>    <span class="n">BLOCK_D</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">triton</span><span class="o">.</span><span class="n">next_power_of_2</span><span class="p">(</span><span class="n">D</span><span class="p">))</span>
 <a id="__codelineno-12-91" name="__codelineno-12-91" href="#__codelineno-12-91"></a>    <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
 <a id="__codelineno-12-92" name="__codelineno-12-92" href="#__codelineno-12-92"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-12-93" name="__codelineno-12-93" href="#__codelineno-12-93"></a>    <span class="n">grid</span> <span class="o">=</span> <span class="p">(</span><span class="n">triton</span><span class="o">.</span><span class="n">cdiv</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="p">),)</span>
@@ -3185,10 +3274,10 @@
 <a id="__codelineno-14-92" name="__codelineno-14-92" href="#__codelineno-14-92"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_ptrs</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">row_mask</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">d_mask</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span>
 <a id="__codelineno-14-93" name="__codelineno-14-93" href="#__codelineno-14-93"></a>
 <a id="__codelineno-14-94" name="__codelineno-14-94" href="#__codelineno-14-94"></a>
-<a id="__codelineno-14-95" name="__codelineno-14-95" href="#__codelineno-14-95"></a><span class="k">def</span><span class="w"> </span><span class="nf">_run_attn</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<a id="__codelineno-14-95" name="__codelineno-14-95" href="#__codelineno-14-95"></a><span class="k">def</span><span class="w"> </span><span class="nf">_run_attn</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
 <a id="__codelineno-14-96" name="__codelineno-14-96" href="#__codelineno-14-96"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span>
 <a id="__codelineno-14-97" name="__codelineno-14-97" href="#__codelineno-14-97"></a>    <span class="n">N</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">shape</span>
-<a id="__codelineno-14-98" name="__codelineno-14-98" href="#__codelineno-14-98"></a>    <span class="n">BLOCK_D</span> <span class="o">=</span> <span class="n">triton</span><span class="o">.</span><span class="n">next_power_of_2</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+<a id="__codelineno-14-98" name="__codelineno-14-98" href="#__codelineno-14-98"></a>    <span class="n">BLOCK_D</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">triton</span><span class="o">.</span><span class="n">next_power_of_2</span><span class="p">(</span><span class="n">D</span><span class="p">))</span>
 <a id="__codelineno-14-99" name="__codelineno-14-99" href="#__codelineno-14-99"></a>    <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
 <a id="__codelineno-14-100" name="__codelineno-14-100" href="#__codelineno-14-100"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">M</span><span class="p">,</span> <span class="n">D</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-14-101" name="__codelineno-14-101" href="#__codelineno-14-101"></a>    <span class="n">grid</span> <span class="o">=</span> <span class="p">(</span><span class="n">triton</span><span class="o">.</span><span class="n">cdiv</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="p">),)</span>
@@ -3330,7 +3419,7 @@
 <li>Because the amount "missing" from a token's top-2 selection is exactly the probability mass its softmax assigned to the other six (unselected) experts — and that split between "concentrated in the top 2" versus "spread across the rest" is different for every token, depending entirely on that token's own specific logits. A token whose gating network was very confident (most probability mass concentrated in 2 experts) loses very little by skipping renormalization; a token whose gating was much less decisive (probability spread more evenly across all 8) loses much more. There is no single scale factor to correct for, because the error itself is a per-token quantity, not a global constant.</li>
 </ol>
 <h3 id="contracts-that-the-small-examples-do-not-cover">Contracts that the small examples do not cover<a class="headerlink" href="#contracts-that-the-small-examples-do-not-cover" title="Permanent link">&para;</a></h3>
-<p>The historical outputs above are interpreter results. The worked BLOCK=4 tiles are useful for tracing but are not valid NVIDIA <code>tl.dot</code> tiles in the referenced v3.3.1 backend, which requires at least 16 in M/N/K for its non-INT8 dot contract. D=8 may be logically valid but needs padding to a valid physical dot extent. CPU tensors also need CUDA counterparts before a GPU launch. Explicit <code>input_precision="ieee"</code> in the current FP32 teaching kernels avoids silently substituting TF32 for an FP32 comparison; that choice is not a Tensor Core peak-performance recipe. The current corrected sources were included in the <a href="../../execution-2026-11-21/">November 21 interpreter rerun</a>; only the separate smoke source has compiled GPU coverage.</p>
+<p>The logical hand traces use small tiles; corrected current wrappers use physical dot extents of at least 16. Triton 3.5.1's NVIDIA non-INT8 minimum is (1,1,16); the older 3.3.1 backend cited previously uses (16,16,16). These are version-specific contracts. Current FP32 dots request IEEE precision. The revised chapter sources have not been rerun; historical interpreter captures apply to their archived hashes. Only the separate smoke source has compiled GPU coverage.</p>
 <p>The bounded causal loop avoids unsupported <code>continue</code> control flow and skips future-key tiles. Valid query rows need at least one unmasked key; all-masked rows, NaNs, empty sequences and rectangular causal alignment require an explicit separate contract. These examples use top-left causal alignment.</p>
 <p>Top-2 renormalization is the selected gating contract here, not a requirement of every MoE model. Other models deliberately retain selected weights from the full softmax. Resolve ties explicitly; a random no-tie example does not prove index equality with <code>torch.topk</code> for tied logits. Require E&gt;=2. Modern <a href="https://triton-lang.org/main/python-api/generated/triton.language.topk.html">tl.topk documentation</a> describes the built-in operation's different API.</p>
 

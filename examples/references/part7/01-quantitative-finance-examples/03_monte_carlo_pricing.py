@@ -25,6 +25,10 @@ def monte_carlo_call_price(S0, K, T, r, sigma, n_sims, seed=0, BLOCK=1024, disco
     payoffs = torch.empty(n_sims)
     grid = (triton.cdiv(n_sims, BLOCK),)
     gbm_call_payoff_kernel[grid](z, payoffs, n_sims, S0, K, T, r, sigma, BLOCK=BLOCK)
+    # Independent fixed-draw oracle: validate arithmetic before statistical pricing.
+    reference = torch.clamp(S0 * torch.exp((r - 0.5 * sigma ** 2) * T
+                            + sigma * (T ** 0.5) * z.double()) - K, min=0.0)
+    torch.testing.assert_close(payoffs.double(), reference, rtol=3e-5, atol=3e-4)
     mean_payoff = payoffs.mean()
     se = payoffs.std(unbiased=True) / (n_sims ** 0.5)
     discount_factor = np.exp(-r * T) if discount else 1.0

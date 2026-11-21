@@ -9,7 +9,7 @@ def row_mean_var_kernel(x_ptr, mean_ptr, var_ptr, M, N, stride_m, BLOCK_N: tl.co
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
 
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
@@ -20,6 +20,7 @@ def row_mean_var_kernel(x_ptr, mean_ptr, var_ptr, M, N, stride_m, BLOCK_N: tl.co
 
 
 def row_mean_var(x, BLOCK_N=None):
+    x = x.contiguous()
     M, N = x.shape
     if BLOCK_N is None:
         BLOCK_N = triton.next_power_of_2(N)

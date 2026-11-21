@@ -43,7 +43,7 @@ def fused_linear_gelu_kernel(a_ptr, b_ptr, bias_ptr, c_ptr, M, N, K,
     tl.store(c_ptrs, result, mask=c_mask)
 
 
-def fused_linear_gelu(x, weight, bias, BLOCK_M=8, BLOCK_N=8, BLOCK_K=4):
+def fused_linear_gelu(x, weight, bias, BLOCK_M=16, BLOCK_N=16, BLOCK_K=16):
     M, K = x.shape
     N = weight.shape[0]
     w_t = weight.t().contiguous()
@@ -79,7 +79,7 @@ def row_mean_var_kernel(x_ptr, mean_ptr, var_ptr, M, N, stride_m, BLOCK_N: tl.co
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
     var = tl.sum(diff * diff, axis=0) / N
@@ -116,14 +116,14 @@ def layernorm_forward_kernel(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N, stride_m
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
     var = tl.sum(diff * diff, axis=0) / N
     inv_std = 1.0 / tl.sqrt(var + eps)
     x_norm = diff * inv_std
-    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0)
-    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0)
+    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0).to(tl.float32)
+    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     y = x_norm * gamma + beta
     out_row_ptr = out_ptr + row * stride_m
     tl.store(out_row_ptr + cols, y, mask=mask)
@@ -136,20 +136,23 @@ def layernorm_forward_kernel_wrong_eps(x_ptr, gamma_ptr, beta_ptr, out_ptr, M, N
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
     row_ptr = x_ptr + row * stride_m
-    x = tl.load(row_ptr + cols, mask=mask, other=0.0)
+    x = tl.load(row_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     mean = tl.sum(x, axis=0) / N
     diff = tl.where(mask, x - mean, 0.0)
     var = tl.sum(diff * diff, axis=0) / N
     inv_std = 1.0 / (tl.sqrt(var) + eps)  # BUG
     x_norm = diff * inv_std
-    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0)
-    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0)
+    gamma = tl.load(gamma_ptr + cols, mask=mask, other=1.0).to(tl.float32)
+    beta = tl.load(beta_ptr + cols, mask=mask, other=0.0).to(tl.float32)
     y = x_norm * gamma + beta
     out_row_ptr = out_ptr + row * stride_m
     tl.store(out_row_ptr + cols, y, mask=mask)
 
 
 def _run_layernorm(x, gamma, beta, eps, kernel):
+    x = x.contiguous()
+    gamma = gamma.contiguous()
+    beta = beta.contiguous()
     M, N = x.shape
     BLOCK_N = triton.next_power_of_2(N)
     out = torch.empty_like(x)

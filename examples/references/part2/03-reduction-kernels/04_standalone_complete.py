@@ -10,7 +10,7 @@ def row_sum_max_kernel(x_ptr, sum_ptr, max_ptr, stride_row, N, BLOCK_N: tl.const
     mask = cols < N
     x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=0.0)
     row_sum = tl.sum(x, axis=0)
-    x_for_max = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
+    x_for_max = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
     row_max = tl.max(x_for_max, axis=0)
     tl.store(sum_ptr + row, row_sum)
     tl.store(max_ptr + row, row_max)
@@ -34,7 +34,7 @@ def stable_softmax_kernel(x_ptr, out_ptr, stride_row, N, BLOCK_N: tl.constexpr):
     row = tl.program_id(0)
     cols = tl.arange(0, BLOCK_N)
     mask = cols < N
-    x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
+    x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
     row_max = tl.max(x, axis=0)
     x_shifted = x - row_max
     num = tl.exp(x_shifted)
@@ -54,16 +54,21 @@ def online_softmax_kernel(x_ptr, out_ptr, stride_row, N,
     for c in range(NUM_CHUNKS):
         cols = c * BLOCK_N + cols0
         mask = cols < N
-        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
+        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
         chunk_max = tl.max(x, axis=0)
         m_new = tl.maximum(m, chunk_max)
-        l = l * tl.exp(m - m_new) + tl.sum(tl.where(mask, tl.exp(x - m_new), 0.0), axis=0)
+        safe_max = tl.where(m_new == float('-inf'), 0.0, m_new)
+        alpha = tl.where(m == float('-inf'), 0.0, tl.exp(m - safe_max))
+        weights = tl.where(mask, tl.exp(x - safe_max), 0.0)
+        l = l * alpha + tl.sum(weights, axis=0)
         m = m_new
     for c in range(NUM_CHUNKS):
         cols = c * BLOCK_N + cols0
         mask = cols < N
-        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf'))
-        y = tl.exp(x - m) / l
+        x = tl.load(x_ptr + row * stride_row + cols, mask=mask, other=float('-inf')).to(tl.float32)
+        safe_max = tl.where(m == float('-inf'), 0.0, m)
+        safe_l = tl.where(l > 0.0, l, 1.0)
+        y = tl.where(l > 0.0, tl.exp(x - safe_max) / safe_l, 0.0)
         tl.store(out_ptr + row * stride_row + cols, y, mask=mask)
 
 

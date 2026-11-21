@@ -50,10 +50,10 @@ def flash_attn_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
     tl.store(out_ptrs, acc, mask=row_mask[:, None] & d_mask[None, :])
 
 
-def flash_attention(q, k, v, BLOCK_M=4, BLOCK_N=4):
+def flash_attention(q, k, v, BLOCK_M=16, BLOCK_N=16):
     M, D = q.shape
     N, _ = k.shape
-    BLOCK_D = triton.next_power_of_2(D)
+    BLOCK_D = max(16, triton.next_power_of_2(D))
     scale = 1.0 / math.sqrt(D)
     out = torch.empty((M, D), dtype=torch.float32)
     grid = (triton.cdiv(M, BLOCK_M),)
@@ -74,7 +74,7 @@ def section_21_1():
     scale = 1.0 / math.sqrt(D)
 
     oracle = torch.softmax(q @ k.T * scale, dim=-1) @ v
-    out = flash_attention(q, k, v, BLOCK_M=4, BLOCK_N=4)
+    out = flash_attention(q, k, v, BLOCK_M=16, BLOCK_N=16)
     print("allclose to naive full attention?", torch.allclose(out, oracle, atol=1e-4))
 
 

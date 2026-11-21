@@ -65,7 +65,7 @@ def fused_linear_gelu_kernel_buggy_bias_axis(a_ptr, b_ptr, bias_ptr, c_ptr, M, N
     tl.store(c_ptrs, result, mask=c_mask)
 
 
-def fused_linear_gelu(x, weight, bias, kernel=fused_linear_gelu_kernel, BLOCK_M=8, BLOCK_N=8, BLOCK_K=4):
+def fused_linear_gelu(x, weight, bias, kernel=fused_linear_gelu_kernel, BLOCK_M=16, BLOCK_N=16, BLOCK_K=16):
     M, K = x.shape
     N = weight.shape[0]
     w_t = weight.t().contiguous()

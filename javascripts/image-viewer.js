@@ -27,7 +27,7 @@
     fit.addEventListener('click', () => {
       const whole = viewer.dataset.fit !== 'whole';
       viewer.dataset.fit = whole ? 'whole' : 'width';
-      fit.textContent = whole ? 'Fit width' : 'Fit whole diagram';
+      // Keep the toggle's accessible name stable; aria-pressed reports the mode.
       fit.setAttribute('aria-pressed', String(whole));
     });
     toolbar.append(fit, close);
@@ -35,13 +35,18 @@
     const error = document.createElement('p');
     error.textContent = 'The diagram could not be loaded. Close this view and try again.';
     error.hidden = true;
+    error.setAttribute('role', 'alert');
     image.addEventListener('error', () => { error.hidden = !viewer.open; });
     image.addEventListener('load', () => { error.hidden = true; });
     viewer.append(toolbar, image, error);
     document.body.append(viewer);
     close.addEventListener('click', () => viewer.close());
     viewer.addEventListener('click', (event) => {
-      if (event.target === viewer) viewer.close();
+      if (event.target === viewer) {
+        const bounds = viewer.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right ||
+            event.clientY < bounds.top || event.clientY > bounds.bottom) viewer.close();
+      }
     });
     viewer.addEventListener('close', () => {
       document.body.style.overflow = previousOverflow;
