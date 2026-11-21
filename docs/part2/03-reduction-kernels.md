@@ -1,5 +1,7 @@
 # Chapter 14: Reduction Kernels
 
+[![Padding needs the reduction identity](../images/ch14/01-concept.svg)](../images/ch14/01-concept.svg)
+
 > "Chapter 13's matmul kernel accumulated a genuine reduction — a sum over K — inside every single output tile, and hid the whole thing behind one call to `tl.dot`. This chapter takes the wrapping paper off: sums and maxes written out explicitly, and softmax, where the reduction itself is unstable if you compute it the naive way, no black-box primitive available to hide that instability from you."
 
 **What you will understand by the end of this chapter:**
@@ -223,6 +225,8 @@ Sections 14.1–14.3 built up this chapter's findings as isolated probes. The fi
 
 ### File: `01_row_reductions.py` — Section 14.1
 
+[Download the complete current reference](../examples/references/part2/03-reduction-kernels/01_row_reductions.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_row_reductions.py`
 
 ```python
@@ -267,6 +271,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_stable_softmax.py` — Section 14.2
+
+[Download the complete current reference](../examples/references/part2/03-reduction-kernels/02_stable_softmax.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 02_stable_softmax.py`
 
@@ -336,6 +342,8 @@ if __name__ == "__main__":
 
 ### File: `03_online_softmax.py` — Section 14.3
 
+[Download the complete current reference](../examples/references/part2/03-reduction-kernels/03_online_softmax.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 03_online_softmax.py`
 
 ```python
@@ -398,6 +406,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part2/03-reduction-kernels/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 

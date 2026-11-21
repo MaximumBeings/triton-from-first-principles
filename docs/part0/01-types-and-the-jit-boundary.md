@@ -1,5 +1,7 @@
 # Chapter 1: Types and the JIT Boundary
 
+[![Compile a signature, then launch its programs](../images/ch01/01-concept.svg)](../images/ch01/01-concept.svg)
+
 > "A `@triton.jit` function is not a function you call. It is a function you compile — and the exact moment that compilation happens, and exactly which of its arguments the compiler is allowed to treat as fixed forever, is the single fact everything else in this book rests on."
 
 **What you will understand by the end of this chapter:**
@@ -17,7 +19,7 @@
 - If your toolchain isn't installed yet, see [Getting Started](../getting-started.md) before continuing
 
 !!! warning "A note on how the code in this book is actually run"
-    Every kernel in this book is written to run on a real NVIDIA GPU through Triton's normal compiled path. But this book itself was authored and its output captured on a machine with **no CUDA GPU attached** — not the author's cloud workspace, and not the Mac the book is written on. Rather than fabricate plausible-looking numbers, every "Reference Implementations" section in this book that needed to run code ran it with `TRITON_INTERPRET=1` set — Triton's built-in interpreter, which executes a kernel's logic in Python on the CPU instead of compiling it to PTX and launching it on a GPU. This gives genuinely computed, reproducible output for anything that depends only on a kernel's *logic* being correct. It does **not** exercise the real GPU compiler or its error messages, and it cannot produce a meaningful timing number — Chapters 18 and 19, where wall-clock performance is the entire point, disclose this limitation again and handle it differently. Anywhere this chapter's behavior might differ between the interpreter and a real compiled GPU build, it says so explicitly rather than presenting interpreter-only behavior as universal.
+    The small reference listings in this edition target interpreter-based instruction and are not all directly GPU-launchable: some use CPU tensors or dot tiles below compiled-backend limits. A compiled GPU version needs valid tiles, CUDA allocations and a compatible toolchain. But this book itself was authored and its output captured on a machine with **no CUDA GPU attached** — not the author's cloud workspace, and not the Mac the book is written on. Rather than fabricate plausible-looking numbers, every "Reference Implementations" section in this book that needed to run code ran it with `TRITON_INTERPRET=1` set — Triton's built-in interpreter, which executes a kernel's logic in Python on the CPU instead of compiling it to PTX and launching it on a GPU. This gives genuinely computed, reproducible output for anything that depends only on a kernel's *logic* being correct. It does **not** exercise the real GPU compiler or its error messages, and it cannot produce a meaningful timing number — Chapters 18 and 19, where wall-clock performance is the entire point, disclose this limitation again and handle it differently. Anywhere this chapter's behavior might differ between the interpreter and a real compiled GPU build, it says so explicitly rather than presenting interpreter-only behavior as universal.
 
 ## 1.1 The Two-Phase Model: Python Function, Compiled Kernel `[FOUNDATIONAL]`
 
@@ -33,7 +35,7 @@ def add_kernel(x_ptr, y_ptr, out_ptr, n, BLOCK: tl.constexpr):
     ...
 ```
 
-does not run anything — it registers a description of a kernel with Triton's `JITFunction` machinery. The moment work actually happens is `add_kernel[grid](x, y, out, n, BLOCK=256)`: the square-bracket `[grid]` is not decoration, it's the order ticket. That single call triggers Triton to trace the Python function body, compile it down to an intermediate representation and then to PTX (or a Python-level simulation of the same steps, in this book's interpreter runs), and only then actually launch it. A kitchen that already has the "BLOCK=256, these dtypes" preparation memorized skips straight to cooking; a genuinely new combination gets compiled first.
+does not run anything — it registers a description of a kernel with Triton's `JITFunction` machinery. The moment work actually happens is `add_kernel[grid](x, y, out, n, BLOCK=256)`: the square-bracket `[grid]` is not decoration, it's the order ticket. That single call triggers Triton to trace the Python function body, compile it down to an intermediate representation and then to PTX (or, in interpreter mode, execute Python/NumPy equivalents while bypassing compilation), and only then actually launch it. A kitchen that already has the "BLOCK=256, these dtypes" preparation memorized skips straight to cooking; a genuinely new combination gets compiled first.
 
 ### Background
 
@@ -41,11 +43,11 @@ does not run anything — it registers a description of a kernel with Triton's `
 |---|---|---|
 | What running `f(...)` does | Executes the function body immediately, every call | **Raises an error** — a `JITFunction` is not meant to be called this way from host code |
 | What actually executes it | The call itself | `f[grid](...)` — indexing with a launch grid |
-| When is it compiled? | Never — CPython interprets bytecode on every call | Once per unique combination of argument dtypes, shapes, and `tl.constexpr` values, the first time that combination is launched |
+| When is it compiled? | Never — CPython interprets bytecode on every call | Once per unique combination of argument argument types, constexpr values, target/options and specialization attributes, the first time that combination is launched |
 | What happens on a repeat call with the same signature | Re-executes from scratch (no such thing as "compiling" a Python function) | Cache hit — the previously compiled kernel is reused, no retracing |
 | What happens on a call with a *different* `tl.constexpr` value | N/A | Cache miss — retraced and recompiled as a distinct kernel variant |
 
-This is much closer to how a statically-compiled systems language behaves than to ordinary Python: the *shape* of the work — which branches exist, how many times a constexpr-bounded loop unrolls, which dtype every operation is specialized for — is nailed down once, before any GPU thread runs a single instruction, rather than re-decided on every call the way pure Python re-evaluates everything every time.
+This is much closer to how a statically-compiled systems language behaves than to ordinary Python: the *shape* of the work — which branches exist, constexpr-dependent loop bounds, which dtype every operation is specialized for — is nailed down once, before any GPU thread runs a single instruction, rather than re-decided on every call the way pure Python re-evaluates everything every time.
 
 ### Worked Example 1.1.1 — A kernel whose two constexpr-selected versions are two genuinely different compiled programs
 
@@ -106,7 +108,7 @@ Both match the hand trace exactly.
 
 A restaurant's fixed menu items — "large," "medium," "small" — are decided long before any customer walks in; the kitchen has separate prep stations already set up for each size. A customer's actual order — *which* size, *today*, for *this* table — is only known the moment they say it out loud. You cannot build a "large" prep station around a size nobody has ordered yet; you cannot leave the size unspecified and start cooking either.
 
-`tl.constexpr` is the menu size: a value Triton's tracer must know completely, and can therefore bake permanently into the shape of the compiled kernel — used to size arrays, decide how many times a loop unrolls, or choose which branch of a Python `if` exists at all. An ordinary kernel argument (a pointer, `n` in the examples above) is the customer's order: read from GPU memory or a register at the moment the kernel actually runs, and free to be a different value on every single launch without triggering a recompile.
+`tl.constexpr` is the menu size: a value Triton's tracer must know completely, and can therefore bake permanently into the shape of the compiled kernel — used to size arrays, decide how many times a loop unrolls, or choose which branch of a Python `if` exists at all. An ordinary kernel argument (a pointer, `n` in the examples above) is the customer's order: read from GPU memory or a register at the moment the kernel actually runs, and able to vary without recompilation while the specialization key remains unchanged; scalar-value and alignment specialization can still create variants.
 
 ### Background
 
@@ -288,6 +290,8 @@ Sections 1.1–1.4 walked through this chapter's ideas as isolated snippets. The
 
 ### File: `01_two_phase_and_constexpr.py` — Sections 1.1 and 1.2
 
+[Download the complete current reference](../examples/references/part0/01-types-and-the-jit-boundary/01_two_phase_and_constexpr.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_two_phase_and_constexpr.py`
 
 ```python
@@ -346,6 +350,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_dtype_promotion_and_precision.py` — Section 1.3
+
+[Download the complete current reference](../examples/references/part0/01-types-and-the-jit-boundary/02_dtype_promotion_and_precision.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 02_dtype_promotion_and_precision.py`
 
@@ -409,6 +415,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_block_shaped_values.py` — Section 1.4
+
+[Download the complete current reference](../examples/references/part0/01-types-and-the-jit-boundary/03_block_shaped_values.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 03_block_shaped_values.py`
 
@@ -481,6 +489,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part0/01-types-and-the-jit-boundary/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 
@@ -610,7 +620,7 @@ Every number in that output was independently hand-traced earlier in this chapte
 
 ## Chapter Summary
 
-A `@triton.jit` function is a description compiled the first time it's launched with a given combination of argument dtypes, shapes, and `tl.constexpr` values — not a function that runs when you call it the way ordinary Python does, and not recompiled on every subsequent launch that reuses the same combination. `tl.constexpr` is Triton's compile-time/run-time boundary: it is required, not merely preferred, anywhere a value must be known before compilation — sizing a `tl.arange`, or deciding which branch of a Python `if` exists at all in the compiled kernel — and Section 1.2's `ValueError` showed that boundary enforced, not suggested. Triton's numeric types promote implicitly on mismatch, the opposite of a language that rejects mixed-width arithmetic outright, which makes deliberate accumulation-dtype choices — not the language's defaults — the thing standing between a kernel and a silently degraded answer, as the fp16-versus-fp32 accumulation gap in Section 1.3 demonstrated directly. And every value derived from `tl.arange` is block-shaped, not scalar, which makes Python's `if` legal only on genuine scalars like `tl.program_id()` — branching on a whole block, as Section 1.4 showed, is either rejected outright by a real compiled build or, under this book's interpreter, silently wrong in a way that `tl.where` never is.
+A `@triton.jit` function is a description compiled the first time it's launched with a given combination of argument argument types, constexpr values, target/options and specialization attributes — not a function that runs when you call it the way ordinary Python does, and not recompiled on every subsequent launch that reuses the same combination. `tl.constexpr` is Triton's compile-time/run-time boundary: it is required, not merely preferred, anywhere a value must be known before compilation — sizing a `tl.arange`, or deciding which branch of a Python `if` exists at all in the compiled kernel — and Section 1.2's `ValueError` showed that boundary enforced, not suggested. Triton's numeric types promote implicitly on mismatch, the opposite of a language that rejects mixed-width arithmetic outright, which makes deliberate accumulation-dtype choices — not the language's defaults — the thing standing between a kernel and a silently degraded answer, as the fp16-versus-fp32 accumulation gap in Section 1.3 demonstrated directly. And every value derived from `tl.arange` is block-shaped, not scalar, which makes Python's `if` legal only on genuine scalars like `tl.program_id()` — branching on a whole block, as Section 1.4 showed, is either rejected outright by a real compiled build or, under this book's interpreter, silently wrong in a way that `tl.where` never is.
 
 ## Self-Check Questions
 
@@ -635,3 +645,7 @@ This chapter treated `tl.constexpr` as a binary switch — a value is either kno
 **4.** The source of the error is not how `0.0001` gets stored — every one of the 2,048 copies has the identical, bounded rounding error from being rounded once to the nearest representable `fp16` value. The error comes from *repeated rounding of the running total*: `fp16` has roughly 10 mantissa bits, and once the accumulator's magnitude climbs toward `0.2`, `fp16`'s representable resolution at that magnitude is already larger than the `0.0001` being added on each subsequent step, so many additions round away some or all of their own contribution, and this compounds unpredictably over all 2,048 steps. Casting to `fp32` before summing keeps far more mantissa precision throughout the accumulation itself, so only the original, bounded per-value storage rounding survives into the final answer — which is exactly why the `fp32`-accumulated result lands within a fraction of a percent of the exact answer while the naive version does not.
 
 **5.** `pid = tl.program_id(0)` is a genuine scalar — exactly one integer, for the one program instance currently running — so `if pid == 0:` has exactly one, unambiguous truth value, the same as an ordinary Python `if` on an ordinary Python value. `mask = offsets < n`, where `offsets` came from `tl.arange`, is `BLOCK`-shaped: one boolean per lane, and when those booleans disagree (some `True`, some `False`) there is no single fact for `if mask:` to be asking about. `if mask:` should be replaced with `tl.where(mask, a, b)`, which doesn't need to collapse the block into one answer at all — it produces one masked answer per lane, which is the actual question a per-lane condition is asking.
+
+### What does and does not identify a compiled specialization?
+
+A raw tensor-pointer argument carries its element type and address, not an automatic shape-specialized tensor object. Shape/stride values can be runtime scalar arguments or explicit constexpr values. Pointer alignment, scalar specialization, compiler options and target also affect the cache. Changing a tensor shape does not by itself prove a recompilation, and `tl.static_print` under the interpreter is not an observation of the compiler cache. Use the compiled path and inspect its artifacts to establish cache behavior. See the [JIT API](https://triton-lang.org/main/python-api/generated/triton.jit.html).

@@ -1,5 +1,7 @@
 # Chapter 10: Targeting Hardware
 
+[![Logical blocks are distributed over physical threads](../images/ch10/01-concept.svg)](../images/ch10/01-concept.svg)
+
 > "A compiled kernel is compiled for something — a specific GPU generation, a specific number of warps scheduled per program instance, a specific number of pipeline stages. This book's interpreter has never had to answer any of those questions honestly, because it has never had a GPU to answer them about. This chapter is the one place that gap can no longer be worked around quietly."
 
 **What you will understand by the end of this chapter:**
@@ -82,16 +84,16 @@ The first two errors are byte-for-byte identical, because both questions route t
 
 A shipping label that says "handle with 4 workers" is a real instruction about how a physical warehouse should staff the job — it changes how fast the job gets done and how it's coordinated, without changing what's inside the box. A simulation of the warehouse that only checks "did the right boxes end up in the right place" can accept that label, print it back, and never actually staff anything differently, because its notion of correctness was never about staffing in the first place.
 
-`num_warps` (how many groups of 32 threads are scheduled per program instance) and `num_stages` (how many iterations of a loop are software-pipelined in flight at once) are exactly this kind of label: real scheduling and pipelining instructions to the GPU's real hardware, with real performance consequences, that this book's interpreter accepts as keyword arguments and does essentially nothing with — because the interpreter simulates a kernel's *logic* on the CPU, one program instance at a time, and has no warp scheduler or instruction pipeline to actually configure.
+`num_warps` (how many groups of 32 threads are scheduled per program instance) and `num_stages` (the requested software-pipeline staging, subject to compiler lowering) are exactly this kind of label: real scheduling and pipelining instructions to the GPU's real hardware, with real performance consequences, that this book's interpreter accepts as keyword arguments and does essentially nothing with — because the interpreter simulates a kernel's *logic* on the CPU, one program instance at a time, and has no warp scheduler or instruction pipeline to actually configure.
 
 ### Background
 
 | | On a real compiled GPU build | Under this book's `TRITON_INTERPRET=1` |
 |---|---|---|
 | What `num_warps` controls | How many warps (groups of 32 threads) execute one program instance concurrently | Nothing — accepted as an argument, has no observable effect |
-| What `num_stages` controls | How many loop iterations are software-pipelined in flight, hiding memory latency | Nothing — same as above |
+| What `num_stages` controls | Requested pipeline staging; actual overlap depends on the lowered kernel | Nothing — same as above |
 | Effect on the kernel's numeric output | None, for a correctly written kernel — these are performance knobs, not correctness knobs | None — genuinely unchanged across values, as Worked Example 10.2.1 shows |
-| Effect on wall-clock performance | Often dramatic — Chapter 19 measures this directly | Not measurable at all — this book's interpreter has no meaningful timing signal (Chapter 1's opening disclosure) |
+| Effect on wall-clock performance | Often dramatic — Chapter 19 explains how to measure this on a GPU | Not measurable at all — this book's interpreter has no meaningful timing signal (Chapter 1's opening disclosure) |
 
 ### Worked Example 10.2.1 — the same kernel, three different `num_warps`, one identical result
 
@@ -191,6 +193,8 @@ Sections 10.1–10.3 built up this chapter's findings as isolated probes. The fi
 
 ### File: `01_hardware_queries.py` — Section 10.1
 
+[Download the complete current reference](../examples/references/part1/05-targeting-hardware/01_hardware_queries.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_hardware_queries.py`
 
 ```python
@@ -225,6 +229,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_warps_and_stages.py` — Section 10.2
+
+[Download the complete current reference](../examples/references/part1/05-targeting-hardware/02_warps_and_stages.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 02_warps_and_stages.py`
 
@@ -266,6 +272,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_constexpr_hw_branch.py` — Section 10.3
+
+[Download the complete current reference](../examples/references/part1/05-targeting-hardware/03_constexpr_hw_branch.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 03_constexpr_hw_branch.py`
 
@@ -310,6 +318,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part1/05-targeting-hardware/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 

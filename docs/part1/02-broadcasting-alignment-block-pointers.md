@@ -1,5 +1,7 @@
 # Chapter 7: Broadcasting, Alignment, and Block Pointers
 
+[![Broadcasting expands an expression, not its storage](../images/ch07/01-concept.svg)](../images/ch07/01-concept.svg)
+
 > "Three things happen when you combine or access block-shaped values in Triton: one is checked at trace time and refuses to compile if you get it wrong, one is a promise you make to the compiler that nothing on the interpreter can ever verify, and one is an API that bundles shape and strides back together — but only for the specific rectangular tile it was built for, and only as far as you hand-typed those numbers correctly in the first place."
 
 **What you will understand by the end of this chapter:**
@@ -242,6 +244,8 @@ Sections 7.1–7.3 built up this chapter's findings as isolated probes. The file
 
 ### File: `01_broadcasting.py` — Section 7.1
 
+[Download the complete current reference](../examples/references/part1/02-broadcasting-alignment-block-pointers/01_broadcasting.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_broadcasting.py`
 
 ```python
@@ -308,6 +312,8 @@ if __name__ == "__main__":
 
 ### File: `02_alignment_hints.py` — Section 7.2
 
+[Download the complete current reference](../examples/references/part1/02-broadcasting-alignment-block-pointers/02_alignment_hints.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 02_alignment_hints.py`
 
 ```python
@@ -360,6 +366,8 @@ if __name__ == "__main__":
 
 ### File: `03_block_pointers.py` — Section 7.3
 
+[Download the complete current reference](../examples/references/part1/02-broadcasting-alignment-block-pointers/03_block_pointers.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 03_block_pointers.py`
 
 ```python
@@ -403,6 +411,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part1/02-broadcasting-alignment-block-pointers/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 

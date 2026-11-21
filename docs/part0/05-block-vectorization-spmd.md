@@ -1,5 +1,7 @@
 # Chapter 5: Block-Level Vectorization and the SPMD Model
 
+[![Vectorize the block, mask the tail](../images/ch05/01-concept.svg)](../images/ch05/01-concept.svg)
+
 > "SIMD and SPMD look like near-anagrams because they're describing the same instinct — do many things at once — at two different scales. Confuse which scale you're actually operating at, and you'll reach for a remainder loop Triton never needed, or assume two programs are running in lockstep when they were never promised to be."
 
 **What you will understand by the end of this chapter:**
@@ -190,6 +192,8 @@ Sections 5.1–5.4 walked through this chapter's ideas as isolated snippets. The
 
 ### File: `01_simd_vs_spmd.py` — Sections 5.1 and 5.2
 
+[Download the complete current reference](../examples/references/part0/05-block-vectorization-spmd/01_simd_vs_spmd.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_simd_vs_spmd.py`
 
 ```python
@@ -247,6 +251,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_reduction_and_transpose.py` — Sections 5.3 and 5.4
+
+[Download the complete current reference](../examples/references/part0/05-block-vectorization-spmd/02_reduction_and_transpose.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 02_reduction_and_transpose.py`
 
@@ -316,6 +322,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part0/05-block-vectorization-spmd/03_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 03_standalone_complete.py`
 

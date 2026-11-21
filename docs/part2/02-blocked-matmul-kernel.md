@@ -1,5 +1,7 @@
 # Chapter 13: The Blocked Matmul Kernel
 
+[![Every output sums the complete K dimension](../images/ch13/01-concept.svg)](../images/ch13/01-concept.svg)
+
 > "Every kernel through Chapter 12 computed each output position from exactly one corresponding input position — masking kept a launch honest at its edges, but no output ever depended on more than a handful of nearby inputs. A matmul breaks that completely: every single output element depends on an entire row of one matrix and an entire column of the other, and the only way to compute it without reading the whole thing back from memory over and over is to accumulate across tiles, in a loop, inside the kernel itself."
 
 **What you will understand by the end of this chapter:**
@@ -53,7 +55,7 @@ def matmul_kernel(a_ptr, b_ptr, c_ptr, M, N, K,
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
 
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     c_mask = (rows[:, None] < M) & (cols[None, :] < N)
@@ -190,7 +192,7 @@ Chapter 1, Section 1.3 showed that summing 2,048 copies of a small `fp16` number
 acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)   # fp32 accumulator
 for k0 in range(0, K, BLOCK_K):
     ...
-    acc += tl.dot(a, b)
+    acc += tl.dot(a, b, input_precision="ieee")
 ...
 tl.store(c_ptrs, acc.to(tl.float16), mask=c_mask)   # cast down only at the very end
 ```
@@ -201,7 +203,7 @@ against
 acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float16)   # fp16 accumulator
 for k0 in range(0, K, BLOCK_K):
     ...
-    partial = tl.dot(a, b).to(tl.float16)
+    partial = tl.dot(a, b, input_precision="ieee").to(tl.float16)
     acc += partial   # rounds to fp16 every single K-chunk
 ```
 
@@ -222,6 +224,8 @@ The `fp32`-accumulated kernel stays within `~1e-4` of the `fp64` ground truth ev
 Sections 13.1–13.3 built up this chapter's findings as isolated probes. The files below are the actual, complete, run-in-order source. `04_standalone_complete.py` combines everything from Sections 13.1 through 13.3 into a single script; its output is reproduced in full afterward. All were run exactly as shown, with `TRITON_INTERPRET=1` set, per Chapter 1's opening disclosure.
 
 ### File: `01_tiled_matmul.py` — Section 13.1
+
+[Download the complete current reference](../examples/references/part2/02-blocked-matmul-kernel/01_tiled_matmul.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 01_tiled_matmul.py`
 
@@ -249,7 +253,7 @@ def matmul_kernel(a_ptr, b_ptr, c_ptr, M, N, K,
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
 
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     c_mask = (rows[:, None] < M) & (cols[None, :] < N)
@@ -286,6 +290,8 @@ if __name__ == "__main__":
 
 ### File: `02_three_way_masking.py` — Section 13.2
 
+[Download the complete current reference](../examples/references/part2/02-blocked-matmul-kernel/02_three_way_masking.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 02_three_way_masking.py`
 
 ```python
@@ -311,7 +317,7 @@ def matmul_kernel(a_ptr, b_ptr, c_ptr, M, N, K,
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     c_mask = (rows[:, None] < M) & (cols[None, :] < N)
     tl.store(c_ptrs, acc, mask=c_mask)
@@ -334,7 +340,7 @@ def matmul_kernel_no_k_mask(a_ptr, b_ptr, c_ptr, M, N, K,
         b_mask = (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     c_mask = (rows[:, None] < M) & (cols[None, :] < N)
     tl.store(c_ptrs, acc, mask=c_mask)
@@ -390,6 +396,8 @@ if __name__ == "__main__":
 
 ### File: `03_accumulation_precision.py` — Section 13.3
 
+[Download the complete current reference](../examples/references/part2/02-blocked-matmul-kernel/03_accumulation_precision.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 03_accumulation_precision.py`
 
 ```python
@@ -415,7 +423,7 @@ def matmul_kernel_fp32_acc(a_ptr, b_ptr, c_ptr, M, N, K,
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     c_mask = (rows[:, None] < M) & (cols[None, :] < N)
     tl.store(c_ptrs, acc.to(tl.float16), mask=c_mask)
@@ -438,7 +446,7 @@ def matmul_kernel_fp16_acc(a_ptr, b_ptr, c_ptr, M, N, K,
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        partial = tl.dot(a, b).to(tl.float16)
+        partial = tl.dot(a, b, input_precision="ieee").to(tl.float16)
         acc += partial
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     c_mask = (rows[:, None] < M) & (cols[None, :] < N)
@@ -478,6 +486,8 @@ if __name__ == "__main__":
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
 
+[Download the complete current reference](../examples/references/part2/02-blocked-matmul-kernel/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 
 ```python
@@ -503,7 +513,7 @@ def matmul_kernel(a_ptr, b_ptr, c_ptr, M, N, K,
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     c_mask = (rows[:, None] < M) & (cols[None, :] < N)
     tl.store(c_ptrs, acc, mask=c_mask)
@@ -526,7 +536,7 @@ def matmul_kernel_no_k_mask(a_ptr, b_ptr, c_ptr, M, N, K,
         b_mask = (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     c_mask = (rows[:, None] < M) & (cols[None, :] < N)
     tl.store(c_ptrs, acc, mask=c_mask)
@@ -549,7 +559,7 @@ def matmul_kernel_fp16_acc(a_ptr, b_ptr, c_ptr, M, N, K,
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        partial = tl.dot(a, b).to(tl.float16)
+        partial = tl.dot(a, b, input_precision="ieee").to(tl.float16)
         acc += partial
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     c_mask = (rows[:, None] < M) & (cols[None, :] < N)
@@ -647,3 +657,7 @@ The matmul kernel in this chapter accumulates a genuine reduction — a sum over
 **4.** The `fp16` accumulator rounds its running total back to `fp16` precision after *every single `K`-iteration*, so each of the 128 iterations in Worked Example 13.3.1 is an independent opportunity to lose a small amount of precision, and these losses compound across iterations rather than canceling out — this is exactly Chapter 1, Section 1.3's finding about repeated rounding of a running total, now happening once per `K`-tile instead of once per element. The `fp32` accumulator only loses precision once, when the final result is cast down to `fp16` for storage, so its error stays roughly constant regardless of how many `K`-iterations occurred, while the `fp16` accumulator's error grows with the loop's length.
 
 **5.** `tl.dot(a, b)`'s `fp32`-typed result only reflects the precision of that *one* tile's multiplication. What happens to that result immediately afterward is a separate decision entirely: Worked Example 13.3.1's buggy kernel explicitly cast that `fp32` result back down to `fp16` (`tl.dot(a, b).to(tl.float16)`) before adding it into an `fp16` accumulator, discarding the precision `tl.dot` had just provided before the addition even happened. The accumulator's own declared dtype across the whole `K`-loop — not `tl.dot`'s internal per-call behavior — is what determines whether that precision survives accumulation or gets thrown away one `K`-tile at a time.
+
+### Taking the hand-sized tile to a compiled GPU
+
+The BLOCK=4 and BLOCK_K=8 traces are interpreter examples. They are below the NVIDIA v3.3.1 dot backend's minimum non-INT8 dimensions (16,16,16); merely setting `TRITON_INTERPRET=0` does not make those launches valid. Keep logical M/N/K arbitrary, choose supported power-of-two physical tile extents, and use masks for all three tails. A new GPU run must allocate CUDA tensors and use independent numerical and memory checks. Current FP32 teaching dots request IEEE input precision; the historical interpreter outputs do not establish compiled performance.

@@ -1,0 +1,38 @@
+name: Verify and deploy book
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: triton-book-main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install documentation dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Check complete sources and worked mathematics without a GPU
+        run: python tools/verify_book.py
+      - name: Check SVG fonts, geometry and label overlap
+        run: python tools/verify_svg_readability.py
+      - name: Check viewer syntax
+        run: node --check docs/javascripts/image-viewer.js
+      - name: Build strictly
+        run: mkdocs build --strict
+      - name: Check built links
+        run: python tools/verify_site_links.py
+      - name: Publish verified site
+        run: mkdocs gh-deploy --force

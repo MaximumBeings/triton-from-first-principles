@@ -1,5 +1,7 @@
 # Chapter 20: Fused Kernels for Real Layers
 
+[![Layer normalization reduces within each row](../images/ch20/01-concept.svg)](../images/ch20/01-concept.svg)
+
 > `torch.nn.Linear` followed by an activation, or `torch.nn.LayerNorm` on its own, are each three or four separate memory round trips when built from ordinary PyTorch operators. A real fused kernel reads its input once and writes its output once, no matter how many logical steps sit in between.
 
 ## What you will understand by the end of this chapter
@@ -56,7 +58,7 @@ def fused_linear_gelu_kernel(a_ptr, b_ptr, bias_ptr, c_ptr, M, N, K,
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
 
     # fused epilogue: bias add (broadcast per output COLUMN), then exact GELU
     bias = tl.load(bias_ptr + cols, mask=cols < N, other=0.0)
@@ -293,6 +295,8 @@ The three files below build up the chapter in order: the fused Linear+bias+GELU 
 
 ### File: `01_fused_linear_gelu.py`
 
+[Download the complete current reference](../examples/references/part6/01-fused-kernels-for-real-layers/01_fused_linear_gelu.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -317,7 +321,7 @@ def fused_linear_gelu_kernel(a_ptr, b_ptr, bias_ptr, c_ptr, M, N, K,
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
 
     bias = tl.load(bias_ptr + cols, mask=cols < N, other=0.0)
     acc = acc + bias[None, :]
@@ -348,7 +352,7 @@ def fused_linear_gelu_kernel_buggy_bias_axis(a_ptr, b_ptr, bias_ptr, c_ptr, M, N
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
 
     bias = tl.load(bias_ptr + rows, mask=rows < M, other=0.0)  # BUG: wrong axis AND wrong bound
     acc = acc + bias[:, None]
@@ -399,6 +403,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_row_mean_var.py`
+
+[Download the complete current reference](../examples/references/part6/01-fused-kernels-for-real-layers/02_row_mean_var.py) (interpreter mode; GPU portability is not established).
 
 ```python
 import torch
@@ -454,6 +460,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_fused_layernorm.py`
+
+[Download the complete current reference](../examples/references/part6/01-fused-kernels-for-real-layers/03_fused_layernorm.py) (interpreter mode; GPU portability is not established).
 
 ```python
 import torch
@@ -556,6 +564,8 @@ if __name__ == "__main__":
 
 ### File: `04_standalone_complete.py`
 
+[Download the complete current reference](../examples/references/part6/01-fused-kernels-for-real-layers/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
+
 ```python
 """
 Chapter 20 standalone: fusing a matmul epilogue with bias+GELU, the row-wise
@@ -589,7 +599,7 @@ def fused_linear_gelu_kernel(a_ptr, b_ptr, bias_ptr, c_ptr, M, N, K,
         b_mask = (ks[:, None] < K) & (cols[None, :] < N)
         a = tl.load(a_ptrs, mask=a_mask, other=0.0)
         b = tl.load(b_ptrs, mask=b_mask, other=0.0)
-        acc += tl.dot(a, b)
+        acc += tl.dot(a, b, input_precision="ieee")
 
     bias = tl.load(bias_ptr + cols, mask=cols < N, other=0.0)
     acc = acc + bias[None, :]

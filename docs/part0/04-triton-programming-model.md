@@ -1,5 +1,7 @@
 # Chapter 4: The Triton Programming Model
 
+[![A launch grid is a grid of program instances](../images/ch04/01-concept.svg)](../images/ch04/01-concept.svg)
+
 > "CUDA hands you one soldier and asks you to figure out the army. Triton hands you the platoon directly, already organized, and asks a different question: given that every program you write already thinks in whole blocks of data at once, what exactly did you stop having to write by hand?"
 
 **What you will understand by the end of this chapter:**
@@ -185,6 +187,8 @@ Sections 4.1–4.4 walked through this chapter's ideas as isolated snippets. The
 
 ### File: `01_program_hierarchy_and_grid.py` — Sections 4.1 and 4.2
 
+[Download the complete current reference](../examples/references/part0/04-triton-programming-model/01_program_hierarchy_and_grid.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_program_hierarchy_and_grid.py`
 
 ```python
@@ -240,6 +244,8 @@ if __name__ == "__main__":
 
 ### File: `02_naive_matmul_one_row.py` — Section 4.4
 
+[Download the complete current reference](../examples/references/part0/04-triton-programming-model/02_naive_matmul_one_row.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 02_naive_matmul_one_row.py`
 
 ```python
@@ -289,6 +295,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part0/04-triton-programming-model/03_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 03_standalone_complete.py`
 

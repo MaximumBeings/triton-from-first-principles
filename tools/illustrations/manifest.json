@@ -1,0 +1,140 @@
+[
+  {
+    "chapter": 1,
+    "path": "docs/images/ch01/01-concept.svg",
+    "title": "Compile a signature, then launch its programs",
+    "height": 702
+  },
+  {
+    "chapter": 2,
+    "path": "docs/images/ch02/01-concept.svg",
+    "title": "Separate the problem from its tile configuration",
+    "height": 673
+  },
+  {
+    "chapter": 3,
+    "path": "docs/images/ch03/01-concept.svg",
+    "title": "A logical coordinate is not a byte address",
+    "height": 739
+  },
+  {
+    "chapter": 4,
+    "path": "docs/images/ch04/01-concept.svg",
+    "title": "A launch grid is a grid of program instances",
+    "height": 693
+  },
+  {
+    "chapter": 5,
+    "path": "docs/images/ch05/01-concept.svg",
+    "title": "Vectorize the block, mask the tail",
+    "height": 695
+  },
+  {
+    "chapter": 6,
+    "path": "docs/images/ch06/01-concept.svg",
+    "title": "The caller owns the pointer-and-stride contract",
+    "height": 729
+  },
+  {
+    "chapter": 7,
+    "path": "docs/images/ch07/01-concept.svg",
+    "title": "Broadcasting expands an expression, not its storage",
+    "height": 635
+  },
+  {
+    "chapter": 8,
+    "path": "docs/images/ch08/01-concept.svg",
+    "title": "Allocate on the host, populate on the device",
+    "height": 727
+  },
+  {
+    "chapter": 9,
+    "path": "docs/images/ch09/01-concept.svg",
+    "title": "A causal mask includes the diagonal",
+    "height": 921
+  },
+  {
+    "chapter": 10,
+    "path": "docs/images/ch10/01-concept.svg",
+    "title": "Logical blocks are distributed over physical threads",
+    "height": 764
+  },
+  {
+    "chapter": 11,
+    "path": "docs/images/ch11/01-concept.svg",
+    "title": "Balance live values against resident work",
+    "height": 729
+  },
+  {
+    "chapter": 12,
+    "path": "docs/images/ch12/01-concept.svg",
+    "title": "Fuse elementwise work without changing its equation",
+    "height": 710
+  },
+  {
+    "chapter": 13,
+    "path": "docs/images/ch13/01-concept.svg",
+    "title": "Every output sums the complete K dimension",
+    "height": 871
+  },
+  {
+    "chapter": 14,
+    "path": "docs/images/ch14/01-concept.svg",
+    "title": "Padding needs the reduction identity",
+    "height": 634
+  },
+  {
+    "chapter": 15,
+    "path": "docs/images/ch15/01-concept.svg",
+    "title": "Autograd connects a forward to a backward contract",
+    "height": 789
+  },
+  {
+    "chapter": 16,
+    "path": "docs/images/ch16/01-concept.svg",
+    "title": "Differentiate the function actually implemented",
+    "height": 702
+  },
+  {
+    "chapter": 17,
+    "path": "docs/images/ch17/01-concept.svg",
+    "title": "Fan-in adds gradient contributions",
+    "height": 558
+  },
+  {
+    "chapter": 18,
+    "path": "docs/images/ch18/01-concept.svg",
+    "title": "Autotuning chooses among correct candidates",
+    "height": 727
+  },
+  {
+    "chapter": 19,
+    "path": "docs/images/ch19/01-concept.svg",
+    "title": "Time the intended interval, not host enqueue calls",
+    "height": 754
+  },
+  {
+    "chapter": 20,
+    "path": "docs/images/ch20/01-concept.svg",
+    "title": "Layer normalization reduces within each row",
+    "height": 643
+  },
+  {
+    "chapter": 21,
+    "path": "docs/images/ch21/01-concept.svg",
+    "title": "Stream attention without storing the whole score matrix",
+    "height": 917
+  },
+  {
+    "chapter": 22,
+    "path": "docs/images/ch22/01-concept.svg",
+    "title": "Monte Carlo pricing is a mean of discounted payoffs",
+    "height": 725
+  },
+  {
+    "chapter": 0,
+    "path": "docs/images/ch00/01-concept.svg",
+    "title": "From tensor contracts to checked GPU kernels",
+    "height": 727
+  }
+]

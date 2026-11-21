@@ -1,0 +1,425 @@
+{
+  "base_commit": "f4b3c81f83c19ae2641722e752502e4613234821",
+  "sources": [
+    {
+      "page": "docs/part0/01-types-and-the-jit-boundary.md",
+      "name": "01_two_phase_and_constexpr.py",
+      "sha256": "b8b6b3e2013df34ebc1004d3ec5e759131757d549b63b791763b1cae95cf6aab"
+    },
+    {
+      "page": "docs/part0/01-types-and-the-jit-boundary.md",
+      "name": "02_dtype_promotion_and_precision.py",
+      "sha256": "8f76db7e1edbe6fb7b2bbcf1099ee65b106357009fe7e3ed439fe67813901525"
+    },
+    {
+      "page": "docs/part0/01-types-and-the-jit-boundary.md",
+      "name": "03_block_shaped_values.py",
+      "sha256": "46276ca14ad00018644b0927c3038ff6df8763cc7b76708c59654da10fcb83bd"
+    },
+    {
+      "page": "docs/part0/01-types-and-the-jit-boundary.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "c915ee8aeaaacd9a1f6a94113fbb0cff16be7a2137cf732c4b80b324e6faa0a6"
+    },
+    {
+      "page": "docs/part0/02-kernel-parameterization.md",
+      "name": "01_constexpr_shape_and_config.py",
+      "sha256": "137cfaed867a63b37dd7dab0cfb8861903267657918c8e13479fd9d692677bc5"
+    },
+    {
+      "page": "docs/part0/02-kernel-parameterization.md",
+      "name": "02_activation_branches.py",
+      "sha256": "7a4543d60dc6ac9db82750eae3938cbece3c46198ef057e57434ed2f6fc4145c"
+    },
+    {
+      "page": "docs/part0/02-kernel-parameterization.md",
+      "name": "03_standalone_complete.py",
+      "sha256": "64dd7b68377f17e78f7c4aa9f000e61cac8158524268fde69bf4b68bdca50f0e"
+    },
+    {
+      "page": "docs/part0/03-strides-pointers-memory-layout.md",
+      "name": "01_transaction_utilization.py",
+      "sha256": "82498d43edb86ed99930172d6efb15cc4fd8128d688f085526b007f21f413402"
+    },
+    {
+      "page": "docs/part0/03-strides-pointers-memory-layout.md",
+      "name": "02_stride_aware_kernels.py",
+      "sha256": "12cb77e1a900a722736dae07934c124131d157725bd60cf91272b2f9fb016f1a"
+    },
+    {
+      "page": "docs/part0/03-strides-pointers-memory-layout.md",
+      "name": "03_standalone_complete.py",
+      "sha256": "ba61fc8bc9178851d2ff7af49f1f1462555dfc1ad19a166adf86a42a4de30621"
+    },
+    {
+      "page": "docs/part0/04-triton-programming-model.md",
+      "name": "01_program_hierarchy_and_grid.py",
+      "sha256": "188694e4c9e078a39e94faa40b6f3d33a84ef8668fb9c63a4beccce0a1a39f95"
+    },
+    {
+      "page": "docs/part0/04-triton-programming-model.md",
+      "name": "02_naive_matmul_one_row.py",
+      "sha256": "cdf046ef8a7d12de8f5f0b09200b8ee4b1bd53a59d9d50df444b392a783b103d"
+    },
+    {
+      "page": "docs/part0/04-triton-programming-model.md",
+      "name": "03_standalone_complete.py",
+      "sha256": "a7978b271b5b936094e5078eeb0fc41e7b72d0b25c66eabbbb146b81ed107d9e"
+    },
+    {
+      "page": "docs/part0/05-block-vectorization-spmd.md",
+      "name": "01_simd_vs_spmd.py",
+      "sha256": "0861fffc7e29b0bf6e01c5d6ea882e5a19960c52a42dd0f33164fc279ae15260"
+    },
+    {
+      "page": "docs/part0/05-block-vectorization-spmd.md",
+      "name": "02_reduction_and_transpose.py",
+      "sha256": "e9ab391dfc4d1036b67fc515efeebf05c141bd034747d4b2598994e482fe288c"
+    },
+    {
+      "page": "docs/part0/05-block-vectorization-spmd.md",
+      "name": "03_standalone_complete.py",
+      "sha256": "55d627c47099d3143867250e0b4b85bd84d2772e19aecf5479fe190cec8e2cd1"
+    },
+    {
+      "page": "docs/part1/01-pointer-stride-contract.md",
+      "name": "01_pointer_boundary.py",
+      "sha256": "a72b13592474dfad207aa719fb8eaca858c8fae49f9c0e6a5b45634a98b6bb74"
+    },
+    {
+      "page": "docs/part1/01-pointer-stride-contract.md",
+      "name": "02_shape_stride_promise.py",
+      "sha256": "ce5ab87b53ccb21ffbabe8acbe855a5edd508fad23583753e039c57e64e542a2"
+    },
+    {
+      "page": "docs/part1/01-pointer-stride-contract.md",
+      "name": "03_dtype_specialization.py",
+      "sha256": "30829f5b62637a3fada0d038d80293b97876c1527759d8d73b857102ce80b282"
+    },
+    {
+      "page": "docs/part1/01-pointer-stride-contract.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "9eb719c914274f235efadd700d4e0cd86a0d5553854828290e59df7af71c32d2"
+    },
+    {
+      "page": "docs/part1/02-broadcasting-alignment-block-pointers.md",
+      "name": "01_broadcasting.py",
+      "sha256": "6d7b1e68487b7a2e7764244d0d00d3b449a208631d51685df15609e1eec7a873"
+    },
+    {
+      "page": "docs/part1/02-broadcasting-alignment-block-pointers.md",
+      "name": "02_alignment_hints.py",
+      "sha256": "c4de41b8b2a163724290f36c8b447df151332bb4474ae82ac5c6190fa34daba6"
+    },
+    {
+      "page": "docs/part1/02-broadcasting-alignment-block-pointers.md",
+      "name": "03_block_pointers.py",
+      "sha256": "d066a067bafad6bae915cd2981b697c0b984b16220325d8c6d16b3141c005ce7"
+    },
+    {
+      "page": "docs/part1/02-broadcasting-alignment-block-pointers.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "23211e14b63b4ffd57696e192887fbb32f4e431e355bb2fb4ecb8fd332c48010"
+    },
+    {
+      "page": "docs/part1/03-gpu-side-construction.md",
+      "name": "01_no_allocation.py",
+      "sha256": "dde02ea1020928a8714b345886c7a378cb00ff4f469542eea6a616b3baa57269"
+    },
+    {
+      "page": "docs/part1/03-gpu-side-construction.md",
+      "name": "02_factory_wrapper.py",
+      "sha256": "52522cad6e7c53d05a380b84d909a502791579461d9bd6e92cf3fb2083eb4f3f"
+    },
+    {
+      "page": "docs/part1/03-gpu-side-construction.md",
+      "name": "03_device_placement.py",
+      "sha256": "bab5d7acee73ecbc89b537c2e1b266132a772541c13f87d3f53b52f6f700123f"
+    },
+    {
+      "page": "docs/part1/03-gpu-side-construction.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "67daa00f01e74ce5c898a15ef1937c1eaad0c23ca22a24cb3f0e57f77216aa9f"
+    },
+    {
+      "page": "docs/part1/04-mask-and-structure-kernels.md",
+      "name": "01_triangular_masks.py",
+      "sha256": "6db95a3b9ded3f014c6a109b1403ea3dc8cd6f677829488c466cbf38e739e28a"
+    },
+    {
+      "page": "docs/part1/04-mask-and-structure-kernels.md",
+      "name": "02_block_sparse.py",
+      "sha256": "110da6214c104cc0efa008710696c37d2e5f4800dad3067bffba1e174de38bd2"
+    },
+    {
+      "page": "docs/part1/04-mask-and-structure-kernels.md",
+      "name": "03_ragged_batches.py",
+      "sha256": "83c25cda35b78926aefe9864e4c526dfe1f590da7be8a564ca541a121184d55c"
+    },
+    {
+      "page": "docs/part1/04-mask-and-structure-kernels.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "9ca57aa6af4957b5b1cbe6199ca19a142861658dfd4dc8b5aeeb65af28385e85"
+    },
+    {
+      "page": "docs/part1/05-targeting-hardware.md",
+      "name": "01_hardware_queries.py",
+      "sha256": "6ca36d09f2537d888a3f4a522938a382a18556901a48efa178b42188d5f253b6"
+    },
+    {
+      "page": "docs/part1/05-targeting-hardware.md",
+      "name": "02_warps_and_stages.py",
+      "sha256": "40c0dd21add1d336e9ce4f6121dcef161e24698e55472231d2b8b538786929e0"
+    },
+    {
+      "page": "docs/part1/05-targeting-hardware.md",
+      "name": "03_constexpr_hw_branch.py",
+      "sha256": "84dc759ff78a34c903fd0d9b3052b25a4bb8c3ef4cc6dc1a467cf3270de5747f"
+    },
+    {
+      "page": "docs/part1/05-targeting-hardware.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "99f23ed381d866e41823d5824ff49805b7f2e5e0b1b3d3e90062e1a0e4137acc"
+    },
+    {
+      "page": "docs/part1/06-shared-memory-register-pressure.md",
+      "name": "01_kernel_cache.py",
+      "sha256": "bd9269aca6d3c9a3fe278ebe9bafc1038ea7b2b1fae069206b1793c893d4f02b"
+    },
+    {
+      "page": "docs/part1/06-shared-memory-register-pressure.md",
+      "name": "02_register_pressure.py",
+      "sha256": "fd113fbe8163e09ccfcec8442abf1ee737a946fb252f1f9a591e3984bfacd5f1"
+    },
+    {
+      "page": "docs/part1/06-shared-memory-register-pressure.md",
+      "name": "03_shared_memory_dot.py",
+      "sha256": "37430ae09137764afb44b8e642f8234a51780f50ce7a45fe3109ae4cdbc366c8"
+    },
+    {
+      "page": "docs/part1/06-shared-memory-register-pressure.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "3f3cfe5c83109e094e740b3e0d5aeeeabb6641b5b0453489dce61a0a7fb9cc64"
+    },
+    {
+      "page": "docs/part2/01-elementwise-kernels.md",
+      "name": "01_fused_fma_relu.py",
+      "sha256": "1743e8ee8777b4d9ca99e5115e89367cebe215706ff525b2575ab9e86cf42bcb"
+    },
+    {
+      "page": "docs/part2/01-elementwise-kernels.md",
+      "name": "02_memory_pass_counting.py",
+      "sha256": "e8aa19bb088d3e9094eb4282dbb7a685cc67f16641bc4c06ae37784918f0d584"
+    },
+    {
+      "page": "docs/part2/01-elementwise-kernels.md",
+      "name": "03_gelu_oracle_verified.py",
+      "sha256": "83d2a8393173f71fab0283c4f703da2dfa1e0caec9381cee380e39684fe2aeca"
+    },
+    {
+      "page": "docs/part2/01-elementwise-kernels.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "7366a09b37a091fdb25612f6860143c573411b5f3f2f3cf6b7ce6eda0e050543"
+    },
+    {
+      "page": "docs/part2/02-blocked-matmul-kernel.md",
+      "name": "01_tiled_matmul.py",
+      "sha256": "8ab58e0978c1788cb5574efa76264ed68e1e1637e8f65236375e6b263318c422"
+    },
+    {
+      "page": "docs/part2/02-blocked-matmul-kernel.md",
+      "name": "02_three_way_masking.py",
+      "sha256": "3814ea32c28ae4ad3ae8b522364edb2283c00dd1fcd5265c685eb5e59bd7ed02"
+    },
+    {
+      "page": "docs/part2/02-blocked-matmul-kernel.md",
+      "name": "03_accumulation_precision.py",
+      "sha256": "4ef13a3a3e1c998cf7c124e698b59fb0fb3d15718f50dabf7137f12e31e21bd2"
+    },
+    {
+      "page": "docs/part2/02-blocked-matmul-kernel.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "c4dc132f456bbd718a0faba313c5ef58d76716eeddcc844f566f6346a874d62b"
+    },
+    {
+      "page": "docs/part2/03-reduction-kernels.md",
+      "name": "01_row_reductions.py",
+      "sha256": "ed099688beb11cb207e8a8112340c41685db5b02f43904917053701056924968"
+    },
+    {
+      "page": "docs/part2/03-reduction-kernels.md",
+      "name": "02_stable_softmax.py",
+      "sha256": "e939ba0bc850b2ae3c6e97446633670d3b470e3bb9f6192ffee3b93aa8b30825"
+    },
+    {
+      "page": "docs/part2/03-reduction-kernels.md",
+      "name": "03_online_softmax.py",
+      "sha256": "f546382b0b8c6ef61e0f20a4521ef2b23d40dcff57e956bae7e53e013d149e3e"
+    },
+    {
+      "page": "docs/part2/03-reduction-kernels.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "2ad47cca5f7484cc7f244b9287cfccb37d4c74b4a16d98b381567f145eb3da44"
+    },
+    {
+      "page": "docs/part3/01-autograd-function-graph-node.md",
+      "name": "01_invisible_to_autograd.py",
+      "sha256": "e81e3eadaa8474d8fa3392af963aa65ff31acc87543d419d377e5c249695fc73"
+    },
+    {
+      "page": "docs/part3/01-autograd-function-graph-node.md",
+      "name": "02_autograd_function.py",
+      "sha256": "adca75370cc9ef994fcd2183c60c962cbc102ac8fad1ff53512a7102f0fdb71a"
+    },
+    {
+      "page": "docs/part3/01-autograd-function-graph-node.md",
+      "name": "03_save_for_backward.py",
+      "sha256": "32e57adc7d4951490ecbbc42d26a49f9303089d337e392a3570a7019555b1847"
+    },
+    {
+      "page": "docs/part3/01-autograd-function-graph-node.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "94a6804860de0a1d29742c4a592d04938f58c9987b06af82de3d057fe8eed29e"
+    },
+    {
+      "page": "docs/part4/01-writing-the-backward-kernel.md",
+      "name": "01_backward_kernel.py",
+      "sha256": "6ae2c85a546e313fd7762fb1e49afb9f36136823d610aa0841ae0b5f9cf5050e"
+    },
+    {
+      "page": "docs/part4/01-writing-the-backward-kernel.md",
+      "name": "02_masked_multiblock.py",
+      "sha256": "9152e9912303f7bd10252e0f591c4b1b13d9091a50bc98f4b93903267fc18c7c"
+    },
+    {
+      "page": "docs/part4/01-writing-the-backward-kernel.md",
+      "name": "03_wired_tritongelu.py",
+      "sha256": "c4e50ea8bb86685bc771d7ee117272859cc1c0c0ba62769c88174d3eccdbf4b8"
+    },
+    {
+      "page": "docs/part4/01-writing-the-backward-kernel.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "73f54d0f74043f6e40baba794e1e448ae121108e2e9ed105e764854c9c62293a"
+    },
+    {
+      "page": "docs/part4/02-chaining-custom-ops.md",
+      "name": "01_chained_expression.py",
+      "sha256": "ea31dc5aa39d72ac55ec42956726c393fe397cc55310d694ba56754d11892b2f"
+    },
+    {
+      "page": "docs/part4/02-chaining-custom-ops.md",
+      "name": "02_graph_structure.py",
+      "sha256": "f981cb295b6c21636d3dda7a2324d2efdc24c42b013d2bb1edcb14af12e46a06"
+    },
+    {
+      "page": "docs/part4/02-chaining-custom-ops.md",
+      "name": "03_fan_in.py",
+      "sha256": "e4d7255f83484b9656e3b14e888fade36ae9a1cb4f90405dfe0b9f01107779fd"
+    },
+    {
+      "page": "docs/part4/02-chaining-custom-ops.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "91fb1301f536e6cc2ae5cb2dffed334c5a739c72c0de99980ea09b635ec59eaa"
+    },
+    {
+      "page": "docs/part5/01-autotuning.md",
+      "name": "01_config_space.py",
+      "sha256": "c5aaca0d5bcb49d2e33376e2f585f8fb759bd1eed0f3cb17ad5fdd4f06bf5c22"
+    },
+    {
+      "page": "docs/part5/01-autotuning.md",
+      "name": "02_autotune_attempt.py",
+      "sha256": "3cab01b0eecb52b83f30ea5d653f03bc7699c095010d1ffc3ecaeed6e52899be"
+    },
+    {
+      "page": "docs/part5/01-autotuning.md",
+      "name": "03_manual_sweep.py",
+      "sha256": "11902b581c3498b240ed72e0b425efc3f6c71b02502808dfd2e24eda37deab35"
+    },
+    {
+      "page": "docs/part5/01-autotuning.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "49135886808dcf86a6740ddf1bdd735375ecdf44be473e57dfa8533fcbb61d89"
+    },
+    {
+      "page": "docs/part5/02-benchmarking-correctly.md",
+      "name": "01_do_bench_attempt.py",
+      "sha256": "fe939d48fa2a2b7d1f0f0917dafb052c94a56cc49d318ce7ad6b444cd711a828"
+    },
+    {
+      "page": "docs/part5/02-benchmarking-correctly.md",
+      "name": "02_warmup_and_statistics.py",
+      "sha256": "4fb9bfc0a5a65d876311e8c9b4d26f210e47b50abb921fb468851f53d7bf7ef4"
+    },
+    {
+      "page": "docs/part5/02-benchmarking-correctly.md",
+      "name": "03_interpreter_timing_trap.py",
+      "sha256": "5339ac1e0c053d103667d9002a33920705562822968574724918c2ceaa443328"
+    },
+    {
+      "page": "docs/part5/02-benchmarking-correctly.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "966e118d415ea3646da2aea9f3b2019c0fddc05a077a116d8fd677397dd85f20"
+    },
+    {
+      "page": "docs/part6/01-fused-kernels-for-real-layers.md",
+      "name": "01_fused_linear_gelu.py",
+      "sha256": "10673bb3dedb0a7d6f8d74b170b75d3878cb7427b6642a5f447d8e45b7bf632b"
+    },
+    {
+      "page": "docs/part6/01-fused-kernels-for-real-layers.md",
+      "name": "02_row_mean_var.py",
+      "sha256": "a1da1b5d5ae384e8b0ef393fa4a82617fe8f69cd975483c11d900b7741b4dcbc"
+    },
+    {
+      "page": "docs/part6/01-fused-kernels-for-real-layers.md",
+      "name": "03_fused_layernorm.py",
+      "sha256": "56775fd63ebba8603edfecef1484ebcc55bc32dbc4903b5dec53645b6237dc0e"
+    },
+    {
+      "page": "docs/part6/01-fused-kernels-for-real-layers.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "cd48e4da26dca51898afc7954d95dbc443bcc55f38f3ebfbfdf2ecc2e3bb6b16"
+    },
+    {
+      "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
+      "name": "01_flash_attention_core.py",
+      "sha256": "93e365cff3cfd38ef7e93df81be4ca243e08e7475488a13ece86a6619827520b"
+    },
+    {
+      "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
+      "name": "02_causal_flash_attention.py",
+      "sha256": "db343fb3ecff101fc923fdc9a54abd1895ea0eecb46e532021fbaa343493db5c"
+    },
+    {
+      "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
+      "name": "03_moe_gating.py",
+      "sha256": "8f3df0704bc90de91aa1320a34b10156e9d228de65954ca8b7612863ff0d5812"
+    },
+    {
+      "page": "docs/part6/02-flash-attention-moe-advanced-features.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "8ca69ad718a63775fb7b422f11be06037bc21c5ce3e039cbcdeff44c90a314ac"
+    },
+    {
+      "page": "docs/part7/01-quantitative-finance-examples.md",
+      "name": "01_black_scholes.py",
+      "sha256": "8bdb4e5fed43bfc93ec00577abab75852f039f5e2e66f6601df25f5f4741a39e"
+    },
+    {
+      "page": "docs/part7/01-quantitative-finance-examples.md",
+      "name": "02_rolling_volatility.py",
+      "sha256": "7cd43b48002cfe02fc5dc069ed9fc3e619d85e7f11ce1f6a9e53bd414e9f377c"
+    },
+    {
+      "page": "docs/part7/01-quantitative-finance-examples.md",
+      "name": "03_monte_carlo_pricing.py",
+      "sha256": "a8a416c04d9b498cfdb43e1a4f3fca895ab242046d7807b41b37ec8866f44456"
+    },
+    {
+      "page": "docs/part7/01-quantitative-finance-examples.md",
+      "name": "04_standalone_complete.py",
+      "sha256": "03beb130190814cdb006e878d6d6667d950311b8f20fde448fd22d5ea355b59b"
+    }
+  ]
+}

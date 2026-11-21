@@ -1,5 +1,7 @@
 # Chapter 2: Kernel Parameterization
 
+[![Separate the problem from its tile configuration](../images/ch02/01-concept.svg)](../images/ch02/01-concept.svg)
+
 > "Mojo gives you a struct: write the layout once, and the compiler builds you a new type. Triton gives you no such thing — there is no keyword that hands you a new type at all. What it gives you instead is a kernel body that can be compiled into as many distinct, specialized versions of itself as you have combinations of compile-time values to feed it, plus a handful of ordinary Python objects to keep track of which combination is which. This chapter is about learning to see that as a feature, not an absence."
 
 **What you will understand by the end of this chapter:**
@@ -20,7 +22,7 @@
 
 ### Intuition
 
-A blueprint fixes a house's layout once, for every house built from it — Mojo's Chapter 2 opens with exactly this image for a `struct`. Triton has nothing that fixes a *data* layout this way, because a kernel doesn't own any persistent data to lay out in the first place — it operates on whatever pointers it's handed. But a kernel does have a "shape" that gets fixed once and stays fixed: the complete set of `tl.constexpr` values it was compiled with. Two compilations of the same source with different constexpr values are, structurally, exactly as separate from each other as two different structs would be — different internal loop counts, different register allocations, potentially entirely different branches present or absent — sharing nothing at the machine-code level despite sharing one Python function definition.
+A blueprint fixes a house's layout once, for every house built from it — Mojo's Chapter 2 opens with exactly this image for a `struct`. Triton has nothing that fixes a *data* layout this way, because a kernel doesn't own any persistent data to lay out in the first place — it operates on whatever pointers it's handed. But a kernel does have a "shape" that gets fixed once and stays fixed: the complete set of `tl.constexpr` values it was compiled with. Two compilations of the same source with different constexpr values are, structurally, exactly as separate from each other as two different structs would be — different internal loop counts, different register allocations, potentially entirely different branches present or absent — sharing a Python definition and potentially many final instructions, while retaining distinct specialization keys.
 
 ### Background
 
@@ -29,9 +31,9 @@ A blueprint fixes a house's layout once, for every house built from it — Mojo'
 | What gets fixed | Byte offsets of named fields | Loop bounds, buffer sizes, which branches exist |
 | Fixed at | Struct definition + parameter instantiation (compile time) | First launch with a given combination (compile time) |
 | Two different instantiations | Two separate compiled types (Section 2.3 in the Mojo edition) | Two separate compiled kernel binaries (Chapter 1, Section 1.1) |
-| What identifies "which one this is" | The type name plus its parameters, e.g. `Vector[DType.float32, 4]` | The tuple of constexpr values plus argument dtypes/shapes used to key the compile cache |
+| What identifies "which one this is" | The type name plus its parameters, e.g. `Vector[DType.float32, 4]` | The tuple of constexpr values plus argument types and specialization attributes used to key the compile cache |
 
-Chapter 1's `_relu_toggle_kernel` already demonstrated this mechanism directly — `USE_RELU=True` and `USE_RELU=False` compiled to two kernels sharing no machine code — without naming what that mechanism was standing in for. It's worth naming now, because the rest of this chapter builds directly on it: everywhere Mojo's Chapter 2 reaches for "a new struct instantiation," this book will reach for "a new constexpr combination."
+Chapter 1's `_relu_toggle_kernel` already demonstrated this mechanism directly — `USE_RELU=True` and `USE_RELU=False` compiled to two kernels stored as distinct specialization artifacts; their final instruction sequences can overlap — without naming what that mechanism was standing in for. It's worth naming now, because the rest of this chapter builds directly on it: everywhere Mojo's Chapter 2 reaches for "a new struct instantiation," this book will reach for "a new constexpr combination."
 
 ### Worked Example 2.1.1 — Two `BLOCK` values, two compiled artifacts, traced through `tl.static_print`
 
@@ -46,7 +48,7 @@ def shape_kernel(x_ptr, out_ptr, n, BLOCK: tl.constexpr):
     tl.store(out_ptr + offsets, x * 2.0, mask=mask)
 ```
 
-`tl.static_print` fires during tracing — once per compilation this book's interpreter performs, not once per element processed. Launching against `x = [0, 1, 2, 3, 4, 5, 6, 7]` first with `BLOCK=8`, then with `BLOCK=16`, genuinely captured:
+On the compiled path, `tl.static_print` is evaluated while generating a specialization. Under the interpreter it prints during interpreted program execution and does not demonstrate a compilation event. The historical interpreter transcript below uses the author's label `COMPILING`, but that label is literal text, not a report from the compiler. The two launches pass BLOCK=8 and BLOCK=16:
 
 ```
 COMPILING a version with BLOCK = 8
@@ -55,7 +57,7 @@ COMPILING a version with BLOCK = 16
 BLOCK=16 result: [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0]
 ```
 
-The numeric result is identical either way — doubling eight numbers doesn't care whether it's done by a kernel shaped for 8 lanes or 16 — but the `COMPILING` line fires twice, once per distinct `BLOCK` value, exactly as Chapter 1 established. That's the whole point of this section: **the numbers here don't distinguish the two kernels at all — only the constexpr-keyed compilation event does.** A struct's two instantiations are told apart by their type name; a kernel's two instantiations are told apart by nothing visible in its output, only by the compile-time event that produced each one.
+The numeric results match. On a compiled path the differing constexpr values select distinct specialization keys; whether their final instructions differ requires inspecting compiled artifacts. These interpreter messages show metadata values and arithmetic, not that two GPU binaries were built or cached.
 
 ### ASCII Diagram — one source, two compiled shapes, invisible from the output alone
 
@@ -260,6 +262,8 @@ Sections 2.1–2.5 walked through this chapter's ideas as isolated snippets. The
 
 ### File: `01_constexpr_shape_and_config.py` — Sections 2.1 and 2.2
 
+[Download the complete current reference](../examples/references/part0/02-kernel-parameterization/01_constexpr_shape_and_config.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_constexpr_shape_and_config.py`
 
 ```python
@@ -307,6 +311,8 @@ if __name__ == "__main__":
 
 ### File: `02_activation_branches.py` — Section 2.5
 
+[Download the complete current reference](../examples/references/part0/02-kernel-parameterization/02_activation_branches.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 02_activation_branches.py`
 
 ```python
@@ -344,6 +350,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part0/02-kernel-parameterization/03_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 03_standalone_complete.py`
 
@@ -465,7 +473,7 @@ Every parameter this chapter treated as a `tl.constexpr` — `BLOCK`, `USE_RELU`
 
 ## Worked Solutions
 
-**1.** They are two entirely separate compiled artifacts, sharing no machine code, produced by two independent trace-and-compile events — the fact that their *numeric output* happens to match on this particular input says nothing about whether their *compiled code* matches, any more than two different structs computing the same number from different formulas would be "the same struct." Section 2.1's `tl.static_print("COMPILING a version with BLOCK =", BLOCK)` is exactly the evidence: it fires once per genuinely distinct compilation, and Worked Example 2.1.1 captured it firing twice — once for `BLOCK=8`, once for `BLOCK=16` — even though the two resulting outputs were identical down to every digit.
+**1.** On the compiled path the BLOCK values select distinct specialization keys; the generated instructions need not be disjoint. In this interpreter transcript no GPU artifact was compiled. The literal `COMPILING` message is not evidence of compilation or cache behavior.
 
 **2.** `triton.Config` is an ordinary Python object; its constructor stores whatever `kwargs` dictionary it's handed without validating any of the keys against a real kernel's parameter names, because at construction time no particular kernel has even been associated with it yet — a `Config` can be built, inspected, and passed around long before it's ever paired with a kernel launch. The typo would only surface at the moment some kernel actually tries to launch using that `Config`'s `kwargs` and looks for a `BLOCK` argument that was never provided (finding `BLOKC` instead) — a runtime `TypeError` or missing-argument failure at launch time, not a compile-time or construction-time rejection.
 

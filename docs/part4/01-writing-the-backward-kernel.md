@@ -1,5 +1,7 @@
 # Chapter 16: Writing the Backward Kernel
 
+[![Differentiate the function actually implemented](../images/ch16/01-concept.svg)](../images/ch16/01-concept.svg)
+
 > A forward pass computes an answer. A backward pass computes how much every input is to blame for the answer's error. Neither one requires a different kind of code — only a different formula, multiplied through the one number the rest of the network hands you.
 
 ## What you will understand by the end of this chapter
@@ -144,6 +146,7 @@ Nothing about the backward kernel's *math* changes to support this — `cdf`, `p
 
 ```python
 def triton_gelu_forward(x, BLOCK=1024):
+    x = x.contiguous()
     out = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -151,6 +154,8 @@ def triton_gelu_forward(x, BLOCK=1024):
     return out
 
 def triton_gelu_backward(grad_output, x, BLOCK=1024):
+    x = x.contiguous()
+    grad_output = grad_output.contiguous()
     grad_input = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -310,6 +315,8 @@ The four files below build up the chapter in order: a single-block backward kern
 
 ### File: `01_backward_kernel.py`
 
+[Download the complete current reference](../examples/references/part4/01-writing-the-backward-kernel/01_backward_kernel.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -388,6 +395,8 @@ if __name__ == "__main__":
 
 ### File: `02_masked_multiblock.py`
 
+[Download the complete current reference](../examples/references/part4/01-writing-the-backward-kernel/02_masked_multiblock.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -423,6 +432,7 @@ def gelu_backward_kernel(grad_out_ptr, x_ptr, grad_in_ptr, n, BLOCK: tl.constexp
 
 
 def triton_gelu_forward(x, BLOCK=1024):
+    x = x.contiguous()
     out = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -431,6 +441,8 @@ def triton_gelu_forward(x, BLOCK=1024):
 
 
 def triton_gelu_backward(grad_output, x, BLOCK=1024):
+    x = x.contiguous()
+    grad_output = grad_output.contiguous()
     grad_input = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -463,6 +475,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_wired_tritongelu.py`
+
+[Download the complete current reference](../examples/references/part4/01-writing-the-backward-kernel/03_wired_tritongelu.py) (interpreter mode; GPU portability is not established).
 
 ```python
 import torch
@@ -499,6 +513,7 @@ def gelu_backward_kernel_upcast(grad_out_ptr, x_ptr, grad_in_ptr, n, BLOCK: tl.c
 
 
 def triton_gelu_forward(x, BLOCK=1024):
+    x = x.contiguous()
     out = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -507,6 +522,8 @@ def triton_gelu_forward(x, BLOCK=1024):
 
 
 def triton_gelu_backward(grad_output, x, BLOCK=1024):
+    x = x.contiguous()
+    grad_output = grad_output.contiguous()
     grad_input = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -600,6 +617,8 @@ if __name__ == "__main__":
 
 ### File: `04_standalone_complete.py`
 
+[Download the complete current reference](../examples/references/part4/01-writing-the-backward-kernel/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
+
 ```python
 """
 Chapter 16 standalone: writing, generalizing, wiring, and measuring the
@@ -688,6 +707,7 @@ def gelu_forward_kernel(x_ptr, out_ptr, n, BLOCK: tl.constexpr):
 
 
 def triton_gelu_forward(x, BLOCK=1024):
+    x = x.contiguous()
     out = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -742,6 +762,8 @@ def gelu_backward_kernel_upcast(grad_out_ptr, x_ptr, grad_in_ptr, n, BLOCK: tl.c
 
 
 def triton_gelu_backward(grad_output, x, BLOCK=1024):
+    x = x.contiguous()
+    grad_output = grad_output.contiguous()
     grad_input = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -852,4 +874,8 @@ A backward kernel is not a new kind of Triton program — GELU's derivative, `Φ
 2. Three: two masked loads (`x` and `grad_out`) and one masked store (`grad_in`), versus the forward kernel's one masked load and one masked store. The backward kernel reads two aligned input tensors instead of one, and both must be indexed and masked identically, or the elements being multiplied together at each lane would come from mismatched positions.
 3. The process crashes outright — a genuine, reproducible segmentation fault (captured as exit code 139), not a Python exception and not a wrong-but-printable number, because the tail program's unmasked load and store reach past the end of every tensor's allocated memory. It is excluded from `04_standalone_complete.py` because a hard process crash cannot be safely combined with other code in the same script — it would kill the entire file's execution and destroy every other section's output along with it, which is exactly why the chapter documents it separately, run once, in isolation.
 4. What changed: `forward` now calls `triton_gelu_forward` (a genuine masked, multi-program Triton launch) instead of Chapter 15's single-block wrapper, and `backward` now calls `triton_gelu_backward` (another genuine masked, multi-program Triton kernel implementing the analytical derivative) instead of four lines of plain `torch.erf`/`torch.exp` arithmetic. What did not change: the `torch.autograd.Function` scaffolding itself — `ctx.save_for_backward(x)`, the `@staticmethod` structure, and the resulting `TritonGELUBackward` graph node all work identically regardless of what `forward` and `backward` compute internally, because autograd only cares that the two methods exist and are consistent with each other, not what's inside them.
-5. It came entirely from storage, not arithmetic: every `tl.load` of an `fp16` tensor rounds each value to `fp16`'s roughly three-decimal-digit precision the instant it's read into the kernel (even though the `.to(tl.float32)` immediately upcasts it for the actual computation), and every `tl.store` back into an `fp16` output tensor rounds the fully-precise `fp32` result down to `fp16` on the way out. The arithmetic in between ran at full `fp32` precision in both versions of the test — the roughly 6,000x accuracy gap is the cost of `fp16`'s limited storage precision alone, a genuinely different mechanism from Chapter 13.3's accumulation-precision loss, which came from summing many low-precision partial products across loop iterations rather than from storing a single value.
+5. It came entirely from storage, not arithmetic: converting the input to `fp16` rounds it to roughly three decimal digits of precision before the load; `tl.load` reads that already-rounded value, and `.to(tl.float32)` cannot restore the lost bits, and every `tl.store` back into an `fp16` output tensor rounds the fully-precise `fp32` result down to `fp16` on the way out. The arithmetic in between ran at full `fp32` precision in both versions of the test — the roughly 6,000x accuracy gap is the cost of `fp16`'s limited storage precision alone, a genuinely different mechanism from Chapter 13.3's accumulation-precision loss, which came from summing many low-precision partial products across loop iterations rather than from storing a single value.
+
+### Backward scope and layout contract
+
+The flat-address GELU wrappers make inputs and upstream gradients contiguous before launching. This preserves logical values for transposed or sliced tensors; pointer increments alone do not understand arbitrary PyTorch strides. The custom Triton backward supports first-order gradients. A raw Triton launch does not create a PyTorch graph for that backward, so higher-order derivatives require a differentiable backward or an explicit rejection such as `once_differentiable`. A first-order comparison or a single `.sum().backward()` is not a gradgrad test. Fan-in accumulation here describes one backward traversal, not an assertion that a node can never run again in a separate traversal.

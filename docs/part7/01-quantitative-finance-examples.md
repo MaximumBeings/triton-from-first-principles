@@ -1,5 +1,7 @@
 # Chapter 22: Quantitative Finance Examples
 
+[![Monte Carlo pricing is a mean of discounted payoffs](../images/ch22/01-concept.svg)](../images/ch22/01-concept.svg)
+
 > A closed-form price, a rolling statistic, and a simulated estimate are three different ways of answering the same kind of question, and each one demands a different way of checking whether the answer is right.
 
 ## What you will understand by the end of this chapter
@@ -21,7 +23,7 @@
 
 ### Intuition
 
-The Black-Scholes formula for a European call option, `C = S*N(d1) - K*exp(-rT)*N(d2)`, is — mechanically — nothing but an elementwise function of five inputs (`S`, `K`, `T`, `r`, `sigma`), exactly the same shape of problem as Chapter 12's GELU. In fact it's a closer relative than it first appears: `N(d)`, the standard normal cumulative distribution function, is *precisely* the same `Φ(x) = 0.5*(1 + erf(x/sqrt(2)))` GELU's own `cdf` term computed — the identical mathematical building block, applied here to a term expressing "the probability, under the risk-neutral measure, that this option finishes in the money" rather than "how much of `x` to let through a nonlinearity." Everything else in the formula — computing `d1` and `d2` from the five inputs, and combining two `N(d)` terms with the discount factor `exp(-rT)` — is ordinary elementwise arithmetic, using nothing this book hasn't already built.
+The Black–Scholes formula for a European call is `C = S*N(d1) - K*exp(-r*T)*N(d2)` in the no-dividend model. It is an elementwise calculation over S, K, T, r and sigma. The normal CDF is the same `Phi(x) = (1+erf(x/sqrt(2)))/2` used by exact GELU. The two CDF terms have different meanings: N(d2) is the risk-neutral probability of exercise; N(d1) is the call delta in this model, not that same exercise probability. The implementation below evaluates the CDF terms and discounted strike separately.
 
 ### Background
 
@@ -136,7 +138,7 @@ def rolling_std_kernel(x_ptr, out_ptr, n, W, BLOCK_W: tl.constexpr):
     have_full_window = i >= (W - 1)
     mean = tl.sum(x, axis=0) / W
     diff = tl.where(mask, x - mean, 0.0)
-    var = tl.sum(diff * diff, axis=0) / (W - 1)   # unbiased -- the finance convention
+    var = tl.sum(diff * diff, axis=0) / (W - 1)   # sample variance (ddof=1), matching the selected pandas oracle
     std = tl.sqrt(var)
 
     result = tl.where(have_full_window, std, float("nan"))
@@ -271,6 +273,8 @@ The three files below build up the chapter in order: Black-Scholes as an element
 
 ### File: `01_black_scholes.py`
 
+[Download the complete current reference](../examples/references/part7/01-quantitative-finance-examples/01_black_scholes.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -362,6 +366,8 @@ if __name__ == "__main__":
 
 ### File: `02_rolling_volatility.py`
 
+[Download the complete current reference](../examples/references/part7/01-quantitative-finance-examples/02_rolling_volatility.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -448,6 +454,8 @@ if __name__ == "__main__":
 
 ### File: `03_monte_carlo_pricing.py`
 
+[Download the complete current reference](../examples/references/part7/01-quantitative-finance-examples/03_monte_carlo_pricing.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -513,6 +521,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py`
+
+[Download the complete current reference](../examples/references/part7/01-quantitative-finance-examples/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 ```python
 """
@@ -705,3 +715,11 @@ This chapter closes the book's core content, having carried Chapter 1's earliest
 3. It means there is no correct numerical answer to compute at all for those positions — "the standard deviation of the last 5 days" is a meaningless question on day 2, because only 3 days of history exist. This differs fundamentally from Chapter 9's masking, where an out-of-bounds lane is excluded from a computation that still produces a perfectly valid, meaningful result for every position that *is* in bounds; here, the entire concept of "this position's rolling volatility" doesn't yet exist, and `NaN` honestly communicates that rather than silently substituting a shorter, non-comparable window or a placeholder value like `0`.
 4. No — both chapters are correctly implementing their own domain's standard convention, and those conventions genuinely differ. LayerNorm's mathematical definition, as specified by its original paper and every standard deep-learning framework's implementation (including PyTorch's own `torch.nn.LayerNorm`), uses the biased (divide-by-`N`) variance. Estimating the volatility of a financial return series from a finite historical sample is conventionally done with the unbiased (divide-by-`N-1`) estimator, matching `pandas`'s own default and standard statistical practice for sample variance. There is no single "more correct" choice between the two in general — the correct choice is always whatever the specific formula or convention being implemented actually specifies, which is exactly why Chapter 20 and this chapter, applying two different domains' conventions, arrived at opposite answers.
 5. A percentage or absolute comparison ignores the estimate's own precision entirely — it treats "5% off" as equally concerning regardless of whether the simulation's standard error is `0.03` or `3.0`. With `200,000` simulated paths, this particular Monte Carlo estimator's standard error was small enough (`~0.03`) that a `0.49`-unit absolute gap corresponds to roughly `14` standard errors — a discrepancy that a correctly implemented estimator would produce by chance with a probability far below one in a billion. The two facts aren't in tension: an estimate can be numerically "close" in absolute or percentage terms while still being astronomically unlikely to have arisen from a correct implementation, once judged against the actual precision that implementation claims to have.
+
+### Domain and statistical assumptions
+
+The displayed Black–Scholes formula assumes a European call, no dividends, S>0, K>0, T>0 and sigma>0 with finite inputs. At expiry use max(S-K,0); at zero volatility use max(S-K*exp(-r*T),0). Do not pass those boundaries into the unguarded d1/d2 formula. A production wrapper must validate the domain or implement those limiting cases.
+
+The rolling example requires W>=2 and uses sample variance, matching pandas' default `ddof=1`. This convention is a modeling choice, not the only correct financial convention; LayerNorm instead defines a population-style row variance. Its sqrt is a standard-deviation estimator and is not itself unbiased merely because the variance denominator is W-1. Annualization and return sampling frequency are separate choices.
+
+Monte Carlo comparisons need independent paths, a stated confidence interval and the same model assumptions. A finite sample can miss a nominal confidence interval without implying a code defect. Exact reuse of one random stream verifies arithmetic, not the randomness or statistical convergence of a different generator.

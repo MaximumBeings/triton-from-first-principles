@@ -1,12 +1,14 @@
 # Chapter 11: Shared Memory and the Kernel Cache
 
+[![Balance live values against resident work](../images/ch11/01-concept.svg)](../images/ch11/01-concept.svg)
+
 > "Part 1 has spent five chapters asking what a kernel actually receives, and one honest answer keeps recurring: less than it looks like, with the rest managed silently on your behalf. This closing chapter applies that same question to the two resources every real GPU kernel depends on most — the compiled binary sitting in a cache somewhere, and the fast on-chip memory a tiled kernel needs to be fast at all — and finds the same answer both times."
 
 **What you will understand by the end of this chapter:**
 
 - What `@triton.jit` actually returns under normal, compiled operation (a `JITFunction`, with a real per-device compilation cache) versus under this book's `TRITON_INTERPRET=1` setup (an `InterpretedFunction`, with no cache at all) — and why every prior chapter's "compiled once, reused on repeat launches" claims describe the former, not something this book's tests have ever literally exercised
 - Why `BLOCK` size is not a free parameter: every block-shaped value in a kernel body occupies real per-thread registers on genuine hardware, and this book's interpreter — which has no notion of threads or registers at all — cannot show you where that cost actually bites
-- Why Triton has no shared-memory primitive whatsoever in its public language — no equivalent of CUDA's `__shared__` — and how `tl.dot`, the one operation where shared memory usage matters most, hides that entire decision inside the compiler
+- Why the classic `triton.language` examples do not declare CUDA-style shared arrays — no equivalent of CUDA's `__shared__` — and how operations such as `tl.dot` and reductions, whose lowering can use shared memory, hides that entire decision inside the compiler
 - How this chapter closes Part 1's running theme — pointer-only kernel arguments (Ch. 6), unverified shape/stride promises (Ch. 6–7), silent interpreter permissiveness (Ch. 1, 7, 8, 10) — by showing the same pattern one last time for compilation and on-chip memory
 
 **What you need to know first:**
@@ -21,7 +23,7 @@
 
 A restaurant's claim that "we only cook a dish from scratch the first time it's ordered, then keep a prepared batch ready for repeat orders" is a real, verifiable claim about a real kitchen — you could walk into that kitchen and find the prepared batch sitting in a warmer. A stage recreation of the same restaurant, built entirely for a demonstration and using none of the kitchen's actual equipment, can *say* the identical line, in exactly the same words, without there being any warmer, any prepared batch, or any actual mechanism behind the claim at all.
 
-Chapter 1, Section 1.1 made a real, verifiable claim about `@triton.jit`: a kernel is traced and compiled once per distinct combination of dtypes, shapes, and `tl.constexpr` values, then reused from a cache on repeat launches with the same signature. That claim describes a genuine `JITFunction` object, compiled and run on real hardware. Every kernel this book has actually launched, however, ran through `TRITON_INTERPRET=1`, which produces a completely different kind of object — an `InterpretedFunction` — and this section inspects, directly, what that object does and doesn't have.
+Chapter 1, Section 1.1 made a real, verifiable claim about `@triton.jit`: a kernel is traced and compiled once per distinct combination of argument types, constexpr values, target/options and specialization attributes, then reused from a cache on repeat launches with the same signature. That claim describes a genuine `JITFunction` object, compiled and run on real hardware. Every kernel this book has actually launched, however, ran through `TRITON_INTERPRET=1`, which produces a completely different kind of object — an `InterpretedFunction` — and this section inspects, directly, what that object does and doesn't have.
 
 ### Background
 
@@ -90,13 +92,13 @@ The genuine `JITFunction`'s `device_caches` is a real, inspectable `defaultdict`
 
 A worker given a single small desk can keep every tool they need for one task within arm's reach; a worker given the exact same job but required to keep a hundred tools laid out at once has to start stacking things on the floor, walking further to reach some of them, and generally working slower even though the job itself didn't change. A GPU's register file is that desk: a fixed, finite amount of extremely fast per-thread storage, shared out among however many threads are resident on a streaming multiprocessor at once.
 
-Every block-shaped value inside a kernel body — every `tl.arange(0, BLOCK)`, every intermediate result computed from it — occupies real registers on genuine hardware, and `BLOCK` directly controls how many. A larger `BLOCK` means more live values per thread, which means either fewer threads can be scheduled concurrently (the register file has to be divided among them) or, past a hard limit, values get "spilled" to slower local memory, or, past an even harder limit, the kernel simply fails to compile at all with a resource-exhaustion error. None of this is a Triton-language concept — it's a physical constraint of the hardware a compiled kernel targets — and Chapter 10 already established that this book's interpreter has no concept of threads, registers, or hardware resource limits whatsoever.
+Block-shaped values are logical arrays distributed across the program's participating threads by a compiler layout. A larger BLOCK can increase live values and resource demand, but it is not a per-thread register count. The peak live set, layout, vectorization and lowering determine actual registers; shared memory and other limits also affect residency. Excess demand can reduce occupancy, spill or fail compilation. None of those outcomes can be measured from interpreter execution alone.
 
 ### Background
 
 | | On real, compiled Triton | Under this book's `TRITON_INTERPRET=1` |
 |---|---|---|
-| What `BLOCK` controls | How many live values (registers) each thread holds for this kernel | Nothing resource-related — it's just an array size for a Python-level computation |
+| What `BLOCK` controls | Logical tile extent; per-thread live allocation depends on layout and lowering | Nothing resource-related — it's just an array size for a Python-level computation |
 | Effect of a very large `BLOCK` | Fewer concurrently resident threads, register spilling, or an outright compilation failure | None observable — Worked Example 11.2.1 |
 | Who decides the actual limit | The target GPU's register file size, divided among resident warps | Not applicable — no register file is modeled at all |
 | Where this trade-off gets addressed in this book | Chapter 18's autotuning — searching `BLOCK` (and `num_warps`) empirically for whichever value performs best on real hardware | Nowhere in this book's interpreter-based tests, honestly |
@@ -119,7 +121,7 @@ BLOCK=  4096 -> correct? True  (no resource error of any kind)
 BLOCK= 65536 -> correct? True  (no resource error of any kind)
 ```
 
-`BLOCK=65536` asks a single (simulated) program instance to hold 65,536 live float values at once. On real hardware, this would very plausibly exceed the register budget available to a single thread outright — GPUs typically allow on the order of a few hundred 32-bit registers per thread, not tens of thousands — and a genuine compiled build would likely refuse to compile this kernel at all, or silently fall back to heavy register spilling with a severe performance cost. This book's interpreter, having no concept of a register file to exhaust, runs all three sizes identically, correctly, and without any indication that one of them would be a serious problem on the hardware this book's kernels are actually written for.
+`BLOCK=65536` describes 65,536 logical values in one program, not 65,536 registers in one thread. With four NVIDIA warps there are 128 participating threads; a simple even distribution would give 512 values per thread before considering masks, reuse and compiler optimization. That estimate alone still does not predict the live register allocation: the compiler can change layouts, schedule live ranges or eliminate dead work where the program permits it. Inspect compiled register/shared-memory metadata and measure occupancy or spills rather than inferring resource failure from the logical array extent. The interpreter cannot supply those measurements.
 
 > `[COMMON TRAP]` A `BLOCK` size that this book's interpreter accepts without complaint should never be read as a `BLOCK` size that's fine to use in production. This is exactly the same shape of trap Chapter 10 identified for `num_warps` and `num_stages`: the interpreter's silence reflects what it doesn't model, not what's actually safe on real hardware. Choosing a reasonable `BLOCK` — large enough to amortize per-launch overhead, small enough to avoid register pressure or spilling — is a genuine, consequential decision in real Triton development, and it's precisely the kind of decision Chapter 18's autotuning exists to make empirically rather than by guesswork, on hardware that can actually report back what happened.
 
@@ -135,7 +137,7 @@ A commercial kitchen's walk-in refrigerator is shared, fast-access storage that 
 
 | | CUDA, writing a raw kernel | Triton |
 |---|---|---|
-| Explicit shared-memory declaration | `__shared__ float tile[...]`, placed and sized by hand | No primitive exists — checked directly: zero `shared`-related names anywhere in `triton.language`'s 149 public attributes |
+| Explicit shared-memory declaration | `__shared__ float tile[...]`, placed and sized by hand | Classic triton.language does not expose a CUDA-style shared-array declaration; an attribute count is not a version-independent API contract |
 | Who decides what gets staged through shared memory | The kernel author, explicitly | The compiler, automatically, whenever block-level operations like `tl.dot` are used |
 | What the kernel author controls instead | The shared-memory layout itself | `BLOCK_M`, `BLOCK_N`, `BLOCK_K` — the same register-pressure trade-off from Section 11.2, now also shaping the compiler's shared-memory staging decisions |
 | Can this book demonstrate the actual shared-memory usage of a compiled `tl.dot` call? | — | No — Chapter 10 already established this environment cannot compile for real hardware at all |
@@ -154,7 +156,7 @@ def matmul_tile_kernel(a_ptr, b_ptr, c_ptr, M, N, K,
     b_ptrs = b_ptr + ks[:, None] * stride_bk + cols[None, :] * stride_bn
     a = tl.load(a_ptrs, mask=(rows[:, None] < M) & (ks[None, :] < K), other=0.0)
     b = tl.load(b_ptrs, mask=(ks[:, None] < K) & (cols[None, :] < N), other=0.0)
-    acc = tl.dot(a, b)   # on real hardware: tensor cores + compiler-managed shared memory tiling
+    acc = tl.dot(a, b, input_precision="ieee")   # on real hardware: tensor cores + compiler-managed shared memory tiling
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     tl.store(c_ptrs, acc, mask=(rows[:, None] < M) & (cols[None, :] < N))
 ```
@@ -195,6 +197,8 @@ Sections 11.1–11.3 built up this chapter's findings as isolated probes. The fi
 
 ### File: `01_kernel_cache.py` — Section 11.1
 
+[Download the complete current reference](../examples/references/part1/06-shared-memory-register-pressure/01_kernel_cache.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `python3 01_kernel_cache.py` (run once with `TRITON_INTERPRET=1` unset, once with it set — see the script's own prints)
 
 ```python
@@ -231,6 +235,8 @@ if __name__ == "__main__":
 
 ### File: `02_register_pressure.py` — Section 11.2
 
+[Download the complete current reference](../examples/references/part1/06-shared-memory-register-pressure/02_register_pressure.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 02_register_pressure.py`
 
 ```python
@@ -263,6 +269,8 @@ if __name__ == "__main__":
 
 ### File: `03_shared_memory_dot.py` — Section 11.3
 
+[Download the complete current reference](../examples/references/part1/06-shared-memory-register-pressure/03_shared_memory_dot.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 03_shared_memory_dot.py`
 
 ```python
@@ -282,7 +290,7 @@ def matmul_tile_kernel(a_ptr, b_ptr, c_ptr, M, N, K,
     b_ptrs = b_ptr + ks[:, None] * stride_bk + cols[None, :] * stride_bn
     a = tl.load(a_ptrs, mask=(rows[:, None] < M) & (ks[None, :] < K), other=0.0)
     b = tl.load(b_ptrs, mask=(ks[:, None] < K) & (cols[None, :] < N), other=0.0)
-    acc = tl.dot(a, b)
+    acc = tl.dot(a, b, input_precision="ieee")
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     tl.store(c_ptrs, acc, mask=(rows[:, None] < M) & (cols[None, :] < N))
 
@@ -304,6 +312,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part1/06-shared-memory-register-pressure/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 
@@ -332,7 +342,7 @@ def matmul_tile_kernel(a_ptr, b_ptr, c_ptr, M, N, K,
     b_ptrs = b_ptr + ks[:, None] * stride_bk + cols[None, :] * stride_bn
     a = tl.load(a_ptrs, mask=(rows[:, None] < M) & (ks[None, :] < K), other=0.0)
     b = tl.load(b_ptrs, mask=(ks[:, None] < K) & (cols[None, :] < N), other=0.0)
-    acc = tl.dot(a, b)
+    acc = tl.dot(a, b, input_precision="ieee")
     c_ptrs = c_ptr + rows[:, None] * stride_cm + cols[None, :] * stride_cn
     tl.store(c_ptrs, acc, mask=(rows[:, None] < M) & (cols[None, :] < N))
 
@@ -417,3 +427,7 @@ Part 1 is complete: eleven chapters have established, in careful and sometimes u
 **4.** It confirms that `tl.dot`'s *result* is numerically correct — this book's interpreter genuinely computed the matrix product and got the right answer, matching both PyTorch's own `@` operator and Chapter 4's independent hand trace. It specifically does not confirm anything about *how* a genuinely compiled version of this kernel would execute on real hardware — whether it would stage `a` and `b`'s tiles through shared memory at all for a tile this small, what tensor-core instructions it might use, or what a larger, realistic block-shape configuration's actual shared-memory footprint would be. The interpreter computes `tl.dot` as a plain array multiplication, with the entire real hardware execution strategy invisible to it.
 
 **5.** The common underlying reason, tying back to Chapter 1's opening disclosure, is that this book's entire environment has no GPU anywhere — not the cloud workspace running this book's tests, not the machine it's authored on — which is exactly why every kernel in this book runs through `TRITON_INTERPRET=1`, a CPU-based Python-level simulation of kernel *logic* rather than genuine compilation and execution on real hardware. The kernel cache (Section 11.1), register pressure (Section 11.2), and shared-memory staging (Section 11.3) are all real, hardware-level or compiled-artifact-level facts about genuine Triton — and all three are, for the same underlying reason, outside what a logic-only interpreter can ever be made to show directly, no matter how the demonstration is constructed.
+
+### API scope and physical storage
+
+This chapter describes the classic `triton.language` interface. Experimental Gluon exposes lower-level layout/shared-memory control; it is a separate API, not evidence that classic `tl.dot` exposes an explicit shared-array declaration. Shared memory can also be generated for reductions and layout conversions. Increasing BLOCK does not necessarily increase the simultaneously live per-thread state in direct proportion.

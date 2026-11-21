@@ -1,5 +1,7 @@
 # Chapter 21: Flash Attention, MoE, and Advanced Features
 
+[![Stream attention without storing the whole score matrix](../images/ch21/01-concept.svg)](../images/ch21/01-concept.svg)
+
 > Every kernel through Chapter 20 computed each output independently of every other. Attention breaks that assumption on purpose — every query genuinely depends on every key and value in its sequence — and the entire trick of Flash Attention is computing that dependency without ever materializing the matrix it implies.
 
 ## What you will understand by the end of this chapter
@@ -66,7 +68,7 @@ def flash_attn_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
         v_ptrs = v_ptr + cols[:, None] * stride_vn + d_idx[None, :] * stride_vd
         v = tl.load(v_ptrs, mask=col_mask[:, None] & d_mask[None, :], other=0.0)
 
-        scores = tl.dot(q, tl.trans(k)) * scale
+        scores = tl.dot(q, tl.trans(k), input_precision="ieee") * scale
         scores = tl.where(col_mask[None, :], scores, float("-inf"))
 
         m_ij = tl.max(scores, axis=1)
@@ -75,7 +77,7 @@ def flash_attn_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
         p = tl.exp(scores - m_new[:, None])
 
         l_i = alpha * l_i + tl.sum(p, axis=1)
-        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v)
+        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v, input_precision="ieee")
         m_i = m_new
 
     acc = acc / l_i[:, None]
@@ -130,13 +132,11 @@ Causal (autoregressive) attention restricts each query to attend only to keys at
 ### Worked Example 21.2.1: causal Flash Attention, verified against naive causal-masked attention
 
 ```python
-max_col = pid_m * BLOCK_M + BLOCK_M   # this query block never needs keys beyond here
-for n0 in range(0, N, BLOCK_N):
-    if n0 >= max_col:
-        continue        # skip key/value blocks entirely past every query in this block
+max_col = pid_m * BLOCK_M + BLOCK_M   # exclusive end of this query block
+for n0 in range(0, tl.minimum(N, max_col), BLOCK_N):
     cols = n0 + tl.arange(0, BLOCK_N)
     ...
-    scores = tl.dot(q, tl.trans(k)) * scale
+    scores = tl.dot(q, tl.trans(k), input_precision="ieee") * scale
     causal_mask = rows[:, None] >= cols[None, :]
     valid = col_mask[None, :] & causal_mask
     scores = tl.where(valid, scores, float("-inf"))
@@ -152,7 +152,7 @@ max abs diff: 3.5762786865234375e-07
 
 ### Worked Example 21.2.2: a correct kernel for the wrong task
 
-Section 21.1's kernel has no bug in it anywhere — it was independently verified against non-causal attention and matched exactly. Running that exact same kernel, unmodified, on this section's causal task:
+Section 21.1's kernel matched its finite non-causal interpreter tests; that is not proof of correctness for every shape, dtype or compiled target. Running that exact same kernel, unmodified, on this section's causal task:
 
 ```
 non-causal kernel allclose to CAUSAL oracle?     False
@@ -180,7 +180,7 @@ Causal mask, tiled (BLOCK_M = BLOCK_N = 4, query block starting at row 8):
   "SKIPPED" blocks: never loaded at all -- entire block is beyond every query's reach
 ```
 
-> [COMMON TRAP] A kernel's correctness can only be judged against the task it was actually built for — a Flash Attention kernel with zero internal bugs, independently verified against non-causal attention, is still completely wrong the moment it's pointed at a causal task without adding the causal condition. This is a different category of mistake from every earlier chapter's traps (a masking boundary error, a forgotten chain-rule multiplication, an eps in the wrong place): here, every individual line of the kernel is doing exactly what it was written to do, and the mismatch is entirely in which mathematical problem that correct code happens to solve.
+> [COMMON TRAP] A kernel's correctness can only be judged against the task it was actually built for — a Flash Attention kernel matching the tested non-causal contract, independently verified against non-causal attention, is still completely wrong the moment it's pointed at a causal task without adding the causal condition. This is a different category of mistake from every earlier chapter's traps (a masking boundary error, a forgotten chain-rule multiplication, an eps in the wrong place): here, every individual line of the kernel is doing exactly what it was written to do, and the mismatch is entirely in which mathematical problem that correct code happens to solve.
 
 ## 21.3 [FOUNDATIONAL] Mixture-of-Experts Routing: Top-K Gating as a Kernel
 
@@ -188,7 +188,7 @@ Causal mask, tiled (BLOCK_M = BLOCK_N = 4, query block starting at row 8):
 
 A Mixture-of-Experts layer routes each token to only a handful of "expert" sub-networks out of many, rather than running every token through every expert. The part of that system genuinely small enough to be one self-contained Triton kernel is the *gating* decision: given one row of per-expert logits for a token, compute a softmax over them (exactly Chapter 14's row-wise softmax pattern) and select the top `k` experts by probability, then renormalize those `k` selected probabilities so they sum to `1` before they're used as mixture weights. Everything downstream of that decision — actually running each selected expert's computation, and shuffling tokens between GPUs or kernel launches so each expert only processes the tokens routed to it — is a real systems engineering problem, well beyond a single kernel, and this section deliberately stops at the boundary where that larger problem begins.
 
-Triton has no built-in "top-k" primitive the way `torch.topk` is a single call, so a from-scratch kernel builds it out of what's already available: find the row's overall maximum (`tl.max`, `tl.argmax`) as the top-1 pick, mask that position out (`tl.where(cols == top1_idx, -inf, probs)`), and take the maximum of what remains as the top-2 pick. The pattern is identical to Chapter 13.2's masked-out sentinel trick, applied here to iteratively remove already-selected candidates instead of masking invalid memory.
+Current Triton documents `tl.topk`, with its own shape/constexpr restrictions; it is not a drop-in replacement for every `torch.topk` use. This section deliberately constructs top-2 values and indices from simpler reductions: find the row's overall maximum (`tl.max`, `tl.argmax`) as the top-1 pick, mask that position out (`tl.where(cols == top1_idx, -inf, probs)`), and take the maximum of what remains as the top-2 pick. The pattern is identical to Chapter 13.2's masked-out sentinel trick, applied here to iteratively remove already-selected candidates instead of masking invalid memory.
 
 ### Background
 
@@ -281,6 +281,8 @@ The three files below build up the chapter in order: the core Flash Attention lo
 
 ### File: `01_flash_attention_core.py`
 
+[Download the complete current reference](../examples/references/part6/02-flash-attention-moe-advanced-features/01_flash_attention_core.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -317,7 +319,7 @@ def flash_attn_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
         v_ptrs = v_ptr + cols[:, None] * stride_vn + d_idx[None, :] * stride_vd
         v = tl.load(v_ptrs, mask=col_mask[:, None] & d_mask[None, :], other=0.0)
 
-        scores = tl.dot(q, tl.trans(k)) * scale
+        scores = tl.dot(q, tl.trans(k), input_precision="ieee") * scale
         scores = tl.where(col_mask[None, :], scores, float("-inf"))
 
         m_ij = tl.max(scores, axis=1)
@@ -326,7 +328,7 @@ def flash_attn_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
         p = tl.exp(scores - m_new[:, None])
 
         l_i = alpha * l_i + tl.sum(p, axis=1)
-        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v)
+        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v, input_precision="ieee")
         m_i = m_new
 
     acc = acc / l_i[:, None]
@@ -368,6 +370,8 @@ if __name__ == "__main__":
 
 ### File: `02_causal_flash_attention.py`
 
+[Download the complete current reference](../examples/references/part6/02-flash-attention-moe-advanced-features/02_causal_flash_attention.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -399,14 +403,14 @@ def flash_attn_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
         k = tl.load(k_ptrs, mask=col_mask[:, None] & d_mask[None, :], other=0.0)
         v_ptrs = v_ptr + cols[:, None] * stride_vn + d_idx[None, :] * stride_vd
         v = tl.load(v_ptrs, mask=col_mask[:, None] & d_mask[None, :], other=0.0)
-        scores = tl.dot(q, tl.trans(k)) * scale
+        scores = tl.dot(q, tl.trans(k), input_precision="ieee") * scale
         scores = tl.where(col_mask[None, :], scores, float("-inf"))
         m_ij = tl.max(scores, axis=1)
         m_new = tl.maximum(m_i, m_ij)
         alpha = tl.exp(m_i - m_new)
         p = tl.exp(scores - m_new[:, None])
         l_i = alpha * l_i + tl.sum(p, axis=1)
-        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v)
+        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v, input_precision="ieee")
         m_i = m_new
     acc = acc / l_i[:, None]
     out_ptrs = out_ptr + rows[:, None] * stride_om + d_idx[None, :] * stride_od
@@ -432,16 +436,14 @@ def flash_attn_causal_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
     acc = tl.zeros((BLOCK_M, BLOCK_D), dtype=tl.float32)
 
     max_col = pid_m * BLOCK_M + BLOCK_M
-    for n0 in range(0, N, BLOCK_N):
-        if n0 >= max_col:
-            continue
+    for n0 in range(0, tl.minimum(N, max_col), BLOCK_N):
         cols = n0 + tl.arange(0, BLOCK_N)
         col_mask = cols < N
         k_ptrs = k_ptr + cols[:, None] * stride_kn + d_idx[None, :] * stride_kd
         k = tl.load(k_ptrs, mask=col_mask[:, None] & d_mask[None, :], other=0.0)
         v_ptrs = v_ptr + cols[:, None] * stride_vn + d_idx[None, :] * stride_vd
         v = tl.load(v_ptrs, mask=col_mask[:, None] & d_mask[None, :], other=0.0)
-        scores = tl.dot(q, tl.trans(k)) * scale
+        scores = tl.dot(q, tl.trans(k), input_precision="ieee") * scale
         causal_mask = rows[:, None] >= cols[None, :]
         valid = col_mask[None, :] & causal_mask
         scores = tl.where(valid, scores, float("-inf"))
@@ -450,7 +452,7 @@ def flash_attn_causal_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
         alpha = tl.exp(m_i - m_new)
         p = tl.exp(scores - m_new[:, None])
         l_i = alpha * l_i + tl.sum(p, axis=1)
-        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v)
+        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v, input_precision="ieee")
         m_i = m_new
     acc = acc / l_i[:, None]
     out_ptrs = out_ptr + rows[:, None] * stride_om + d_idx[None, :] * stride_od
@@ -502,6 +504,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_moe_gating.py`
+
+[Download the complete current reference](../examples/references/part6/02-flash-attention-moe-advanced-features/03_moe_gating.py) (interpreter mode; GPU portability is not established).
 
 ```python
 import torch
@@ -578,6 +582,8 @@ if __name__ == "__main__":
 
 ### File: `04_standalone_complete.py`
 
+[Download the complete current reference](../examples/references/part6/02-flash-attention-moe-advanced-features/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
+
 ```python
 """
 Chapter 21 standalone: the Flash Attention core loop, causal masking inside
@@ -618,14 +624,14 @@ def flash_attn_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
         k = tl.load(k_ptrs, mask=col_mask[:, None] & d_mask[None, :], other=0.0)
         v_ptrs = v_ptr + cols[:, None] * stride_vn + d_idx[None, :] * stride_vd
         v = tl.load(v_ptrs, mask=col_mask[:, None] & d_mask[None, :], other=0.0)
-        scores = tl.dot(q, tl.trans(k)) * scale
+        scores = tl.dot(q, tl.trans(k), input_precision="ieee") * scale
         scores = tl.where(col_mask[None, :], scores, float("-inf"))
         m_ij = tl.max(scores, axis=1)
         m_new = tl.maximum(m_i, m_ij)
         alpha = tl.exp(m_i - m_new)
         p = tl.exp(scores - m_new[:, None])
         l_i = alpha * l_i + tl.sum(p, axis=1)
-        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v)
+        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v, input_precision="ieee")
         m_i = m_new
     acc = acc / l_i[:, None]
     out_ptrs = out_ptr + rows[:, None] * stride_om + d_idx[None, :] * stride_od
@@ -650,16 +656,14 @@ def flash_attn_causal_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
     l_i = tl.zeros((BLOCK_M,), dtype=tl.float32)
     acc = tl.zeros((BLOCK_M, BLOCK_D), dtype=tl.float32)
     max_col = pid_m * BLOCK_M + BLOCK_M
-    for n0 in range(0, N, BLOCK_N):
-        if n0 >= max_col:
-            continue
+    for n0 in range(0, tl.minimum(N, max_col), BLOCK_N):
         cols = n0 + tl.arange(0, BLOCK_N)
         col_mask = cols < N
         k_ptrs = k_ptr + cols[:, None] * stride_kn + d_idx[None, :] * stride_kd
         k = tl.load(k_ptrs, mask=col_mask[:, None] & d_mask[None, :], other=0.0)
         v_ptrs = v_ptr + cols[:, None] * stride_vn + d_idx[None, :] * stride_vd
         v = tl.load(v_ptrs, mask=col_mask[:, None] & d_mask[None, :], other=0.0)
-        scores = tl.dot(q, tl.trans(k)) * scale
+        scores = tl.dot(q, tl.trans(k), input_precision="ieee") * scale
         causal_mask = rows[:, None] >= cols[None, :]
         valid = col_mask[None, :] & causal_mask
         scores = tl.where(valid, scores, float("-inf"))
@@ -668,7 +672,7 @@ def flash_attn_causal_kernel(q_ptr, k_ptr, v_ptr, out_ptr,
         alpha = tl.exp(m_i - m_new)
         p = tl.exp(scores - m_new[:, None])
         l_i = alpha * l_i + tl.sum(p, axis=1)
-        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v)
+        acc = acc * alpha[:, None] + tl.dot(p.to(tl.float32), v, input_precision="ieee")
         m_i = m_new
     acc = acc / l_i[:, None]
     out_ptrs = out_ptr + rows[:, None] * stride_om + d_idx[None, :] * stride_od
@@ -805,13 +809,13 @@ mean raw (non-renormalized) top-2 weight sum: 0.5583722591400146
 
 ## Chapter Summary
 
-Chapter 14.3's online-softmax rescaling identity generalizes directly from a single reduction to a full attention computation by adding one more accumulator — a running, `alpha`-rescaled weighted sum over `V` — verified against naive full attention to ordinary floating-point noise while never once materializing the full attention matrix (Section 21.1). Adding a causal condition to that same loop required nothing new beyond a per-tile, two-dimensional version of Chapter 9's masking idea, but demonstrated a genuinely new category of mistake: a kernel with zero internal bugs, independently verified correct for one task, that is still completely wrong — by a `~1.72` maximum deviation, not floating-point noise — the moment it's pointed at a different task it was never built for (Section 21.2). And Mixture-of-Experts routing turned out to be a genuine, self-contained, verifiable Triton kernel in its own right — softmax over experts plus iterative top-`k` selection, matched exactly against `torch.topk` — whose one real trap, forgetting to renormalize the selected weights, produces an error whose *severity itself varies* from token to token depending on how much probability mass the unselected experts happened to carry (Section 21.3), and whose larger surrounding system — actually dispatching tokens to experts across real hardware — this book explicitly and honestly declines to build.
+Chapter 14.3's online-softmax rescaling identity generalizes directly from a single reduction to a full attention computation by adding one more accumulator — a running, `alpha`-rescaled weighted sum over `V` — verified against naive full attention to ordinary floating-point noise while never once materializing the full attention matrix (Section 21.1). Adding a causal condition to that same loop required nothing new beyond a per-tile, two-dimensional version of Chapter 9's masking idea, but demonstrated a genuinely new category of mistake: a kernel matching the tested non-causal contract, independently verified correct for one task, that is still completely wrong — by a `~1.72` maximum deviation, not floating-point noise — the moment it's pointed at a different task it was never built for (Section 21.2). And Mixture-of-Experts routing turned out to be a genuine, self-contained, verifiable Triton kernel in its own right — softmax over experts plus iterative top-`k` selection, matched exactly against `torch.topk` — whose one real trap, forgetting to renormalize the selected weights, produces an error whose *severity itself varies* from token to token depending on how much probability mass the unselected experts happened to carry (Section 21.3), and whose larger surrounding system — actually dispatching tokens to experts across real hardware — this book explicitly and honestly declines to build.
 
 ## Self-Check Questions
 
 1. Chapter 14.3's online softmax rescales its running sum `l_i` by `alpha = exp(m_old - m_new)` whenever a new block reveals a larger maximum. What second quantity does this chapter's Flash Attention kernel rescale by that exact same `alpha`, and why does it need rescaling for the identical reason `l_i` does?
 2. Worked Example 21.2.2 found that a completely bug-free attention kernel produced a `~1.72` maximum deviation from the causal oracle. Was this a bug in the kernel? Explain precisely what did and didn't go wrong.
-3. Why does the causal Flash Attention kernel's loop include `if n0 >= max_col: continue`, and is this line required for correctness or is it something else?
+3. Why does the causal Flash Attention kernel use a loop bounded by `min(N, max_col)`, and is this line required for correctness or is it something else?
 4. In the MoE gating kernel, why is `tl.where(cols == top1_idx, float("-inf"), probs)` used to find the second-highest probability, rather than simply calling `tl.max` a second time on the unmodified `probs`?
 5. Worked Example 21.3.2 found that skipping renormalization produced weight sums ranging from `0.36` to `0.72` across just six tokens, rather than a single, consistent wrong scale factor. Why does this specific bug's severity vary per token instead of being uniformly wrong by some fixed amount?
 
@@ -826,3 +830,11 @@ This chapter closes Part 6's tour of realistic neural network building blocks �
 3. It's a performance optimization, not a correctness requirement. Once a query block's own row range (`pid_m * BLOCK_M` through `pid_m * BLOCK_M + BLOCK_M - 1`) is known, any key/value block starting at `n0 >= max_col` consists entirely of keys strictly beyond every query in this block — under causal masking, `causal_mask = rows >= cols` would evaluate to `False` for every single pair in such a block anyway. Skipping it outright avoids loading and computing on a block whose entire contribution the causal mask would zero out regardless; omitting this line would still produce a correct answer, just a slower one.
 4. Calling `tl.max` a second time on the unmodified `probs` would simply return the same top-1 value and index again — `tl.max` has no memory of what was already selected. Masking the already-selected position to `-inf` first ensures the next `tl.max` call is forced to find the largest value *among what remains*, which is exactly Chapter 13.2's masked-sentinel technique repurposed: instead of masking out invalid memory, this masks out an already-claimed candidate so the next search step is guaranteed not to re-select it.
 5. Because the amount "missing" from a token's top-2 selection is exactly the probability mass its softmax assigned to the other six (unselected) experts — and that split between "concentrated in the top 2" versus "spread across the rest" is different for every token, depending entirely on that token's own specific logits. A token whose gating network was very confident (most probability mass concentrated in 2 experts) loses very little by skipping renormalization; a token whose gating was much less decisive (probability spread more evenly across all 8) loses much more. There is no single scale factor to correct for, because the error itself is a per-token quantity, not a global constant.
+
+### Contracts that the small examples do not cover
+
+The historical outputs above are interpreter results. The worked BLOCK=4 tiles are useful for tracing but are not valid NVIDIA `tl.dot` tiles in the referenced v3.3.1 backend, which requires at least 16 in M/N/K for its non-INT8 dot contract. D=8 may be logically valid but needs padding to a valid physical dot extent. CPU tensors also need CUDA counterparts before a GPU launch. Explicit `input_precision="ieee"` in the current FP32 teaching kernels avoids silently substituting TF32 for an FP32 comparison; that choice is not a Tensor Core peak-performance recipe. Source changes need a new execution record.
+
+The bounded causal loop avoids unsupported `continue` control flow and skips future-key tiles. Valid query rows need at least one unmasked key; all-masked rows, NaNs, empty sequences and rectangular causal alignment require an explicit separate contract. These examples use top-left causal alignment.
+
+Top-2 renormalization is the selected gating contract here, not a requirement of every MoE model. Other models deliberately retain selected weights from the full softmax. Resolve ties explicitly; a random no-tie example does not prove index equality with `torch.topk` for tied logits. Require E>=2. Modern [tl.topk documentation](https://triton-lang.org/main/python-api/generated/triton.language.topk.html) describes the built-in operation's different API.

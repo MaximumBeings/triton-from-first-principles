@@ -1,5 +1,7 @@
 # Chapter 8: GPU-Side Construction
 
+[![Allocate on the host, populate on the device](../images/ch08/01-concept.svg)](../images/ch08/01-concept.svg)
+
 > "A `@triton.jit` kernel can compute anything you can express in its language, and allocate nothing at all. Every buffer it will ever write into has to already exist, built by ordinary Python code, before the kernel is ever indexed with a grid."
 
 **What you will understand by the end of this chapter:**
@@ -199,6 +201,8 @@ Sections 8.1–8.3 built up this chapter's findings as isolated probes. The file
 
 ### File: `01_no_allocation.py` — Section 8.1
 
+[Download the complete current reference](../examples/references/part1/03-gpu-side-construction/01_no_allocation.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_no_allocation.py`
 
 ```python
@@ -253,6 +257,8 @@ if __name__ == "__main__":
 
 ### File: `02_factory_wrapper.py` — Section 8.2
 
+[Download the complete current reference](../examples/references/part1/03-gpu-side-construction/02_factory_wrapper.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 02_factory_wrapper.py`
 
 ```python
@@ -291,6 +297,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_device_placement.py` — Section 8.3
+
+[Download the complete current reference](../examples/references/part1/03-gpu-side-construction/03_device_placement.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 03_device_placement.py`
 
@@ -333,6 +341,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part1/03-gpu-side-construction/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 

@@ -1,5 +1,7 @@
 # Chapter 12: Element-wise Kernels
 
+[![Fuse elementwise work without changing its equation](../images/ch12/01-concept.svg)](../images/ch12/01-concept.svg)
+
 > "Every ingredient for a complete kernel has already been introduced — a wrapper function that assembles a pointer's shape and dtype (Ch. 6, 8), a mask that keeps a launch honest at its edges (Ch. 5), a grid that covers the whole tensor (Ch. 5). This chapter's only genuinely new idea is what happens when you stop treating each of those ingredients as a separate lesson and start asking: what's actually worth building this way, and how do you know it's right when the answer isn't a small hand-traceable integer anymore?"
 
 **What you will understand by the end of this chapter:**
@@ -226,6 +228,8 @@ Sections 12.1–12.3 built up this chapter's findings as isolated probes. The fi
 
 ### File: `01_fused_fma_relu.py` — Section 12.1
 
+[Download the complete current reference](../examples/references/part2/01-elementwise-kernels/01_fused_fma_relu.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_fused_fma_relu.py`
 
 ```python
@@ -270,6 +274,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_memory_pass_counting.py` — Section 12.2
+
+[Download the complete current reference](../examples/references/part2/01-elementwise-kernels/02_memory_pass_counting.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 02_memory_pass_counting.py`
 
@@ -319,6 +325,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_gelu_oracle_verified.py` — Section 12.3
+
+[Download the complete current reference](../examples/references/part2/01-elementwise-kernels/03_gelu_oracle_verified.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 03_gelu_oracle_verified.py`
 
@@ -393,6 +401,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part2/01-elementwise-kernels/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 

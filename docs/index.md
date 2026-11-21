@@ -1,38 +1,40 @@
-# Triton From First Principles — Under Development
+# Triton From First Principles
+
+[![From tensor contracts to checked GPU kernels](images/ch00/01-concept.svg)](images/ch00/01-concept.svg)
 
 **Building Production GPU Kernels in OpenAI Triton, One Layer at a Time**
 
-!!! info "This book is just getting started"
-    This is the sibling project to [*Mojo From First Principles*](https://maximumbeings.github.io/mojo-from-first-principles/), built the same way: one chapter at a time, in page order, each one carrying real runnable code and genuinely captured output rather than illustrative numbers. Only the scaffold and Chapter 1 exist so far — the rest of this page describes where the book is going, not what it already contains.
+!!! info "Scope and testing status"
+    All 22 chapters are present. Existing example outputs are interpreter references, not GPU benchmark records. This edition adds original SVGs and an offline technical review; compiled GPU validation remains pending. See the [review record](review-and-testing.md).
 
 > "A kernel is not finished when it computes the right answer once. It is finished when you can tell the compiler exactly which memory it may touch, which values it may assume never change, and how many threads get to look at each byte at the same time — and PyTorch's own autograd engine can still find its way through it."
 
-This is a practitioner's guide to [OpenAI Triton](https://triton-lang.org) — the Python-embedded language for writing GPU kernels that compile down to machine code competitive with hand-tuned CUDA, without leaving Python. Unlike a systems language building its own tensor library from scratch, Triton is deliberately narrow: it owns the *kernel*, not the tensor, the device, or the autograd graph. Those belong to PyTorch. The running project in this book is a set of fused, production-style Triton kernels — element-wise ops, a blocked matmul, reductions, fused layer-norm and softmax, Flash Attention, an MoE grouped-GEMM — each one wired into PyTorch's real `torch.autograd.Function` machinery rather than a hand-rolled graph, and each one pointed, in the closing part, at the same quantitative-finance problems the Mojo book ends on.
+This is a practitioner's guide to [OpenAI Triton](https://triton-lang.org) — the Python-embedded language for writing GPU kernels that compile down to machine code competitive with hand-tuned CUDA, without leaving Python. Unlike a systems language building its own tensor library from scratch, Triton is deliberately narrow: it owns the *kernel*, not the tensor, the device, or the autograd graph. Those belong to PyTorch. The running project in this book is a set of fused, production-style Triton kernels — element-wise ops, a blocked matmul, reductions, fused layer-norm and softmax, attention and top-2 MoE gating — with dedicated chapters wiring custom operations into PyTorch's `torch.autograd.Function` machinery rather than a hand-rolled graph, and each one pointed, in the closing part, at the same quantitative-finance problems the Mojo book ends on.
 
 The design principles carried through the whole book:
 
 - **Kernel-first, not framework-first.** Triton doesn't give you a tensor class or a computational graph — it gives you a compiler for the innermost loop. This book treats that boundary honestly instead of papering over it.
-- **PyTorch does the bookkeeping.** Every custom kernel here plugs into `torch.autograd.Function`, so the chain rule, the graph traversal, and gradient accumulation are the real engine's job, not a toy reimplementation of it.
+- **PyTorch does the bookkeeping.** The autograd chapters wrap custom kernels in `torch.autograd.Function`, so the chain rule, the graph traversal, and gradient accumulation are the real engine's job, not a toy reimplementation of it.
 - **Numbers you can check by hand.** Every worked example traces the arithmetic — block indices, strides, masked lanes — before showing the code that produces it.
-- **Financial computing ready.** The closing chapters validate these kernels against bond pricing, credit-spread solving, portfolio duration, and Monte Carlo option pricing — domains with zero tolerance for a silently wrong gradient.
+- **Financial computing examples.** The closing chapter compares teaching implementations of Black–Scholes pricing, rolling return statistics, and Monte Carlo option pricing; production use requires additional numerical, domain and GPU validation.
 
 <div class="grid cards" markdown>
 
 - :material-book-open-page-variant:{ .lg .middle } **22 chapters**
 
-    Part 0 through Part 7, from `@triton.jit` to Monte Carlo gradients.
+    Part 0 through Part 7, from `@triton.jit` to Monte Carlo pricing.
 
 - :material-code-tags:{ .lg .middle } **Real, runnable kernels**
 
-    Every section ships runnable Triton source and its captured output — or says plainly when a real run wasn't possible.
+    84 complete downloadable reference listings accompany the explanations. Historical interpreter outputs and pending GPU tests are distinguished.
 
-- :material-file-document-multiple:{ .lg .middle } **2 appendices**
+- :material-file-document-multiple:{ .lg .middle } **4 appendices**
 
-    Environment setup for a CUDA GPU, plus a self-check quiz.
+    Setup, a self-check quiz, PyTorch integration and memory-model notes.
 
 - :material-finance:{ .lg .middle } **Real financial models**
 
-    Bond pricing and Monte Carlo option pricing, GPU-accelerated.
+    Black–Scholes, rolling volatility and Monte Carlo teaching kernels.
 
 </div>
 
@@ -46,8 +48,8 @@ The design principles carried through the whole book:
 | **Part 3 — Wiring Into PyTorch's Autograd** | `torch.autograd.Function` as the real graph node a Triton kernel plugs into |
 | **Part 4 — The Backward Kernel** | Writing the backward kernel and `ctx.save_for_backward`, how PyTorch's autograd engine chains custom ops |
 | **Part 5 — GPU Acceleration and Performance** | Autotuning (`num_warps`, `num_stages`, `BLOCK_SIZE`), benchmarking correctly with `triton.testing.do_bench` |
-| **Part 6 — Neural Network Building Blocks** | Fused LayerNorm/softmax/dropout/matmul+bias+activation, Flash Attention, MoE grouped-GEMM, higher-order derivatives, gradient checking, serialization |
-| **Part 7 — Financial Computing Applications** | Bond pricing, credit spread/risk analytics, portfolio duration, Monte Carlo option pricing |
+| **Part 6 — Neural Network Building Blocks** | Fused LayerNorm/softmax/dropout/matmul+bias+activation, Flash Attention, top-2 MoE gating and the boundary to a full expert-dispatch system |
+| **Part 7 — Financial Computing Applications** | Black–Scholes calls, rolling standard deviation and Monte Carlo call pricing |
 
 Start with [Getting Started](getting-started.md) to stand up a Triton + PyTorch + CUDA environment, or jump straight into [Part 0: Triton Foundations](part0/01-types-and-the-jit-boundary.md) if your toolchain is already installed.
 

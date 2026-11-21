@@ -1,5 +1,7 @@
 # Chapter 15: `torch.autograd.Function` as the Graph Node
 
+[![Autograd connects a forward to a backward contract](../images/ch15/01-concept.svg)](../images/ch15/01-concept.svg)
+
 > "Every kernel through Chapter 14 was a function you called: you passed it tensors, it gave you back a tensor, and that was the entire transaction. PyTorch's autograd was never in the room. The moment you want `.backward()` to reach through a Triton kernel the way it reaches through `torch.nn.functional.gelu`, you need a genuinely different kind of object — one PyTorch's graph recognizes as a node, not just a Python function that happens to return a tensor."
 
 **What you will understand by the end of this chapter:**
@@ -238,6 +240,8 @@ Sections 15.1–15.3 built up this chapter's findings as isolated probes. The fi
 
 ### File: `01_invisible_to_autograd.py` — Section 15.1
 
+[Download the complete current reference](../examples/references/part3/01-autograd-function-graph-node/01_invisible_to_autograd.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_invisible_to_autograd.py`
 
 ```python
@@ -284,6 +288,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_autograd_function.py` — Section 15.2
+
+[Download the complete current reference](../examples/references/part3/01-autograd-function-graph-node/02_autograd_function.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 02_autograd_function.py`
 
@@ -350,6 +356,8 @@ if __name__ == "__main__":
 
 ### File: `03_save_for_backward.py` — Section 15.3
 
+[Download the complete current reference](../examples/references/part3/01-autograd-function-graph-node/03_save_for_backward.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `python3 03_save_for_backward.py` (no Triton involved — ordinary Python)
 
 ```python
@@ -410,6 +418,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part3/01-autograd-function-graph-node/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 

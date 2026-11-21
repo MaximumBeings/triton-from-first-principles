@@ -1,5 +1,7 @@
 # Chapter 6: The Pointer+Stride Contract
 
+[![The caller owns the pointer-and-stride contract](../images/ch06/01-concept.svg)](../images/ch06/01-concept.svg)
+
 > "A `torch.Tensor` walks up to the kernel boundary carrying a shape, a set of strides, a dtype, and a device. Only one of those four crosses. The other three are a promise you type in by hand, and nothing on the other side checks whether you kept it."
 
 **What you will understand by the end of this chapter:**
@@ -12,7 +14,7 @@
 
 **What you need to know first:**
 
-- Chapter 1's two-phase model (a `@triton.jit` kernel is compiled once per distinct combination of argument dtypes, shapes, and `tl.constexpr` values) — this chapter is largely about *which* of a tensor's properties feed into that combination and which don't
+- Chapter 1's two-phase model (a `@triton.jit` kernel is compiled once per distinct combination of argument argument types, constexpr values, target/options and specialization attributes) — this chapter is largely about *which* of a tensor's properties feed into that combination and which don't
 - Chapter 4's SPMD programming model (`tl.program_id`, `tl.arange`, pointer arithmetic) — every worked example below is built from exactly these primitives
 - Chapter 5's masking discipline (`mask=`, `other=`) — used throughout without further explanation
 - If you've read the Mojo edition of this book, Chapter 6 there ("The Tensor") builds `Tensor[dtype]` as a `struct` with `TensorShape`, `TensorStrides`, a raw pointer, and a dtype, all bundled into one compile-time-checked type. This chapter covers the same four concepts from the opposite direction: Triton never bundles them at all, and Part 1 of this book is largely about what that costs you and what you do about it.
@@ -282,6 +284,8 @@ Sections 6.1–6.4 built up this chapter's findings as isolated probes. The file
 
 ### File: `01_pointer_boundary.py` — Section 6.1
 
+[Download the complete current reference](../examples/references/part1/01-pointer-stride-contract/01_pointer_boundary.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_pointer_boundary.py`
 
 ```python
@@ -321,6 +325,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_shape_stride_promise.py` — Section 6.2
+
+[Download the complete current reference](../examples/references/part1/01-pointer-stride-contract/02_shape_stride_promise.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 02_shape_stride_promise.py`
 
@@ -363,6 +369,8 @@ if __name__ == "__main__":
 
 ### File: `03_dtype_specialization.py` — Section 6.3
 
+[Download the complete current reference](../examples/references/part1/01-pointer-stride-contract/03_dtype_specialization.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 03_dtype_specialization.py`
 
 ```python
@@ -400,6 +408,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part1/01-pointer-stride-contract/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 

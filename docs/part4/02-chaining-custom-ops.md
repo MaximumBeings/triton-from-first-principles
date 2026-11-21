@@ -1,5 +1,7 @@
 # Chapter 17: How PyTorch's Autograd Engine Chains Custom Ops
 
+[![Fan-in adds gradient contributions](../images/ch17/01-concept.svg)](../images/ch17/01-concept.svg)
+
 > A custom `backward` method that has only ever been tested alone has only been tested against the one input it can never actually receive in practice: a `grad_output` of uniform ones.
 
 ## What you will understand by the end of this chapter
@@ -220,6 +222,8 @@ The three files below build up the chapter in order: chaining `TritonGELU` insid
 
 ### File: `01_chained_expression.py`
 
+[Download the complete current reference](../examples/references/part4/02-chaining-custom-ops/01_chained_expression.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -269,6 +273,7 @@ def gelu_backward_kernel_buggy_no_chain_rule(grad_out_ptr, x_ptr, grad_in_ptr, n
 
 
 def triton_gelu_forward(x, BLOCK=1024):
+    x = x.contiguous()
     out = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -343,6 +348,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_graph_structure.py`
+
+[Download the complete current reference](../examples/references/part4/02-chaining-custom-ops/02_graph_structure.py) (interpreter mode; GPU portability is not established).
 
 ```python
 import torch
@@ -473,6 +480,8 @@ if __name__ == "__main__":
 
 ### File: `03_fan_in.py`
 
+[Download the complete current reference](../examples/references/part4/02-chaining-custom-ops/03_fan_in.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -508,6 +517,7 @@ def gelu_backward_kernel(grad_out_ptr, x_ptr, grad_in_ptr, n, BLOCK: tl.constexp
 
 
 def triton_gelu_forward(x, BLOCK=1024):
+    x = x.contiguous()
     out = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -516,6 +526,8 @@ def triton_gelu_forward(x, BLOCK=1024):
 
 
 def triton_gelu_backward(grad_output, x, BLOCK=1024):
+    x = x.contiguous()
+    grad_output = grad_output.contiguous()
     grad_input = torch.empty_like(x)
     n = x.numel()
     grid = (triton.cdiv(n, BLOCK),)
@@ -581,6 +593,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py`
+
+[Download the complete current reference](../examples/references/part4/02-chaining-custom-ops/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 ```python
 """
@@ -847,3 +861,7 @@ Every custom op examined so far has taken one tensor in and produced one tensor 
 3. It confirms that `y`'s graph node's `next_functions` pointer — the edge representing "what produced this node's input" — points to the exact same `Function` object as `z`'s own `.grad_fn`, not merely an equivalent-looking one. Since `y = TritonSquare.apply(z)`, PyTorch recorded that `TritonSquare`'s input came directly from `TritonGELU`'s output, and `is` (object identity, not just equality) confirms that edge is real and precisely wired, not two separately-constructed objects that merely print the same way.
 4. Exactly once — not twice. Autograd computes each of `z.sum()`'s two contributions to `d(loss)/dz` (each equal to `1`, since both terms are literally the same expression `z.sum()`), sums them together into a single tensor equal to `2` uniformly, and only then calls `TritonGELU.backward` a single time with that already-summed `grad_output=2`.
 5. Because autograd's contract only guarantees that `grad_output` is the *correctly summed* gradient across every path that reaches this node from the loss — it makes no promise about how many paths contributed, what their individual coefficients were, or whether this is the first, only, or tenth time the node's output was used. A `backward` that tried to detect or special-case "a single clean use" (for example, assuming a specific expected magnitude, or trying to distinguish contributions from different callers) would be relying on information that has already been irreversibly summed away by the time `backward` receives it, and would silently misbehave the moment the real usage pattern didn't match that assumption — exactly the class of mistake Section 17.3's `[COMMON TRAP]` warns against.
+
+### Backward scope and layout contract
+
+The flat-address GELU wrappers make inputs and upstream gradients contiguous before launching. This preserves logical values for transposed or sliced tensors; pointer increments alone do not understand arbitrary PyTorch strides. The custom Triton backward supports first-order gradients. A raw Triton launch does not create a PyTorch graph for that backward, so higher-order derivatives require a differentiable backward or an explicit rejection such as `once_differentiable`. A first-order comparison or a single `.sum().backward()` is not a gradgrad test. Fan-in accumulation here describes one backward traversal, not an assertion that a node can never run again in a separate traversal.

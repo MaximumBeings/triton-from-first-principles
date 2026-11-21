@@ -1,5 +1,7 @@
-site_name: Triton From First Principles — Under Development
+site_name: Triton From First Principles
 site_description: Building Production GPU Kernels in OpenAI Triton, One Layer at a Time
+site_url: https://maximumbeings.github.io/triton-from-first-principles/
+repo_url: https://github.com/MaximumBeings/triton-from-first-principles
 site_author: Oluwaseyi Awoga
 copyright: Copyright &copy; 2026 Oluwaseyi Awoga
 
@@ -37,6 +39,9 @@ theme:
 
 markdown_extensions:
   - admonition
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.highlight:
@@ -58,6 +63,7 @@ plugins:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Review & Testing Status: review-and-testing.md
   - "Part 0 — Triton Foundations":
       - "1. Types and the JIT Boundary": part0/01-types-and-the-jit-boundary.md
       - "2. Kernel Parameterization": part0/02-kernel-parameterization.md
@@ -98,3 +104,8 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/maximumbeings
+
+extra_css:
+  - stylesheets/reader.css
+extra_javascript:
+  - javascripts/image-viewer.js

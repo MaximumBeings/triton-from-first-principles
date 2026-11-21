@@ -1,5 +1,7 @@
 # Chapter 9: Mask and Structure Kernels
 
+[![A causal mask includes the diagonal](../images/ch09/01-concept.svg)](../images/ch09/01-concept.svg)
+
 > "Every mask since Chapter 5 has answered one question: is this index in bounds? A mask can answer a much richer question than that — is this position on or below the diagonal, is this whole tile worth computing at all, does this particular row even have this many real elements — and the moment it does, the mask stops being bookkeeping and starts being the actual structure of the computation."
 
 **What you will understand by the end of this chapter:**
@@ -230,6 +232,8 @@ Sections 9.1–9.3 built up this chapter's findings as isolated probes. The file
 
 ### File: `01_triangular_masks.py` — Section 9.1
 
+[Download the complete current reference](../examples/references/part1/04-mask-and-structure-kernels/01_triangular_masks.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 01_triangular_masks.py`
 
 ```python
@@ -287,6 +291,8 @@ if __name__ == "__main__":
 
 ### File: `02_block_sparse.py` — Section 9.2
 
+[Download the complete current reference](../examples/references/part1/04-mask-and-structure-kernels/02_block_sparse.py) (interpreter mode; GPU portability is not established).
+
 **Execution:** `TRITON_INTERPRET=1 python3 02_block_sparse.py`
 
 ```python
@@ -327,6 +333,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_ragged_batches.py` — Section 9.3
+
+[Download the complete current reference](../examples/references/part1/04-mask-and-structure-kernels/03_ragged_batches.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 03_ragged_batches.py`
 
@@ -370,6 +378,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part1/04-mask-and-structure-kernels/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 04_standalone_complete.py`
 

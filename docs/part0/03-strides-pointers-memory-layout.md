@@ -1,5 +1,7 @@
 # Chapter 3: Strides, Pointers, and Block-Level Memory Layout
 
+[![A logical coordinate is not a byte address](../images/ch03/01-concept.svg)](../images/ch03/01-concept.svg)
+
 > "A pointer plus an offset is not an address until you multiply by a stride. Get the stride wrong, or assume one that was never actually there, and the kernel doesn't crash — it just quietly reads the wrong sixteen bytes, computes a perfectly plausible-looking wrong answer, and hands it back with no complaint at all."
 
 **What you will understand by the end of this chapter:**
@@ -73,7 +75,7 @@ SoA (vx array, 4B stride): thread i's vx address = i*4
 
 A spreadsheet stored "by row" — every cell of row 1, then every cell of row 2 — lets you read an entire row in one smooth pass down the page. Reading one *column* out of that same sheet means jumping to a completely different page for every single cell, because column members were never placed near each other in the first place. Nothing about the data changed between those two reads — only which direction through it happens to align with how it was actually laid out on the page.
 
-A **stride** is the number that says how far apart, in memory, two logically-adjacent elements along a given axis actually sit. A row-major matrix's row-stride is small (its elements are packed tight) and its column-stride is large (jumping down a column means skipping an entire row's worth of bytes each time) — and Worked Example 3.1.1's whole AoS-vs-SoA story is really just one particular case of this general fact.
+A **stride** is the number that says how far apart, in memory, two logically-adjacent elements along a given axis actually sit. A contiguous row-major matrix has column-axis stride 1 (moving across a row) and row-axis stride equal to the column count (moving down a column) — and Worked Example 3.1.1's whole AoS-vs-SoA story is really just one particular case of this general fact.
 
 ### Background
 
@@ -160,7 +162,7 @@ matches base.t()? True
 
 Same kernel logic, same tensor, the only change is reading `1` and `4` from `t.stride()` instead of assuming `3` and `1` from the output shape — and the result now matches `base.t()` exactly.
 
-> `[COMMON TRAP]` This exact bug is easy to write and easy to miss in testing, because it is invisible on every contiguous tensor — which is most tensors, most of the time, especially the ones a kernel author tests against first. It surfaces only the moment some caller passes a transpose, a `narrow()`, a `[::2]` slice, or any other stride-changing view — often in someone else's code, calling a kernel that was "tested and working" against contiguous inputs the whole time it was being developed. Reading strides from the tensor instead of the shape costs nothing and is correct unconditionally; hardcoding them is a bet that no caller, ever, will hand this kernel anything but the one layout it was written against.
+> `[COMMON TRAP]` This exact bug is easy to write and easy to miss in testing, because it is invisible on every contiguous tensor — which is most tensors, most of the time, especially the ones a kernel author tests against first. It surfaces only the moment some caller passes a transpose, a `narrow()`, a `[::2]` slice, or any other stride-changing view — often in someone else's code, calling a kernel that was "tested and working" against contiguous inputs the whole time it was being developed. Passing actual strides makes the input address calculation correct for valid in-bounds strided views; output bounds, overlap and dtype still need their own checks; hardcoding them is a bet that no caller, ever, will hand this kernel anything but the one layout it was written against.
 
 ## 3.4 2D Blocks: Broadcasting Row and Column Offsets Into One Tile of Pointers `[FOUNDATIONAL]`
 
@@ -208,6 +210,8 @@ Part 2's matmul kernel (Chapter 13) builds directly on this pattern, with a thir
 Sections 3.1–3.4 walked through this chapter's ideas as isolated snippets. The files below are the complete, run-in-order source; `03_standalone_complete.py` combines everything, and its output is reproduced in full afterward. All Python-level segment-counting in this chapter is exact, deterministic arithmetic on addresses — not a hardware measurement — computed the same way whether or not a GPU is present; the Triton kernels were run with `TRITON_INTERPRET=1`, per Chapter 1's opening note.
 
 ### File: `01_transaction_utilization.py` — Sections 3.1 and 3.2
+
+[Download the complete current reference](../examples/references/part0/03-strides-pointers-memory-layout/01_transaction_utilization.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `python3 01_transaction_utilization.py` (pure Python — no Triton launch needed for this file)
 
@@ -265,6 +269,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_stride_aware_kernels.py` — Sections 3.3 and 3.4
+
+[Download the complete current reference](../examples/references/part0/03-strides-pointers-memory-layout/02_stride_aware_kernels.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 02_stride_aware_kernels.py`
 
@@ -331,6 +337,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_standalone_complete.py` — the full chapter, one program
+
+[Download the complete current reference](../examples/references/part0/03-strides-pointers-memory-layout/03_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 **Execution:** `TRITON_INTERPRET=1 python3 03_standalone_complete.py`
 

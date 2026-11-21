@@ -1,5 +1,7 @@
 # Chapter 18: Autotuning
 
+[![Autotuning chooses among correct candidates](../images/ch18/01-concept.svg)](../images/ch18/01-concept.svg)
+
 > Every kernel in this book so far has used one fixed block size, chosen once, by a human, and left alone. Autotuning replaces that guess with an experiment — but an experiment needs something to measure against, and that is exactly the one thing this book's environment has never had.
 
 ## What you will understand by the end of this chapter
@@ -235,6 +237,8 @@ The three files below build up the chapter in order: constructing and validating
 
 ### File: `01_config_space.py`
 
+[Download the complete current reference](../examples/references/part5/01-autotuning/01_config_space.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -278,6 +282,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_autotune_attempt.py`
+
+[Download the complete current reference](../examples/references/part5/01-autotuning/02_autotune_attempt.py) (interpreter mode; GPU portability is not established).
 
 ```python
 import torch
@@ -325,6 +331,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `03_manual_sweep.py`
+
+[Download the complete current reference](../examples/references/part5/01-autotuning/03_manual_sweep.py) (interpreter mode; GPU portability is not established).
 
 ```python
 import torch
@@ -378,6 +386,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py`
+
+[Download the complete current reference](../examples/references/part5/01-autotuning/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 ```python
 """

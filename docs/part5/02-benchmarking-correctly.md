@@ -1,5 +1,7 @@
 # Chapter 19: Benchmarking Correctly
 
+[![Time the intended interval, not host enqueue calls](../images/ch19/01-concept.svg)](../images/ch19/01-concept.svg)
+
 > A number produced by a stopwatch is not automatically a measurement. It is only a measurement once the thing being timed, the moment timing starts, and the moment timing stops have all been chosen correctly — and getting any one of those three wrong produces a number that looks exactly as convincing as a correct one.
 
 ## What you will understand by the end of this chapter
@@ -205,6 +207,8 @@ The three files below build up the chapter in order: the genuine failure of `tri
 
 ### File: `01_do_bench_attempt.py`
 
+[Download the complete current reference](../examples/references/part5/02-benchmarking-correctly/01_do_bench_attempt.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -247,6 +251,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `02_warmup_and_statistics.py`
+
+[Download the complete current reference](../examples/references/part5/02-benchmarking-correctly/02_warmup_and_statistics.py) (interpreter mode; GPU portability is not established).
 
 ```python
 import torch
@@ -321,6 +327,8 @@ if __name__ == "__main__":
 
 ### File: `03_interpreter_timing_trap.py`
 
+[Download the complete current reference](../examples/references/part5/02-benchmarking-correctly/03_interpreter_timing_trap.py) (interpreter mode; GPU portability is not established).
+
 ```python
 import torch
 import triton
@@ -378,6 +386,8 @@ if __name__ == "__main__":
 ```
 
 ### File: `04_standalone_complete.py`
+
+[Download the complete current reference](../examples/references/part5/02-benchmarking-correctly/04_standalone_complete.py) (interpreter mode; GPU portability is not established).
 
 ```python
 """
