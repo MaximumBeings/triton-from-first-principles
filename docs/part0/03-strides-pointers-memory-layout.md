@@ -19,15 +19,18 @@
 - Chapter 1, Section 1.4 (every value in a kernel body is block-shaped) — this chapter's 2D tiles are built from exactly the same `tl.arange` mechanism, broadcast across two axes instead of one
 - Chapter 2's `tl.constexpr` block-size parameters (`BLOCK`) — this chapter introduces `BLOCK_M` and `BLOCK_N`, the same idea applied to two dimensions
 
+!!! info "What the segment-counting model measures"
+    The AoS calculation unions sectors across four separate field-load instructions. Its 28 sectors / 896 bytes are a **unique-sector footprint with ideal reuse between fields**, not measured memory traffic. Each of the four AoS field instructions touches 28 sectors: 112 sector requests before cache reuse. SoA touches four sectors per field: 16 requests across four fields. Cache hits/misses and actual DRAM bytes are separate quantities. Historical code/output labels such as “bytes fetched” below name this modeled footprint, not a hardware measurement. See [NVIDIA's memory-access model](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html).
+
 ## 3.1 Memory Transactions: Every Segment Costs Bandwidth, Whether You Use It or Not `[FOUNDATIONAL]`
 
 ### Intuition
 
-Mojo's Chapter 3 opens with movers who only carry pre-packed boxes: ask for the forks and the whole kitchen box comes along, plates and pots included, because they were packed together. A GPU's global memory system runs on the identical principle, one level up: it doesn't fetch individual bytes on request, it fetches fixed-size *segments* — and if the bytes eight, sixteen, or thirty-two different threads actually want are scattered across many segments instead of packed into a few, the hardware issues one expensive transaction per segment touched, whether or not most of each transaction's bytes were ever asked for.
+Mojo's Chapter 3 opens with movers who only carry pre-packed boxes: ask for the forks and the whole kitchen box comes along, plates and pots included, because they were packed together. A GPU's global memory system runs on the identical principle, one level up: it doesn't fetch individual bytes on request, it fetches fixed-size *segments* — and if the bytes eight, sixteen, or thirty-two different threads actually want are scattered across many segments instead of packed into a few, a load instruction requests the sectors containing its active addresses, whether or not most of each transaction's bytes were ever asked for.
 
 ### Background
 
-Define **transaction utilization** for a group of threads reading memory simultaneously exactly the way Mojo's Chapter 3 defines bus utilization for a CPU:
+Define **modeled footprint utilization** for a group of threads reading memory simultaneously exactly the way Mojo's Chapter 3 defines bus utilization for a CPU:
 
 ```
 transaction utilization = (bytes actually needed) / (bytes actually fetched)
@@ -461,16 +464,16 @@ stride-aware kernel on base.t(), correct? True
 top-left 2x2 tile: [[0.0, 4.0], [1.0, 5.0]] (expected [[0,4],[1,5]])
 ```
 
-Every number here was independently hand-traced earlier in this chapter: the 57.1%/100.0% split in Section 3.1 (matching Mojo's own particle-system numbers exactly), the 100.0%/12.5% row-vs-column split in Section 3.2, the transpose-correctness booleans in Section 3.3, and the 2×2 tile in Section 3.4.
+Every number here belongs to the explicitly stated unique-sector model and was independently hand-traced earlier in this chapter: the 57.1%/100.0% split in Section 3.1 (matching Mojo's own particle-system numbers exactly), the 100.0%/12.5% row-vs-column split in Section 3.2, the transpose-correctness booleans in Section 3.3, and the 2×2 tile in Section 3.4.
 
 ## Chapter Summary
 
-GPU global memory, like a CPU's memory bus, moves data in fixed-size chunks — this chapter's simplified 32-byte segments — and a memory access pattern is only as efficient as the fraction of each fetched chunk it actually needed. Section 3.1 reran Mojo Chapter 3's own particle-system example on a simulated warp of GPU threads and landed on the identical 57.1%-versus-100% split, for a related but mechanically distinct reason: AoS wastes CPU bus bandwidth by fetching unwanted neighboring fields in one thread's access, while it wastes GPU transaction bandwidth by scattering many threads' wanted fields across many separate segments. Section 3.2 showed the same principle applies to something as simple as which direction you read a matrix: a row read and a column read of the same 32×32 tensor differ by 8× in transaction utilization, purely because of which axis happens to be contiguous. Section 3.3 showed that a kernel's stride arithmetic is either read from the real tensor it's given or it's a bet — a bet that silently loses, with no error and a plausible-looking wrong answer, the moment anyone hands it a transpose or any other non-contiguous view. And Section 3.4 named the broadcasting mechanism — `rows[:, None]`, `cols[None, :]` — that every 2D-tile kernel from here through the end of Part 2 is built from.
+GPU global memory, like a CPU's memory bus, moves data in fixed-size chunks — this chapter's simplified 32-byte segments — and a memory access pattern is only as efficient as the fraction of each fetched chunk it actually needed. Section 3.1 reran Mojo Chapter 3's own particle-system example on a simulated warp of GPU threads and landed on the identical 57.1%-versus-100% split, for a related but mechanically distinct reason: AoS wastes CPU bus bandwidth by fetching unwanted neighboring fields in one thread's access, while it wastes GPU transaction bandwidth by scattering many threads' wanted fields across many separate segments. Section 3.2 showed the same principle applies to something as simple as which direction you read a matrix: a row read and a column read of the same 32×32 tensor differ by 8× in modeled footprint utilization, purely because of which axis happens to be contiguous. Section 3.3 showed that a kernel's stride arithmetic is either read from the real tensor it's given or it's a bet — a bet that silently loses, with no error and a plausible-looking wrong answer, the moment anyone hands it a transpose or any other non-contiguous view. And Section 3.4 named the broadcasting mechanism — `rows[:, None]`, `cols[None, :]` — that every 2D-tile kernel from here through the end of Part 2 is built from.
 
 ## Self-Check Questions
 
 1. Section 3.1 computes identical `57.1%` utilization figures for AoS on both a CPU (Mojo's Chapter 3) and a simulated GPU warp (this chapter). Are these two `57.1%`s measuring the same physical waste? If not, what's actually different underneath the matching number?
-2. A `(64, 64)` row-major `float32` matrix is read one full row at a time in one kernel, and one full column at a time in another. Without recomputing exact segment counts, which one has higher transaction utilization, and why does the *row-major* label alone determine the answer?
+2. A `(64, 64)` row-major `float32` matrix is read one full row at a time in one kernel, and one full column at a time in another. Without recomputing exact segment counts, which one has higher modeled footprint utilization, and why does the *row-major* label alone determine the answer?
 3. `ptrs = x_ptr + rows[:, None] * N + cols[None, :]` produced the correct result when tested against a contiguous `(3,4)` tensor. Explain precisely why that successful test does not prove the kernel is correct in general, and what specific kind of input would have caught the bug immediately.
 4. What are `t.stride(0)` and `t.stride(1)` for `t = base.t()`, where `base` is a contiguous `(3,4)` tensor, and why are they in that specific order rather than matching `base`'s own strides directly?
 5. `rows[:, None]` has shape `(BLOCK_M, 1)` and `cols[None, :]` has shape `(1, BLOCK_N)`. Explain what broadcasting rule allows `rows[:, None] * stride_row + cols[None, :] * stride_col` to produce a `(BLOCK_M, BLOCK_N)` result, and why writing out all `BLOCK_M * BLOCK_N` addresses individually would compute the identical values.

@@ -26,6 +26,10 @@ def main():
     for page, banner in [('index.md','book-overview'),('getting-started.md','getting-started')]:
         if f'images/chapter-openers/{banner}.svg' not in (ROOT/'docs'/page).read_text():
             raise ValueError('Missing entry-page banner: '+page)
+    for letter, page in [('a','installation-setup.md'),('b','practice-quiz.md'),('c','pytorch-triton-integration.md'),('d','memory-model-continued.md')]:
+        text=(ROOT/'docs/appendix'/page).read_text()
+        if f'chapter-openers/appendix-{letter}.svg' not in text or f'images/appendix-{letter}/01-concept.svg' not in text:
+            raise ValueError('Missing appendix figures: '+page)
     rows=list(examples())
     if len(rows)!=84:raise ValueError('Complete source inventory changed; review the manifest')
     for row in rows:ast.parse(row['code'],filename=row['download'])

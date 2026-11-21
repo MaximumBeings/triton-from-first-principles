@@ -17,6 +17,27 @@ def online(scores, values, block):
 
 
 class WorkedMath(unittest.TestCase):
+    def test_sector_requests_versus_unique_footprint(self):
+        fields=[3,4,5,6]
+        requests=[{(i*28+field*4)//32 for i in range(32)} for field in fields]
+        self.assertEqual([len(x) for x in requests],[28]*4)
+        self.assertEqual(sum(map(len,requests)),112)
+        self.assertEqual(len(set.union(*requests)),28)
+        self.assertEqual(32*4*4/(28*32),4/7)
+
+    def test_discount_error_contract_attribution(self):
+        inputs=zip([100,100,100,80,120,100],[100,90,110,100,100,100],[1,.5,2,1,1,.01],[.05,.05,.03,.05,.05,.05],[.2,.3,.25,.4,.15,.2])
+        relative=[]
+        cdf=lambda x:.5*(1+math.erf(x/math.sqrt(2)))
+        for S,K,T,r,vol in inputs:
+            d1=(math.log(S/K)+(r+vol*vol/2)*T)/(vol*math.sqrt(T));d2=d1-vol*math.sqrt(T)
+            correct=S*cdf(d1)-K*math.exp(-r*T)*cdf(d2)
+            wrong=S*cdf(d1)-K*cdf(d2)
+            relative.append(100*(wrong-correct)/correct)
+        self.assertEqual(max(range(6),key=lambda i:abs(relative[i])),0)
+        self.assertAlmostEqual(relative[0],-26.116,delta=.01)
+        self.assertAlmostEqual(relative[2],-19.947,delta=.01)
+
     def test_stride_units(self):
         offsets = [[i*5+j for j in range(3)] for i in range(2)]
         self.assertEqual(offsets, [[0,1,2],[5,6,7]])

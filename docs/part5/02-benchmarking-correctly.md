@@ -6,6 +6,9 @@
 
 > A number produced by a stopwatch is not automatically a measurement. It is only a measurement once the thing being timed, the moment timing starts, and the moment timing stops have all been chosen correctly — and getting any one of those three wrong produces a number that looks exactly as convincing as a correct one.
 
+!!! info "Historical interpreter timing examples"
+    The driver-less failures below describe the original authoring environment. The later H100 smoke run is recorded separately; interpreter wall-clock times are not GPU performance measurements.
+
 ## What you will understand by the end of this chapter
 
 - What `triton.testing.do_bench` actually does internally — estimating a single call's cost, deriving warmup and repeat counts from target durations in milliseconds, timing with GPU-side events, and clearing the cache between repeats — read directly from its real, installed source

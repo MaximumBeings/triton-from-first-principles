@@ -61,7 +61,7 @@ GPU SMOKE PASS: 12 compiled GPU cases; not the complete chapter suite
 
 ## Complete chapter references: interpreter rerun
 
-All **84 complete current reference files exited zero** under
+All **84 complete reference files at the captured commit exited zero** under
 `TRITON_INTERPRET=1` on the same host. They used CPU tensors/interpreter semantics;
 this count is not 84 GPU-compiled programs. Several files intentionally print
 negative comparisons to demonstrate bugs. A zero process exit is not proof of
@@ -72,7 +72,7 @@ The runner used four independent processes with CPU math thread counts set to
 one; CUDA visibility was GPU 1. Its [complete source](validation/2026-11-21-h100/run_triton_references.py)
 is retained. Each result's log path is relative to the `interpreter/` directory.
 Historical printed chapter outputs remain historical; these new logs record the
-current source identities without editing those earlier outputs.
+captured source identities without editing those earlier outputs. After the final review, 83 sources remain byte-identical; one finance file changes only an incorrect printed maturity label. That exact before/after change is pinned and checked separately; the new label has not been rerun. See the [final review](final-review-2026-11-21.md).
 
 ## What remains
 

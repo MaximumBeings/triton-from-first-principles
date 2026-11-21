@@ -79,7 +79,7 @@ def section_22_1():
     rel_diff_pct = 100 * (out_wrong.numpy() - oracle) / oracle
     print("relative diffs (%):", np.round(rel_diff_pct, 2))
     print("smallest |relative diff| (shortest maturity):", np.round(rel_diff_pct[np.argmin(np.abs(rel_diff_pct))], 2))
-    print("largest |relative diff| (longest maturity):", np.round(rel_diff_pct[np.argmax(np.abs(rel_diff_pct))], 2))
+    print("largest |relative diff| across these contracts:", np.round(rel_diff_pct[np.argmax(np.abs(rel_diff_pct))], 2))
 
 
 if __name__ == "__main__":

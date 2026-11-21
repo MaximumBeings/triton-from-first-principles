@@ -27,7 +27,9 @@ jobs:
       - name: Check complete sources and worked mathematics without a GPU
         run: python tools/verify_book.py
       - name: Verify captured H100 execution evidence
-        run: python tools/verify_execution.py
+        run: |
+          python tools/verify_execution.py
+          python tools/test_review_evidence.py
       - name: Check SVG fonts, geometry and label overlap
         run: python tools/verify_svg_readability.py
       - name: Check viewer syntax

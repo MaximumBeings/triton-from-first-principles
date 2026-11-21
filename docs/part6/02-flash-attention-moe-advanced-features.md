@@ -184,6 +184,9 @@ Causal mask, tiled (BLOCK_M = BLOCK_N = 4, query block starting at row 8):
 
 > [COMMON TRAP] A kernel's correctness can only be judged against the task it was actually built for — a Flash Attention kernel matching the tested non-causal contract, independently verified against non-causal attention, is still completely wrong the moment it's pointed at a causal task without adding the causal condition. This is a different category of mistake from every earlier chapter's traps (a masking boundary error, a forgotten chain-rule multiplication, an eps in the wrong place): here, every individual line of the kernel is doing exactly what it was written to do, and the mismatch is entirely in which mathematical problem that correct code happens to solve.
 
+!!! info "Routing contract for this lesson"
+    This example deliberately renormalizes the selected top-2 weights to sum to one. Retaining the selected full-softmax weights is a different model policy, not a universal MoE bug. Every “wrong” label in this section means wrong for this chosen normalized-mixture contract.
+
 ## 21.3 [FOUNDATIONAL] Mixture-of-Experts Routing: Top-K Gating as a Kernel
 
 ### Intuition
@@ -198,7 +201,7 @@ Current Triton documents `tl.topk`, with its own shape/constexpr restrictions; i
 |---|---|---|
 | Softmax over experts | `probs = exp(logits - max) / sum(exp(logits - max))` | Chapter 14's numerically-stable softmax |
 | Top-1 selection | `tl.max`/`tl.argmax` over the row of probabilities | New this chapter |
-| Top-2 selection | Mask out the top-1 position, take `tl.max`/`tl.argmax` of what remains | Chapter 13.2's masked-sentinel pattern, repurposed |
+| Top-2 selection | Mask out the top-1 position, take `tl.max`/`tl.argmax` of what remains | Chapter 14's reduction-sentinel pattern, repurposed |
 | Renormalization | Divide each selected weight by the sum of the selected weights (not the full row's sum, which is already `1`) | New this chapter |
 
 ### Worked Example 21.3.1: top-2 gating, verified against `torch.topk`
@@ -242,7 +245,7 @@ kernel weights (w0,w1) allclose to oracle? True
 w0+w1 == 1 for all rows? True
 ```
 
-Every selected expert index matches PyTorch's own `topk`, and the renormalized weights sum to exactly `1` for every token, as intended.
+Every selected expert index matches PyTorch's own `topk`, and the renormalized weights sum to `1` within the stated tolerance for every token, as intended.
 
 ### Worked Example 21.3.2: forgetting to renormalize
 
@@ -264,7 +267,7 @@ Token's expert logits:  [ 8 experts, one softmax probability each, summing to 1.
 
   CORRECT:   w_i = p_i / (p_i + p_j)     w_j = p_j / (p_i + p_j)     -->  w_i + w_j = 1.0  ALWAYS
 
-  WRONG:     w_i = p_i                    w_j = p_j                  -->  w_i + w_j = (p_i+p_j)
+  DIFFERENT POLICY (not this contract):     w_i = p_i                    w_j = p_j                  -->  w_i + w_j = (p_i+p_j)
                                                                             which VARIES per token,
                                                                             e.g. 0.36 to 0.72 here --
                                                                             silently scales every
@@ -830,12 +833,12 @@ This chapter closes Part 6's tour of realistic neural network building blocks �
 1. The running weighted-`V` accumulator, `acc`. It needs the identical rescaling for the identical reason `l_i` does: `acc` is a running sum of terms — `exp(scores - m_old) @ V_block` — computed relative to the *old* running maximum, and the moment a new block reveals a larger maximum, every term already summed into `acc` was computed against a now-stale baseline. Multiplying `acc` by `alpha = exp(m_old - m_new)` corrects every previously-accumulated term to be relative to the new maximum, exactly as multiplying `l_i` by the same factor does for the running sum.
 2. No — nothing went wrong inside the kernel itself. It was independently verified, in Section 21.1, to compute `softmax(Q @ K^T / sqrt(d)) @ V` correctly, with no restriction on which keys a query may attend to, and Worked Example 21.2.2 confirmed it still matches that same non-causal computation exactly. What "went wrong" is that this section's task requires causal masking — restricting each query to keys at or before its own position — and the kernel, correctly, was never built to do that. The mismatch is between the kernel's (correct) specification and the task's (different) requirement, not a defect in the code.
 3. It's a performance optimization, not a correctness requirement. Once a query block's own row range (`pid_m * BLOCK_M` through `pid_m * BLOCK_M + BLOCK_M - 1`) is known, any key/value block starting at `n0 >= max_col` consists entirely of keys strictly beyond every query in this block — under causal masking, `causal_mask = rows >= cols` would evaluate to `False` for every single pair in such a block anyway. Skipping it outright avoids loading and computing on a block whose entire contribution the causal mask would zero out regardless; omitting this line would still produce a correct answer, just a slower one.
-4. Calling `tl.max` a second time on the unmodified `probs` would simply return the same top-1 value and index again — `tl.max` has no memory of what was already selected. Masking the already-selected position to `-inf` first ensures the next `tl.max` call is forced to find the largest value *among what remains*, which is exactly Chapter 13.2's masked-sentinel technique repurposed: instead of masking out invalid memory, this masks out an already-claimed candidate so the next search step is guaranteed not to re-select it.
+4. Calling `tl.max` a second time on the unmodified `probs` would simply return the same top-1 value and index again — `tl.max` has no memory of what was already selected. Masking the already-selected position to `-inf` first ensures the next `tl.max` call is forced to find the largest value *among what remains*, which is exactly Chapter 14's reduction-sentinel technique repurposed: instead of masking out invalid memory, this masks out an already-claimed candidate so the next search step is guaranteed not to re-select it.
 5. Because the amount "missing" from a token's top-2 selection is exactly the probability mass its softmax assigned to the other six (unselected) experts — and that split between "concentrated in the top 2" versus "spread across the rest" is different for every token, depending entirely on that token's own specific logits. A token whose gating network was very confident (most probability mass concentrated in 2 experts) loses very little by skipping renormalization; a token whose gating was much less decisive (probability spread more evenly across all 8) loses much more. There is no single scale factor to correct for, because the error itself is a per-token quantity, not a global constant.
 
 ### Contracts that the small examples do not cover
 
-The historical outputs above are interpreter results. The worked BLOCK=4 tiles are useful for tracing but are not valid NVIDIA `tl.dot` tiles in the referenced v3.3.1 backend, which requires at least 16 in M/N/K for its non-INT8 dot contract. D=8 may be logically valid but needs padding to a valid physical dot extent. CPU tensors also need CUDA counterparts before a GPU launch. Explicit `input_precision="ieee"` in the current FP32 teaching kernels avoids silently substituting TF32 for an FP32 comparison; that choice is not a Tensor Core peak-performance recipe. Source changes need a new execution record.
+The historical outputs above are interpreter results. The worked BLOCK=4 tiles are useful for tracing but are not valid NVIDIA `tl.dot` tiles in the referenced v3.3.1 backend, which requires at least 16 in M/N/K for its non-INT8 dot contract. D=8 may be logically valid but needs padding to a valid physical dot extent. CPU tensors also need CUDA counterparts before a GPU launch. Explicit `input_precision="ieee"` in the current FP32 teaching kernels avoids silently substituting TF32 for an FP32 comparison; that choice is not a Tensor Core peak-performance recipe. The current corrected sources were included in the [November 21 interpreter rerun](../execution-2026-11-21.md); only the separate smoke source has compiled GPU coverage.
 
 The bounded causal loop avoids unsupported `continue` control flow and skips future-key tiles. Valid query rows need at least one unmasked key; all-masked rows, NaNs, empty sequences and rectangular causal alignment require an explicit separate contract. These examples use top-left causal alignment.
 

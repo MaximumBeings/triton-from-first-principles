@@ -9,7 +9,7 @@ autograd integration, measurement, attention and financial-computing examples.
 
 The printed historical outputs are interpreter references. They do not establish
 compiled GPU correctness or performance. The current edition exports all 84
-complete reference files, records their identities and adds 47 original SVGs, including 22 chapter banners and two entry-page banners.
+complete reference files, records their identities and adds 55 original SVGs, including banners and worked diagrams for all four appendices.
 A separate GPU smoke program is prepared but has not yet been GPU-tested.
 
 ## Build and verify without a GPU

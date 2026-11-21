@@ -1,0 +1,26 @@
+[
+  {
+    "appendix": "A",
+    "banner": "docs/images/chapter-openers/appendix-a.svg",
+    "concept": "docs/images/appendix-a/01-concept.svg",
+    "height": 783
+  },
+  {
+    "appendix": "B",
+    "banner": "docs/images/chapter-openers/appendix-b.svg",
+    "concept": "docs/images/appendix-b/01-concept.svg",
+    "height": 677
+  },
+  {
+    "appendix": "C",
+    "banner": "docs/images/chapter-openers/appendix-c.svg",
+    "concept": "docs/images/appendix-c/01-concept.svg",
+    "height": 808
+  },
+  {
+    "appendix": "D",
+    "banner": "docs/images/chapter-openers/appendix-d.svg",
+    "concept": "docs/images/appendix-d/01-concept.svg",
+    "height": 802
+  }
+]

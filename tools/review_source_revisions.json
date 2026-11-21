@@ -1,0 +1,11 @@
+[
+  {
+    "source": "docs/examples/references/part7/01-quantitative-finance-examples/01_black_scholes.py",
+    "before_source": "audit/final-review-2026-11-21/before/01_black_scholes.py",
+    "captured_sha256": "8bdb4e5fed43bfc93ec00577abab75852f039f5e2e66f6601df25f5f4741a39e",
+    "current_sha256": "a1d35706f6d1595a980e9a8c06a119fc896ebcea90f5fb5df8849a6a10857bc8",
+    "old_label": "largest |relative diff| (longest maturity)",
+    "new_label": "largest |relative diff| across these contracts",
+    "scope": "Output label only; numerical operations unchanged. Revised label has not been recaptured; original logs remain exact."
+  }
+]

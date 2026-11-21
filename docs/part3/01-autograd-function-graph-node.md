@@ -6,10 +6,13 @@
 
 > "Every kernel through Chapter 14 was a function you called: you passed it tensors, it gave you back a tensor, and that was the entire transaction. PyTorch's autograd was never in the room. The moment you want `.backward()` to reach through a Triton kernel the way it reaches through `torch.nn.functional.gelu`, you need a genuinely different kind of object — one PyTorch's graph recognizes as a node, not just a Python function that happens to return a tensor."
 
+!!! warning "Input contract for these first wrappers"
+    Pass small contiguous FP32 tensors whose element count fits the single BLOCK. These flat-address examples do not support arbitrary strided views: `arange(8)[::2]` contains `[0,2,4,6]`, whereas an unchecked flat read sees `[0,1,2,3]`. Chapter 16 normalizes its multi-program wrappers before launch. Differentiation support is limited to the derivatives explicitly implemented.
+
 **What you will understand by the end of this chapter:**
 
 - Why calling a Triton kernel from an ordinary Python function is completely invisible to PyTorch's autograd, even when the input tensor has `requires_grad=True` — and exactly what error you get for trying to differentiate through it anyway
-- How `torch.autograd.Function`, with its paired `forward` and `backward` static methods, is the one sanctioned mechanism for inserting a computation autograd cannot see through — like a raw kernel launch — into a graph autograd can actually traverse
+- How `torch.autograd.Function`, with its paired `forward` and `backward` static methods, is a standard mechanism for inserting a computation autograd cannot see through — like a raw kernel launch — into a graph autograd can actually traverse
 - How to wire up a correct `forward`/`backward` pair for a real kernel (this chapter's GELU from Chapter 12), verify the resulting gradient against PyTorch's own autograd-enabled `torch.nn.functional.gelu`, while being explicit that this chapter's `backward` is still ordinary PyTorch arithmetic, not yet a hand-written kernel — that's Chapter 16's job
 - Why `ctx.save_for_backward(x)` exists as a distinct mechanism from just storing `ctx.x = x`, and what specific, silent failure mode the distinct mechanism prevents
 

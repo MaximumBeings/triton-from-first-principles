@@ -62,9 +62,9 @@ class Banner:
   elif kind=='reduce':
    self.grid(370,130,1,6,23);self.arrow(517,141,554,174);self.box(569,148,130,70,labels[1],GOLD);self.text(535,270,labels[0]+' → '+labels[2],18,MUTED,'middle')
   elif kind=='branch':
-   self.box(365,145,65,65,'x',GOLD);self.box(486,93,94,61,'x × x');self.box(486,210,94,61,'+ x');self.box(634,145,75,65,'dx',GREEN)
+   self.box(365,145,65,65,'x',GOLD);self.box(486,93,94,61,'x × x');self.box(486,210,94,61,'x');self.box(634,145,75,65,'y',GREEN)
    for a,b,c,d in [(431,175,480,125),(431,179,480,239),(584,125,628,173),(584,239,628,179)]:self.arrow(a,b,c,d)
-   self.text(538,310,'Accumulate both paths',18,MUTED,'middle')
+   self.text(538,297,'Forward: y = x*x + x',18,MUTED,'middle');self.text(538,323,'Backward: dy/dx = 2*x+1',17,MUTED,'middle')
   elif kind=='attention':
    self.grid(366,109,4,4,23,True);self.arrow(463,155,505,155);self.box(517,116,102,80,'m, l, acc',GOLD);self.arrow(624,155,653,155);self.box(665,124,50,64,'O',GREEN);self.text(540,270,'Rescale both running sums',18,MUTED,'middle')
   elif kind=='plot':

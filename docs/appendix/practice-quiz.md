@@ -1,5 +1,9 @@
 # Appendix B: Practice Quiz
 
+[![Appendix B: Trace by hand. Then test the claim.](../images/chapter-openers/appendix-b.svg)](../images/chapter-openers/appendix-b.svg)
+
+[![Appendix B worked concept](../images/appendix-b/01-concept.svg)](../images/appendix-b/01-concept.svg)
+
 Work through the question before opening its answer. These are reasoning exercises, not GPU execution records. Chapter numbers follow the book's main sequence.
 
 ## Foundations and tensor contracts

@@ -2,8 +2,6 @@
 
 [![From tensors. To GPU kernels.](images/chapter-openers/book-overview.svg)](images/chapter-openers/book-overview.svg)
 
-[![From tensor contracts to checked GPU kernels](images/ch00/01-concept.svg)](images/ch00/01-concept.svg)
-
 **Building Production GPU Kernels in OpenAI Triton, One Layer at a Time**
 
 !!! info "Scope and testing status"
@@ -12,6 +10,8 @@
 > "A kernel is not finished when it computes the right answer once. It is finished when you can tell the compiler exactly which memory it may touch, which values it may assume never change, and how many threads get to look at each byte at the same time — and PyTorch's own autograd engine can still find its way through it."
 
 This is a practitioner's guide to [OpenAI Triton](https://triton-lang.org) — the Python-embedded language for writing GPU kernels that compile down to machine code competitive with hand-tuned CUDA, without leaving Python. Unlike a systems language building its own tensor library from scratch, Triton is deliberately narrow: it owns the *kernel*, not the tensor, the device, or the autograd graph. Those belong to PyTorch. The running project in this book is a set of fused, production-style Triton kernels — element-wise ops, a blocked matmul, reductions, fused layer-norm and softmax, attention and top-2 MoE gating — with dedicated chapters wiring custom operations into PyTorch's `torch.autograd.Function` machinery rather than a hand-rolled graph, and each one pointed, in the closing part, at the same quantitative-finance problems the Mojo book ends on.
+
+No Mojo book is required: comparisons to it are optional analogies, and the Triton concepts are explained here.
 
 The design principles carried through the whole book:
 
@@ -42,6 +42,8 @@ The design principles carried through the whole book:
 
 ## How the book is organized
 
+[![From tensor contracts to checked GPU kernels](images/ch00/01-concept.svg)](images/ch00/01-concept.svg)
+
 | Part | Focus |
 |---|---|
 | **Part 0 — Triton Foundations** | Triton's type system and the JIT boundary, kernel parameterization (`constexpr`, configs), strides and pointers, the grid/program/block model, block-level SPMD vectorization |
@@ -50,7 +52,7 @@ The design principles carried through the whole book:
 | **Part 3 — Wiring Into PyTorch's Autograd** | `torch.autograd.Function` as the real graph node a Triton kernel plugs into |
 | **Part 4 — The Backward Kernel** | Writing the backward kernel and `ctx.save_for_backward`, how PyTorch's autograd engine chains custom ops |
 | **Part 5 — GPU Acceleration and Performance** | Autotuning (`num_warps`, `num_stages`, `BLOCK_SIZE`), benchmarking correctly with `triton.testing.do_bench` |
-| **Part 6 — Neural Network Building Blocks** | Fused LayerNorm/softmax/dropout/matmul+bias+activation, Flash Attention, top-2 MoE gating and the boundary to a full expert-dispatch system |
+| **Part 6 — Neural Network Building Blocks** | Fused LayerNorm/softmax/matmul+bias+activation, Flash Attention, top-2 MoE gating and the boundary to a full expert-dispatch system |
 | **Part 7 — Financial Computing Applications** | Black–Scholes calls, rolling standard deviation and Monte Carlo call pricing |
 
 Start with [Getting Started](getting-started.md) to stand up a Triton + PyTorch + CUDA environment, or jump straight into [Part 0: Triton Foundations](part0/01-types-and-the-jit-boundary.md) if your toolchain is already installed.

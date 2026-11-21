@@ -6,13 +6,16 @@
 
 > Every kernel in this book so far has used one fixed block size, chosen once, by a human, and left alone. Autotuning replaces that guess with an experiment — but an experiment needs something to measure against, and that is exactly the one thing this book's environment has never had.
 
+!!! info "Historical interpreter timing examples"
+    The driver-less failures below describe the original authoring environment. The later H100 smoke run is recorded separately; interpreter wall-clock times are not GPU performance measurements.
+
 ## What you will understand by the end of this chapter
 
 - What `triton.Config` actually is — a plain, driver-independent Python object bundling a kernel's compile-time meta-parameters (`BLOCK`, and similar) together with `num_warps` and `num_stages` — and what each of those fields roughly controls
 - Why not every combination of values is even a legal candidate, and what happens, genuinely, when one isn't
 - What `@triton.autotune`'s `key=[...]` argument means, and the difference between its first-call behavior (a full timed sweep across every candidate) and every subsequent call with the same key values (an immediate, cached reuse of whichever candidate won)
 - Why `@triton.autotune` cannot run at all in this book's own `TRITON_INTERPRET=1` environment — not degraded, not approximate, but a genuine, immediate failure — and exactly why that failure is fundamentally different from every earlier chapter's "no GPU" disclosures
-- What this environment *can* still verify about a candidate search space without any hardware timing at all: that every legally-constructed candidate computes the identical, correct answer, regardless of its `BLOCK`, `num_warps`, or `num_stages`
+- What this environment *can* still verify about a candidate search space without any hardware timing at all: how the demonstrated elementwise arithmetic agrees across logical BLOCK choices, without proving compiled warp/stage scheduling
 - Why "every candidate is correct" is not the same claim as "here is the fastest candidate," and why confusing the two would undo the whole point of autotuning
 
 ## What you need to know first
@@ -90,7 +93,7 @@ Candidate search space (kwargs, num_warps, num_stages):
 
 ### Intuition
 
-`@triton.autotune(configs=[...], key=[...])` wraps a `@triton.jit` kernel so that its very first launch for a given combination of `key` argument values doesn't just run the kernel — it runs the kernel once per candidate `Config`, times every single run against real hardware, and keeps only the fastest. Every subsequent launch whose `key` arguments match a combination already tuned skips the entire sweep and reuses the cached winner immediately. The `key` list exists because the "best" config is generally not a universal constant — a `BLOCK` size that's fastest for a 1,000-element tensor is not necessarily fastest for a 10,000,000-element one, so the decorator re-runs its search whenever an argument named in `key` (typically the problem size) takes on a value it hasn't tuned for yet.
+`@triton.autotune(configs=[...], key=[...])` wraps a `@triton.jit` kernel so that its very first launch for a given combination of `key` argument values doesn't just run the kernel — it benchmarks each candidate `Config` through repeated invocations on real hardware, and keeps only the fastest. Every subsequent launch whose `key` arguments match a combination already tuned skips the entire sweep and reuses the cached winner immediately. The `key` list exists because the "best" config is generally not a universal constant — a `BLOCK` size that's fastest for a 1,000-element tensor is not necessarily fastest for a 10,000,000-element one, so the decorator re-runs its search whenever an argument named in `key` (typically the problem size) takes on a value it hasn't tuned for yet.
 
 Every mechanism this book has examined up through Chapter 17 — masking, pointer arithmetic, shared memory, reductions, even the entire `torch.autograd.Function` machinery — is something the CPU-based interpreter can genuinely execute, because those mechanisms are about what a kernel *computes*. Autotuning is different in kind: its entire purpose is to measure how long each candidate actually takes to *run on real hardware*, and "time it against real hardware" is not something a CPU-based logic simulator can approximate, degrade gracefully into, or substitute a placeholder for. There is no CPU-timing fallback built into Triton's autotuner — its benchmarking step reaches directly for the active GPU driver, and if none exists, it fails immediately, before running a single candidate.
 
@@ -162,17 +165,17 @@ first launch for a new key --> Autotuner.benchmark()
 
 ### Intuition
 
-`@triton.autotune`'s decorator is unusable here, but nothing stops calling the underlying `@triton.jit` kernel directly, once per candidate, exactly the way every kernel in this book has been launched since Chapter 6 — the only difference is looping over several `BLOCK`/`num_warps`/`num_stages` combinations by hand instead of picking one. That can never answer the question autotuning exists to answer (which candidate is fastest), but it answers a different, genuinely useful question this environment actually can check: is every candidate in the search space even a *correct* kernel? Since `num_warps` and `num_stages` are execution-scheduling choices — how work is grouped and pipelined — and not part of the mathematical formula a kernel computes, a well-built config space should produce the *exact same answer* from every legal candidate, differing only (on real hardware) in how long each one takes.
+`@triton.autotune`'s decorator is unusable here, but nothing stops calling the underlying `@triton.jit` kernel directly, once per candidate, exactly the way every kernel in this book has been launched since Chapter 6 — the only difference is looping over several `BLOCK`/`num_warps`/`num_stages` combinations by hand instead of picking one. That can never answer the question autotuning exists to answer (which candidate is fastest), but it answers a different, genuinely useful question this environment actually can check: does this elementwise arithmetic agree across the configurations exercised by the interpreter? This simple elementwise interpreter example should agree exactly. Compiled candidates still need their own correctness checks: physical layouts, resources, synchronization and reduction rounding can differ.
 
 ### Background
 
 | Question | Requires real GPU timing? | Verifiable in this environment? |
 |---|---|---|
 | Which candidate config is fastest? | Yes | No — this is precisely what Section 18.2 showed cannot run at all |
-| Does every legal candidate compute the correct answer? | No — this is a property of the kernel's logic, not its execution speed | Yes — genuinely, directly, via the interpreter |
-| Do different candidates ever disagree with each other numerically? | No | Yes — and a well-formed search space should show they never do |
+| Does this elementwise interpreter example agree across logical BLOCK choices? | No | Yes; this does not establish compiled legality or GPU correctness |
+| Can compiled candidates differ in rounding or resource behavior? | Actual compiled testing needed | The interpreter alone cannot establish this |
 
-### Worked Example 18.3.1: every legal candidate is correct
+### Worked Example 18.3.1: the elementwise interpreter candidates agree
 
 ```python
 candidate_configs = [
@@ -517,9 +520,21 @@ BLOCK= 2048 allclose to oracle? True
 all four candidates bit-for-bit identical to each other? True
 ```
 
+## Stateful candidates: reset before benchmarking
+
+An autotuner measures speed; it does not prove numerical correctness. Validate each compiled candidate against an oracle before accepting its timing. For a kernel that adds into `out`, benchmarking it repeatedly changes the input state:
+
+```text
+Initial out = 0; one intended accumulation adds 2 → out = 2.
+Three benchmark invocations without reset → 2, 4, 6.
+Those invocations no longer start from the same mathematical problem.
+```
+
+For an accumulation benchmark whose intended initial output is zero, use the documented `reset_to_zero=["out_ptr"]` argument (matching the kernel parameter name). To preserve an initial nonzero tensor, use `restore_value=["out_ptr"]`. These are alternative reset policies for different contracts, not a substitute for validating the result of a single intended invocation. A custom pre-hook must preserve the same reset semantics. See [the autotune API's repeated-execution warning](https://triton-lang.org/main/python-api/generated/triton.autotune.html).
+
 ## Chapter Summary
 
-A `triton.Config` is nothing more than a plain Python object bundling a kernel's `BLOCK`-style meta-parameters with `num_warps` and `num_stages`, and building one requires no GPU at all — but a config search space is only as good as its candidates' legality, and a candidate that violates a kernel's own compile-time constraints (Chapter 9's `tl.arange` power-of-2 requirement, revisited here) fails immediately, not silently (Section 18.1). `@triton.autotune`'s entire purpose is to time every candidate against real hardware on a search's first launch for a given `key`, caching whichever candidate wins for every subsequent call with matching key values — and because that purpose *is* hardware timing, with no CPU-simulated fallback available anywhere in Triton's own implementation, it fails immediately and completely in this book's driver-less environment, a categorically different kind of "no GPU" limitation than any earlier chapter's degraded-but-functional disclosures (Section 18.2). What remains genuinely checkable without any hardware timing is correctness invariance: launching the same kernel directly under several `BLOCK`/`num_warps`/`num_stages` combinations confirmed every legal candidate agrees with the oracle, and that different candidates agree with *each other* bit-for-bit, since those parameters govern how work is scheduled and partitioned, never what formula an individual output element is computed through (Section 18.3) — a necessary property of a well-formed search space, but not, and never a substitute for, the actual timing question autotuning exists to answer.
+Configuration construction does not prove compilation or launch legality. The historical interpreter sweep checks the shown elementwise arithmetic across logical BLOCK choices, not physical warp/stage behavior. On a real GPU, validate each compiled candidate's output and resource requirements separately. Correct candidates may differ in rounding for reductions and matrix operations. Autotuning repeatedly benchmarks candidates, resets mutated state according to its declared policy, and selects a measured winner for its key. Correctness checks and timing answer different questions.
 
 ## Self-Check Questions
 
@@ -539,4 +554,4 @@ Chapter 18 established that `@triton.autotune`'s core mechanism — timing candi
 2. `key` is a list of the wrapped kernel's own argument names whose value combination identifies "the same tuning problem." The first time `@triton.autotune` sees a particular combination of `key` argument values, it runs the full timed sweep across every candidate config and caches the winner against that specific combination. Any subsequent call whose `key` arguments match a combination already tuned skips the sweep entirely and reuses the cached winning config immediately, with no re-benchmarking.
 3. Chapter 9 established that `tl.arange`'s range argument must be a compile-time power of 2, as part of introducing masking for boundary-safe kernels. An autotuning search space is still ultimately just a list of values fed into the same kernel body, and that kernel body's `tl.arange(0, BLOCK)` call enforces the exact same constraint regardless of whether `BLOCK` arrived as a hand-typed literal or as one field of a `triton.Config` in a candidate list — there is nothing about the autotuning mechanism itself that relaxes or checks this constraint in advance.
 4. `BLOCK`, `num_warps`, and `num_stages` only change how work is partitioned and scheduled across programs — how many elements each program handles and how many programs run — not the mathematical formula each individual output element is computed through. Since every element is still produced by exactly one program executing exactly the same arithmetic regardless of the surrounding partitioning, there is no floating-point-order-of-operations difference between configs the way there was, for example, between Chapter 12's two structurally different GELU formulas (exact `erf` versus the `tanh` approximation) — so exact equality, not tolerance-based closeness, is the correct and achievable standard here.
-5. Correctness invariance across the four configs says only that all four are *legal, correct* kernels — it says absolutely nothing about which one is fastest, which is the entire point of autotuning in the first place and precisely the question Section 18.2 showed this environment cannot answer at all. On real hardware, these four configs could easily differ by a large factor in actual runtime depending on the GPU generation and the input size, and shipping "any of the four, since they're all correct" throws away the entire benefit autotuning exists to provide — correctness is a necessary precondition for a config to be considered, never a stand-in for having actually measured its speed.
+5. Interpreter agreement does not establish compiled legality, numerical correctness or speed. Validate every candidate on the target GPU, including physical resources and any synchronization, then benchmark correct candidates under the intended reset and cache policies. The elementwise interpreter equality shown here cannot certify a production configuration.
