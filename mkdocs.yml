@@ -99,11 +99,15 @@ nav:
       - "21. Forward Attention and Top-2 MoE Gating": part6/02-flash-attention-moe-advanced-features.md
   - "Part 7 — Financial Computing Applications":
       - "22. Quantitative Finance Examples": part7/01-quantitative-finance-examples.md
+  - "Part 8 — Inference Kernels":
+      - "23. Fused Residual + RMSNorm, Profiled Against PyTorch": part8/01-fused-residual-rmsnorm.md
+      - "24. Decode Attention Over a Paged KV Cache": part8/02-paged-decode-attention.md
   - Appendix:
       - "A. Installation & Setup": appendix/installation-setup.md
       - "B. Practice Quiz": appendix/practice-quiz.md
       - "C. PyTorch and Triton Integration": appendix/pytorch-triton-integration.md
       - "D. The Memory Model, Continued": appendix/memory-model-continued.md
+      - "E. Twelve Inference-Engineering Projects": appendix/inference-projects.md
 
 extra:
   social:
