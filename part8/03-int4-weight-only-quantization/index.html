@@ -1,0 +1,3409 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Building Production GPU Kernels in OpenAI Triton, One Layer at a Time">
+      
+      
+        <meta name="author" content="Oluwaseyi Awoga">
+      
+      
+        <link rel="canonical" href="https://maximumbeings.github.io/triton-from-first-principles/part8/03-int4-weight-only-quantization/">
+      
+      
+        <link rel="prev" href="../02-paged-decode-attention/">
+      
+      
+        <link rel="next" href="../04-grammar-constrained-decoding/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>25. Weight-Only INT4 and Simulated FP4 - Triton From First Principles</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/reader.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-25-weight-only-int4-and-simulated-fp4" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Triton From First Principles" class="md-header__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Triton From First Principles
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              25. Weight-Only INT4 and Simulated FP4
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Triton From First Principles" class="md-nav__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
+
+    </a>
+    Triton From First Principles
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../version-and-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versions & Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../review-and-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Review & Testing Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../final-review-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Final Adversarial Review
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../opus-review-response-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Independent Review Response
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rerun-differences-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interpreter Rerun Differences
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../execution-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    November 21 H100 Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 0 — Triton Foundations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 0 — Triton Foundations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/01-types-and-the-jit-boundary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Types and the JIT Boundary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/02-kernel-parameterization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Kernel Parameterization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/03-strides-pointers-memory-layout/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Strides, Pointers, and Memory Layout
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/04-triton-programming-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. The Triton Programming Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/05-block-vectorization-spmd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Block-Level Vectorization and SPMD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 1 — Kernel–Tensor Interface
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 1 — Kernel–Tensor Interface
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/01-pointer-stride-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. The Pointer+Stride Contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/02-broadcasting-alignment-block-pointers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Broadcasting, Alignment, and Block Pointers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/03-gpu-side-construction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. GPU-Side Construction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/04-mask-and-structure-kernels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Mask and Structure Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/05-targeting-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Targeting Hardware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/06-shared-memory-register-pressure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Shared Memory and the Kernel Cache
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 2 — Core Kernels
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 2 — Core Kernels
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part2/01-elementwise-kernels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Element-wise Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part2/02-blocked-matmul-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. The Blocked Matmul Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part2/03-reduction-kernels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14. Reduction Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 3 — Wiring Into PyTorch's Autograd
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 3 — Wiring Into PyTorch's Autograd
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part3/01-autograd-function-graph-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15. torch.autograd.Function as the Graph Node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 4 — The Backward Kernel
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 4 — The Backward Kernel
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part4/01-writing-the-backward-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16. Writing the Backward Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part4/02-chaining-custom-ops/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17. How PyTorch's Autograd Engine Chains Custom Ops
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 5 — GPU Acceleration and Performance
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 5 — GPU Acceleration and Performance
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part5/01-autotuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18. Autotuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part5/02-benchmarking-correctly/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19. Benchmarking Correctly
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 6 — Neural Network Building Blocks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 6 — Neural Network Building Blocks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part6/01-fused-kernels-for-real-layers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20. Fused Kernels for Real Layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part6/02-flash-attention-moe-advanced-features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    21. Forward Attention and Top-2 MoE Gating
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 7 — Financial Computing Applications
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 7 — Financial Computing Applications
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part7/01-quantitative-finance-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    22. Quantitative Finance Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 8 — Inference Kernels
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 8 — Inference Kernels
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-fused-residual-rmsnorm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    23. Fused Residual + RMSNorm, Profiled Against PyTorch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-paged-decode-attention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    24. Decode Attention Over a Paged KV Cache
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    25. Weight-Only INT4 and Simulated FP4
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    25. Weight-Only INT4 and Simulated FP4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-understand-by-the-end-of-this-chapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will understand by the end of this chapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-need-to-know-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you need to know first
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#251-foundational-why-weight-only-4-bit-helps-and-when-it-does-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.1 [FOUNDATIONAL] Why Weight-Only 4-Bit Helps (and When It Does Not)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="25.1 [FOUNDATIONAL] Why Weight-Only 4-Bit Helps (and When It Does Not)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#252-foundational-group-wise-int4-and-calibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.2 [FOUNDATIONAL] Group-Wise INT4 and Calibration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="25.2 [FOUNDATIONAL] Group-Wise INT4 and Calibration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2521-quantize-pack-compare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 25.2.1: quantize, pack, compare
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#253-foundational-the-dequant-inside-the-gemm-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.3 [FOUNDATIONAL] The Dequant-Inside-the-GEMM Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="25.3 [FOUNDATIONAL] The Dequant-Inside-the-GEMM Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2531-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 25.3.1: the kernel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-ch25_int4_weight_onlypy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: ch25_int4_weight_only.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#254-what-a-fair-evaluation-includes-a-plan-untested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.4 What a Fair Evaluation Includes (a plan, untested)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="25.4 What a Fair Evaluation Includes (a plan, untested)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#number-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Number formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#255-foundational-self-tests-proving-the-quantizer-and-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.5 [FOUNDATIONAL] Self-Tests: Proving the Quantizer and the Kernel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#256-foundational-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.6 [FOUNDATIONAL] Experiments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#257-foundational-failure-modes-and-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.7 [FOUNDATIONAL] Failure Modes and Edge Cases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#258-foundational-on-real-hardware-untested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.8 [FOUNDATIONAL] On Real Hardware (UNTESTED)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-exercises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Exercises
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files-and-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files and Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-grammar-constrained-decoding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    26. Grammar-Constrained Decoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-speculative-decoding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    27. Speculative Decoding: the Verify Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/installation-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A. Installation & Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/practice-quiz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    B. Practice Quiz
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/pytorch-triton-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    C. PyTorch and Triton Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/memory-model-continued/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    D. The Memory Model, Continued
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/inference-projects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E. Twelve Inference-Engineering Projects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-understand-by-the-end-of-this-chapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will understand by the end of this chapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-need-to-know-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you need to know first
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#251-foundational-why-weight-only-4-bit-helps-and-when-it-does-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.1 [FOUNDATIONAL] Why Weight-Only 4-Bit Helps (and When It Does Not)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="25.1 [FOUNDATIONAL] Why Weight-Only 4-Bit Helps (and When It Does Not)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#252-foundational-group-wise-int4-and-calibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.2 [FOUNDATIONAL] Group-Wise INT4 and Calibration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="25.2 [FOUNDATIONAL] Group-Wise INT4 and Calibration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2521-quantize-pack-compare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 25.2.1: quantize, pack, compare
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#253-foundational-the-dequant-inside-the-gemm-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.3 [FOUNDATIONAL] The Dequant-Inside-the-GEMM Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="25.3 [FOUNDATIONAL] The Dequant-Inside-the-GEMM Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2531-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 25.3.1: the kernel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-ch25_int4_weight_onlypy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: ch25_int4_weight_only.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#254-what-a-fair-evaluation-includes-a-plan-untested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.4 What a Fair Evaluation Includes (a plan, untested)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="25.4 What a Fair Evaluation Includes (a plan, untested)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#number-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Number formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#255-foundational-self-tests-proving-the-quantizer-and-the-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.5 [FOUNDATIONAL] Self-Tests: Proving the Quantizer and the Kernel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#256-foundational-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.6 [FOUNDATIONAL] Experiments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#257-foundational-failure-modes-and-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.7 [FOUNDATIONAL] Failure Modes and Edge Cases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#258-foundational-on-real-hardware-untested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25.8 [FOUNDATIONAL] On Real Hardware (UNTESTED)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-exercises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Exercises
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files-and-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files and Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="chapter-25-weight-only-int4-and-simulated-fp4">Chapter 25: Weight-Only INT4 and Simulated FP4<a class="headerlink" href="#chapter-25-weight-only-int4-and-simulated-fp4" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Decode reads every weight once per token, so shrinking the weights shrinks the dominant cost. Four bits per weight cuts that traffic to about a quarter of FP16. What it costs is accuracy, and the only honest way to report it is to measure it.</p>
+</blockquote>
+<div class="admonition info">
+<p class="admonition-title">What was and was not validated</p>
+<p>The quantizer, the packing, and the Triton dequant-GEMM kernel were run in the <strong>interpreter</strong> (<code>TRITON_INTERPRET=1</code>, CPU) on <strong>synthetic weights</strong>. They verify that the kernel computes exactly the dequantized matrix product. They say <strong>nothing</strong> about perplexity on a real model, latency, or VRAM bandwidth. The evaluation procedure in Section 25.4 is a plan to run, not a result.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Hopper has no FP4 tensor cores</p>
+<p>An H100 has FP8 tensor cores (Chapter 7) but no native FP4 path. On Hopper, "4-bit" means <strong>weight-only</strong> quantization: weights are stored in 4 bits and <strong>dequantized to BF16 or FP16 inside the kernel</strong>, and the math runs at 16-bit. The saving is memory capacity and bandwidth, not tensor-core throughput. Native FP4 math belongs to Blackwell; see the B200 appendix of Programming the H100. The FP4 code here is a <strong>simulation</strong> of the number format for studying error, not a speed path.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Project 6 of the twelve</p>
+<p>See <a href="../../appendix/inference-projects/">Appendix E</a>.</p>
+</div>
+<h2 id="what-you-will-understand-by-the-end-of-this-chapter">What you will understand by the end of this chapter<a class="headerlink" href="#what-you-will-understand-by-the-end-of-this-chapter" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Why weight-only 4-bit helps decode (memory-bound) and can hurt large-batch prefill (compute-bound)</li>
+<li>How group-wise symmetric INT4 quantization works, and how two 4-bit values pack into one byte</li>
+<li>How a simple calibration step (searching the clip range per group) reduces error</li>
+<li>How a dequant-inside-the-GEMM kernel keeps weights in 4 bits until the last moment</li>
+<li>How the FP4 (E2M1) grid differs from INT4, and the NVFP4 versus MXFP4 scaling conventions</li>
+<li>Why perplexity alone is not enough, and what a fuller evaluation includes</li>
+</ul>
+<h2 id="what-you-need-to-know-first">What you need to know first<a class="headerlink" href="#what-you-need-to-know-first" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Chapter 13: the blocked matmul kernel</li>
+<li>Chapter 23 and 24: bandwidth-bound reasoning</li>
+<li>Chapter 7 of Programming the H100: FP8 on Hopper</li>
+</ul>
+<h2 id="251-foundational-why-weight-only-4-bit-helps-and-when-it-does-not">25.1 [FOUNDATIONAL] Why Weight-Only 4-Bit Helps (and When It Does Not)<a class="headerlink" href="#251-foundational-why-weight-only-4-bit-helps-and-when-it-does-not" title="Permanent link">&para;</a></h2>
+<h3 id="intuition">Intuition<a class="headerlink" href="#intuition" title="Permanent link">&para;</a></h3>
+<p>In decode the batch is small, every weight is read once per step, and arithmetic is cheap. Time is about bytes. Storing weights in 4 bits instead of 16 reads about a quarter as many bytes. In prefill the batch is large, the matrix multiply is compute-bound, and the dequantization work added to the inner loop can make the kernel slower than plain 16-bit.</p>
+<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Regime</th>
+<th>Limiting resource</th>
+<th>Effect of weight-only INT4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Decode, small batch</td>
+<td>Memory bandwidth</td>
+<td>Fewer bytes read: faster, in principle</td>
+</tr>
+<tr>
+<td>Prefill, large batch</td>
+<td>Tensor-core compute</td>
+<td>Extra dequant work: can be slower</td>
+</tr>
+<tr>
+<td>Model capacity</td>
+<td>VRAM</td>
+<td>About a quarter of the weight memory, plus scales</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>FP16 weights:   [ 16 bits ][ 16 bits ][ 16 bits ][ 16 bits ]  ...
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>INT4 packed:    [ 4 ][ 4 ] -&gt; one byte; plus one scale per group of 32 weights
+</code></pre></div>
+<p>Memory arithmetic from the test run, including 16-bit scales:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>packed bytes: 3072 vs fp16 bytes: 12288  (+ scales 384 B at fp16) -&gt; 0.28x of fp16
+</code></pre></div>
+<p>The scales are why the saving is 0.28x and not 0.25x.</p>
+<h2 id="252-foundational-group-wise-int4-and-calibration">25.2 [FOUNDATIONAL] Group-Wise INT4 and Calibration<a class="headerlink" href="#252-foundational-group-wise-int4-and-calibration" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_1">Intuition<a class="headerlink" href="#intuition_1" title="Permanent link">&para;</a></h3>
+<p>One scale for a whole row is too coarse: a single large weight forces a large scale and crushes every small weight to zero. Giving each group of 32 consecutive weights its own scale limits the damage. Calibration then adjusts each group's scale. Round-to-nearest (RTN) sets the scale from the largest magnitude; clip search tries smaller ranges, sacrificing the occasional outlier to resolve the many small weights better.</p>
+<h3 id="background_1">Background<a class="headerlink" href="#background_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Group</td>
+<td>Split each row of <code>K</code> weights into groups of 32</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td><code>scale = clip_ratio * max(abs(group)) / 7</code></td>
+</tr>
+<tr>
+<td>Round</td>
+<td><code>q = clamp(round(w / scale), -8, 7)</code></td>
+</tr>
+<tr>
+<td>Pack</td>
+<td>Offset by 8 to <code>0..15</code>; low nibble holds even <code>k</code>, high nibble odd <code>k</code></td>
+</tr>
+<tr>
+<td>Calibrate</td>
+<td>Try clip ratios 0.6 to 1.0; keep the one with the lowest squared error per group</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">COMMON TRAP</p>
+<p>Quantization error measured on random Gaussian weights is optimistic. Real weights have outliers and structure. The test below deliberately injects heavy-tailed weights so that clipping matters, but a real model still needs a real evaluation.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Production methods</p>
+<p>Round-to-nearest with clip search is the simplest calibration. Production pipelines use methods such as AWQ (activation-aware scaling) or GPTQ (second-order error compensation) with a calibration dataset. Name the method and the calibration set when you report results.</p>
+</div>
+<h3 id="worked-example-2521-quantize-pack-compare">Worked Example 25.2.1: quantize, pack, compare<a class="headerlink" href="#worked-example-2521-quantize-pack-compare" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">packed</span><span class="p">,</span> <span class="n">sc</span> <span class="o">=</span> <span class="n">quantize_int4</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>                      <span class="c1"># round-to-nearest</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">packed_c</span><span class="p">,</span> <span class="n">sc_c</span> <span class="o">=</span> <span class="n">quantize_int4</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">clip_search</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># calibrated</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>weight rel-error  RTN=0.1349  clip-search=0.1215  clip better? True
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>same block size 16: INT4(clip-search)=0.0952  simulated FP4 (E2M1)=0.0897  (numerics only, not speed)
+</code></pre></div>
+<p>The second line compares INT4 and simulated FP4 at the <strong>same</strong> block size of 16. They are close. Do not read it as "FP4 is better": the result depends on the weight distribution, the scale format, and the block size, and it was measured on synthetic data.</p>
+<h2 id="253-foundational-the-dequant-inside-the-gemm-kernel">25.3 [FOUNDATIONAL] The Dequant-Inside-the-GEMM Kernel<a class="headerlink" href="#253-foundational-the-dequant-inside-the-gemm-kernel" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_2">Intuition<a class="headerlink" href="#intuition_2" title="Permanent link">&para;</a></h3>
+<p>Dequantizing the whole matrix to FP16 first would allocate the large tensor you were trying to avoid. Instead, the kernel loads packed bytes, extracts the right nibble, multiplies by the group scale, and feeds the result straight into the dot product, all in registers.</p>
+<h3 id="background_2">Background<a class="headerlink" href="#background_2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a> packed byte  = [ high nibble | low nibble ]   -&gt; weights for k=2j+1 and k=2j
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a> for logical index k:   byte = packed[n, k // 2]
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                        nibble = byte &amp; 0xF   if k is even
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>                                 byte &gt;&gt; 4    if k is odd
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>                        w = (nibble - 8) * scale[n, k // GROUP]
+</code></pre></div>
+<h3 id="worked-example-2531-the-kernel">Worked Example 25.3.1: the kernel<a class="headerlink" href="#worked-example-2531-the-kernel" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nd">@triton</span><span class="o">.</span><span class="n">jit</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">w4a16_kernel</span><span class="p">(</span><span class="n">a_ptr</span><span class="p">,</span> <span class="n">wp_ptr</span><span class="p">,</span> <span class="n">s_ptr</span><span class="p">,</span> <span class="n">c_ptr</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>                 <span class="n">stride_am</span><span class="p">,</span> <span class="n">stride_wn</span><span class="p">,</span> <span class="n">stride_sn</span><span class="p">,</span> <span class="n">stride_cm</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>                 <span class="n">GROUP</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>                 <span class="n">BLOCK_N</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span> <span class="n">BLOCK_K</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">):</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">pm</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="n">pn</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">rm</span> <span class="o">=</span> <span class="n">pm</span> <span class="o">*</span> <span class="n">BLOCK_M</span> <span class="o">+</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="p">)</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">rn</span> <span class="o">=</span> <span class="n">pn</span> <span class="o">*</span> <span class="n">BLOCK_N</span> <span class="o">+</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="p">)</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">BLOCK_M</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="k">for</span> <span class="n">k0</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">BLOCK_K</span><span class="p">):</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>        <span class="n">ks</span> <span class="o">=</span> <span class="n">k0</span> <span class="o">+</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">BLOCK_K</span><span class="p">)</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        <span class="n">a</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">a_ptr</span> <span class="o">+</span> <span class="n">rm</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">stride_am</span> <span class="o">+</span> <span class="n">ks</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>                    <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">rm</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">),</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>        <span class="n">byte</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">wp_ptr</span> <span class="o">+</span> <span class="n">rn</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">stride_wn</span> <span class="o">+</span> <span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>                       <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">rn</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">),</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>        <span class="n">nib</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">byte</span> <span class="o">&amp;</span> <span class="mh">0xF</span><span class="p">,</span> <span class="n">byte</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>        <span class="n">sc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">s_ptr</span> <span class="o">+</span> <span class="n">rn</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">stride_sn</span> <span class="o">+</span> <span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">//</span> <span class="n">GROUP</span><span class="p">),</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>                     <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">rn</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ks</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">),</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>        <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="n">nib</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">-</span> <span class="mf">8.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">sc</span>          <span class="c1"># dequantize in registers</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>        <span class="n">acc</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">input_precision</span><span class="o">=</span><span class="s2">&quot;ieee&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">c_ptr</span> <span class="o">+</span> <span class="n">rm</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">stride_cm</span> <span class="o">+</span> <span class="n">rn</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">acc</span><span class="p">,</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>             <span class="n">mask</span><span class="o">=</span><span class="p">(</span><span class="n">rm</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rn</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="file-ch25_int4_weight_onlypy">File: <code>ch25_int4_weight_only.py</code><a class="headerlink" href="#file-ch25_int4_weight_onlypy" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part8/ch25_int4_weight_only.py">Download the complete reference</a> (interpreter mode; GPU performance not established).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">TRITON_INTERPRET</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python3<span class="w"> </span>/Users/oluwaseyiawoga/Developer/triton-from-first-principles/docs/examples/references/part8/ch25_int4_weight_only.py
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>kernel matches dequantized reference? True  max|err|=5.72e-06
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>output rel-error vs full-precision x@W.T = 0.1460
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>ragged shapes ok? True
+</code></pre></div>
+<p>The kernel is checked against <code>x @ dequant(W).T</code>, which isolates kernel correctness from quantization error. The 0.146 output error is the quantization error itself, on synthetic heavy-tailed weights; it is not a model-quality number. The ragged-shape check uses 3 rows of <code>x</code> and 37 output columns, so neither tile dimension divides evenly.</p>
+<div class="admonition warning">
+<p class="admonition-title">UNTESTED ON H100</p>
+<p>This kernel is written for clarity, with 16-wide tiles and one nibble extracted per element. A fast version uses larger tiles, unpacks both nibbles of a byte together, and may use a different layout for the packed weights. No speed claim is made.</p>
+</div>
+<h2 id="254-what-a-fair-evaluation-includes-a-plan-untested">25.4 What a Fair Evaluation Includes (a plan, untested)<a class="headerlink" href="#254-what-a-fair-evaluation-includes-a-plan-untested" title="Permanent link">&para;</a></h2>
+<p>Perplexity on one dataset is a start and can hide failures on reasoning tasks. Report all of the following, from the same model, same data and same context length:</p>
+<table>
+<thead>
+<tr>
+<th>Measurement</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Perplexity</td>
+<td>Fixed evaluation set (for example WikiText-2), BF16 baseline versus each format</td>
+</tr>
+<tr>
+<td>Task accuracy</td>
+<td>A harness such as lm-evaluation-harness on a reasoning set and a knowledge set (for example GSM8K and MMLU)</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>Weight bytes plus scale bytes, and peak VRAM at your serving batch size</td>
+</tr>
+<tr>
+<td>Decode throughput</td>
+<td>Tokens per second at batch 1, 8 and 32</td>
+</tr>
+<tr>
+<td>Prefill throughput</td>
+<td>Tokens per second at a long prompt; expect INT4 to lose here</td>
+</tr>
+<tr>
+<td>Calibration</td>
+<td>Method (RTN, AWQ, GPTQ), dataset and number of samples</td>
+</tr>
+</tbody>
+</table>
+<h3 id="number-formats">Number formats<a class="headerlink" href="#number-formats" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Element</th>
+<th>Block</th>
+<th>Scale</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>INT4 (this chapter)</td>
+<td>4-bit integer, -8 to 7</td>
+<td>32</td>
+<td>FP16</td>
+<td>Weight-only on Hopper</td>
+</tr>
+<tr>
+<td>FP4 E2M1</td>
+<td>1 sign, 2 exponent, 1 mantissa; magnitudes 0, 0.5, 1, 1.5, 2, 3, 4, 6</td>
+<td>16 or 32</td>
+<td>varies</td>
+<td>Native on Blackwell</td>
+</tr>
+<tr>
+<td>NVFP4</td>
+<td>E2M1</td>
+<td>16</td>
+<td>FP8 E4M3 per block plus a per-tensor FP32 scale</td>
+<td>NVIDIA format</td>
+</tr>
+<tr>
+<td>MXFP4</td>
+<td>E2M1</td>
+<td>32</td>
+<td>E8M0 (a power of two) per block</td>
+<td>OCP microscaling format</td>
+</tr>
+</tbody>
+</table>
+<p>Verify block sizes and scale formats against the format specifications before quoting them in your own report.</p>
+<h2 id="255-foundational-self-tests-proving-the-quantizer-and-the-kernel">25.5 [FOUNDATIONAL] Self-Tests: Proving the Quantizer and the Kernel<a class="headerlink" href="#255-foundational-self-tests-proving-the-quantizer-and-the-kernel" title="Permanent link">&para;</a></h2>
+<p><code>main()</code> prints a few error numbers. The <code>--test</code> flag runs a suite that fails when the quantizer or the kernel is wrong:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">TRITON_INTERPRET</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python3<span class="w"> </span>ch25_int4_weight_only.py<span class="w"> </span>--test
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>[PASS] hand case: byte 0xA3 is [-5, +2] and byte 0x08 is [0, -8] (low nibble = even k)
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  [PASS] packed is uint8 [N, K/2]; scales are [N, K/group]
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  [PASS] weights already on the grid (integers -7..7, amax 7 in every group) round-trip exactly
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  [PASS] RTN error is at most half a scale step for every element (no clipping happens at amax/7)
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  [PASS] RTN never uses code -8 (the symmetric range wastes one of the 16 codes)
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  [PASS] clip-search does use -8 on this data
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  [PASS] all-zero weights come back as exact zeros, no NaN
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>  [PASS] a constant group is reproduced (to float32 precision)
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>  [PASS] clip-search is no worse than RTN in EVERY group (ratio 1.0 is in its search set)
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>  [PASS] groups are independent: changing weights in two groups of row 3 changes no other group&#39;s result
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>  [PASS] RTN is scale-equivariant: quantize(2w) dequantizes to 2 x dequantize(w)
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>  [PASS] RTN is sign-symmetric: quantize(-w) dequantizes to -dequantize(w)
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>  [PASS] fp16 scales (what the 0.28x byte count assumes) change the dequantized weights by at most 2^-10 relative
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>  [PASS] bytes: INT4 + fp16 scales is exactly 0.28125 of fp16 for group 32 (0.25 + 1/32)
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>  [PASS] K not a multiple of the group, or odd K, is rejected
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>  [PASS] every FP4 output is scale x one of {0, .5, 1, 1.5, 2, 3, 4, 6} (up to float32 rounding)
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>  [PASS] FP4 quantization is idempotent
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>  [PASS] hand case (block max 6, scale 1): [6, .2, .3, 2.4, 2.6, 5.1, -4.9, -.2] -&gt; [6, 0, .5, 2, 3, 6, -4, 0]
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>  [PASS] FP4 of zeros is zeros
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>  [PASS] kernel equals x @ dequant(W).T (atol 1e-4)
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>  [PASS] ragged M and N, K = 32..128 including K = 48 and 80 (not a multiple of the 32-wide K tile), groups 16/32/64 all match
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>  [PASS] hand case, nibble order: only k=0 non-zero, so the output is x[:, 0] (a swapped nibble reads k=1)
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>  [PASS] hand case, nibble order: only k=1 non-zero, so the output is x[:, 1]
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a>  [PASS] hand case, scale per group: all codes +1, scales [1, 10] -&gt; sum = 32 x 1 + 32 x 10 = 352
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a>  [PASS] K = 48 with a 32-wide K tile: NaN scales stored just past the real K are never used (the K mask on the scale load)
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a>  [PASS] K = 48: NaN activations stored just past the real K are never used (the K mask on the activation load)
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a>  [PASS] bf16 activations are accepted and match the float reference to 5e-2
+<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a>  [PASS] kernel is deterministic and does not modify its inputs
+<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a>28/28 self-tests pass
+</code></pre></div>
+<p>Four of these are hand computations that do not use the reference at all, because a reference written by the same author can share the same mistake. Byte <code>0xA3</code> must unpack to <code>[-5, +2]</code>; a weight matrix with a single non-zero in column 0 (a low nibble) must produce <code>x[:, 0]</code>, and one in column 1 (a high nibble) must produce <code>x[:, 1]</code>; and all-ones codes with scales <code>[1, 10]</code> must sum to <code>32 x 1 + 32 x 10 = 352</code>.</p>
+<p><strong>Do the tests catch bugs?</strong> Each row is one change to a copy of the file. The number is how many of the 28 tests still passed.</p>
+<table>
+<thead>
+<tr>
+<th>Broken copy</th>
+<th>Tests passing</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>kernel reads the high nibble for even <code>k</code></td>
+<td>23/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>nibble parity flipped</td>
+<td>23/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>kernel offset 7 instead of 8</td>
+<td>22/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>scale indexed by <code>k // 2</code> instead of <code>k // GROUP</code></td>
+<td>22/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>weight byte indexed by <code>k</code>, not <code>k // 2</code></td>
+<td>23/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td><code>acc</code> overwritten instead of accumulated</td>
+<td>22/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>scale load: K mask removed</td>
+<td>27/28</td>
+<td>caught by test 25 only</td>
+</tr>
+<tr>
+<td>activation load: mask removed</td>
+<td>27/28</td>
+<td>caught by test 26 only</td>
+</tr>
+<tr>
+<td>output store: N mask removed</td>
+<td>heap corruption</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>scale <code>amax / 8</code> instead of <code>amax / 7</code></td>
+<td>21/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>pack shift 3 instead of 4</td>
+<td>19/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>code offset +7 instead of +8</td>
+<td>19/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>dequantizer high-nibble offset 7</td>
+<td>18/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>clip search stops at 0.95</td>
+<td>27/28</td>
+<td>caught (only by the "never worse than RTN" test)</td>
+</tr>
+<tr>
+<td>clip search keeps the worse candidate</td>
+<td>26/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>FP4 block scale <code>/ 4</code> instead of <code>/ 6</code></td>
+<td>26/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>FP4 <code>argmin</code> without <code>abs</code></td>
+<td>27/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>FP4 sign dropped</td>
+<td>27/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>FP4 grid has 5 where it should have 4</td>
+<td>27/28</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>scale load: N mask removed</td>
+<td>28/28</td>
+<td><strong>survives</strong></td>
+</tr>
+<tr>
+<td>weight-byte load: mask removed</td>
+<td>28/28</td>
+<td><strong>survives</strong></td>
+</tr>
+<tr>
+<td><code>clamp_min(1e-8)</code> on the group maximum removed</td>
+<td>28/28</td>
+<td><strong>survives</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Two of the "caught by one test only" rows needed a special test, and the story is worth knowing. The first draft of the suite let both mask mutants survive, because a masked-out lane's garbage is multiplied by zero and contributes nothing, so any finite garbage is harmless. The fix is to make the garbage <strong>NaN</strong>: tests 25 and 26 store NaN in the padding just past the real <code>K</code> (using a view whose row stride is wider than <code>K</code>), so an unmasked read turns the result NaN. That is a general trick for testing masks in the interpreter.</p>
+<p>The three survivors are not test gaps:</p>
+<ul>
+<li><em>Scale-load N mask.</em> Rows past <code>N</code> only feed output columns that are never stored. The mask protects an address, and the interpreter does not fault on a stray read.</li>
+<li><em>Weight-byte mask.</em> A byte cannot hold NaN, and the activation for those lanes is zero, so the product is exactly zero whatever byte is read.</li>
+<li><em><code>clamp_min</code>.</em> For an all-zero group, <code>0 / 0</code> gives NaN, and converting NaN to <code>int8</code> is undefined in C. On this machine it happens to give 0, so the result is correct by luck. The clamp is there to avoid undefined behaviour, which a test on one machine cannot prove.</li>
+</ul>
+<p><strong>A finding from the tests.</strong> The code stores scales as <code>float32</code>, but the chapter's memory ratio (0.28x) counts them as 16-bit. Test 13 checks that rounding the scales to <code>float16</code> changes the dequantized weights by at most 2^-10 relative, and test 14 checks that the ratio is exactly 0.28125, so the claim in the text is consistent with the code and the cost of the 16-bit scale is small.</p>
+<h2 id="256-foundational-experiments">25.6 [FOUNDATIONAL] Experiments<a class="headerlink" href="#256-foundational-experiments" title="Permanent link">&para;</a></h2>
+<p>Six experiments, run with <code>--extras</code>. They measure numerical error and byte counts only.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">TRITON_INTERPRET</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python3<span class="w"> </span>ch25_int4_weight_only.py<span class="w"> </span>--extras
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Experiment A: group size vs weight error and bytes (2% outliers, N=64, K=512, fp16 scales assumed in the byte count)
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>group   RTN err   clip err   bytes vs fp16
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>   16   0.1124    0.1019     0.3125
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>   32   0.1441    0.1302     0.2812
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>   64   0.1854    0.1646     0.2656
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>  128   0.2312    0.1977     0.2578
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>  512   0.3156    0.2398     0.2520
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>Experiment B: outlier fraction vs weight error, group 32
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>outliers   RTN err   clip err   clip gain
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>   0.0 %   0.0977    0.0866     11.4 %
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>   0.5 %   0.1145    0.1024     10.5 %
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>   2.0 %   0.1418    0.1294      8.8 %
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>   5.0 %   0.1566    0.1413      9.8 %
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>Experiment C: error of the layer OUTPUT x @ W.T against weight error (group 32, clip search, 256 random activations)
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>weight rel-error 0.1302   output rel-error 0.1296   (random Gaussian x only: this does not test real activations, whose outlier channels can behave differently)
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>Experiment D: scale precision, group 32 RTN
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>fp32: weight rel-error 0.14413
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>fp16: weight rel-error 0.14413
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>bf16: weight rel-error 0.14414
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>
+<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>Experiment E: code usage (share of weights at each end of the range), group 32
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>RTN          code -8: 0.000 %   code +7: 1.981 %   code -7: 1.996 %
+<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>clip-search  code -8: 1.694 %   code +7: 2.689 %   code -7: 1.184 %
+<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>
+<a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>Experiment F: decode bandwidth floor for the WEIGHTS of a 70e9-parameter model (assumed count; ignores embeddings, KV cache, activations)
+<a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a>fp16                            140.0 GB   floor  41.8 ms/token at 3.35 TB/s (datasheet)
+<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a>INT4 group 32 + fp16 scales      39.4 GB   floor  11.8 ms/token at 3.35 TB/s (datasheet)
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>INT4 group 128 + fp16 scales     36.1 GB   floor  10.8 ms/token at 3.35 TB/s (datasheet)
+<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>batch-1 decode reads every weight once per token; at large batch or in prefill the GEMM is compute-bound and INT4 helps little
+</code></pre></div>
+<p><strong>A. Group size.</strong> Error rises steadily with group size (RTN 0.112 at 16, 0.144 at 32, 0.231 at 128, 0.316 for one scale per row) while the byte ratio falls only from 0.3125 to 0.252. Going from group 32 to 128 saves 0.023 of the fp16 size and costs about 60% more weight error on this data. Group 32 is a trade, not a law.</p>
+<p><strong>B. Outliers.</strong> Clip search reduces the error by roughly 9 to 11% at every outlier rate tried, including a pure Gaussian. Its benefit does not grow with outliers here, which is a reminder that the chapter's heavy-tailed data is one synthetic choice.</p>
+<p><strong>C. Output error.</strong> With random Gaussian activations the output error (0.1296) is close to the weight error (0.1302). That is not evidence about real models, whose activations have outlier channels.</p>
+<p><strong>D. Scale precision.</strong> fp32, fp16 and bf16 scales give the same weight error to four digits (0.1441). Scale precision is not where the error comes from.</p>
+<p><strong>E. Code usage.</strong> RTN never uses code -8 and uses the other 15 codes; clip search uses -8 for 1.7% of weights because shrinking the scale pushes some negative values past -7.5.</p>
+<p><strong>F. Bandwidth floor.</strong> For an assumed 70-billion-parameter model, weights alone are 140 GB in fp16 and about 39 GB as INT4 with group-32 fp16 scales: floors of about 42 ms and 12 ms per token at the 3.35 TB/s datasheet figure. These are ceilings for batch-1 decode, ignoring the KV cache, the embedding table and activations. Measured speedups will be lower.</p>
+<h2 id="257-foundational-failure-modes-and-edge-cases">25.7 [FOUNDATIONAL] Failure Modes and Edge Cases<a class="headerlink" href="#257-foundational-failure-modes-and-edge-cases" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>What happens</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>K</code> not a multiple of the group size, or odd <code>K</code></td>
+<td><code>AssertionError</code> in <code>quantize_int4</code></td>
+<td>15</td>
+</tr>
+<tr>
+<td><code>K</code> not a multiple of the 32-wide kernel tile (48, 80)</td>
+<td>Correct: the tail is masked</td>
+<td>21, 25, 26</td>
+</tr>
+<tr>
+<td>Ragged <code>M</code> and <code>N</code> (1, 17, 37)</td>
+<td>Correct</td>
+<td>21</td>
+</tr>
+<tr>
+<td>All-zero weights, constant group</td>
+<td>Exact zeros, constant reproduced</td>
+<td>7, 8</td>
+</tr>
+<tr>
+<td>Round-to-nearest uses only 15 of the 16 codes</td>
+<td>By design (symmetric range)</td>
+<td>5</td>
+</tr>
+<tr>
+<td>A single large weight in a group</td>
+<td>Coarsens the whole group; clip search helps</td>
+<td>9, experiment B</td>
+</tr>
+<tr>
+<td>bf16 activations</td>
+<td>Accepted; output is float32</td>
+<td>27</td>
+</tr>
+<tr>
+<td>Kernel changes its inputs, or is non-deterministic</td>
+<td>Neither</td>
+<td>28</td>
+</tr>
+<tr>
+<td>NaN or infinity in the weights</td>
+<td>A NaN group maximum makes the whole group NaN; not tested</td>
+<td>not modelled</td>
+</tr>
+<tr>
+<td>Weights whose group is larger than the tile (group 64 with a 32 tile)</td>
+<td>Correct</td>
+<td>21</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Not modelled.</strong> NaN and infinity in the weights; asymmetric quantization with a zero point; AWQ and GPTQ calibration; activation quantization; the effect on perplexity or task accuracy, which needs a real model; the packed layouts of production kernels, which reorder weights so loads are coalesced and dequantization is cheap; tile-size tuning (the kernel uses a fixed 16 x 16 x 32 tile that is far from optimal on a GPU); a transposed weight layout; native FP4 kernels, which Hopper cannot run; and all timing.</p>
+<h2 id="258-foundational-on-real-hardware-untested">25.8 [FOUNDATIONAL] On Real Hardware (UNTESTED)<a class="headerlink" href="#258-foundational-on-real-hardware-untested" title="Permanent link">&para;</a></h2>
+<p>Everything above ran on CPU. These commands were written without access to a GPU and have <strong>not been run by the author</strong>; verify them against your installed versions.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># 1. Correctness on the GPU (no TRITON_INTERPRET)</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>python3<span class="w"> </span>ch25_int4_weight_only.py<span class="w"> </span>--test
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># 2. Compare against an fp16 matmul at several batch sizes</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>python3<span class="w"> </span>ch25_int4_weight_only.py<span class="w"> </span>--bench
+</code></pre></div>
+<p><strong>Known gaps before <code>--bench</code> means anything:</strong> <code>w4a16_matmul</code> allocates its output on the CPU, so it needs <code>device=a.device</code>; and the fixed 16 x 16 x 32 tile will be far slower than a tuned kernel, so a loss to fp16 <code>torch</code> at small batch tells you about the tile, not about INT4. A reasonable hypothesis to test, not a result: at batch 1 a well-tuned INT4 kernel should approach the ratio of bytes read, and at batch 128 and beyond it should lose to fp16 because it does extra work in the inner loop. For the numbers that matter, compare against a production INT4 kernel, not against this teaching kernel.</p>
+<h2 id="chapter-summary">Chapter Summary<a class="headerlink" href="#chapter-summary" title="Permanent link">&para;</a></h2>
+<p>On Hopper, 4-bit weights save memory and decode bandwidth but run through 16-bit math, because there are no FP4 tensor cores; the same dequantization overhead can slow compute-bound prefill. Group-wise INT4 gives every 32 weights their own scale and packs two values per byte, and a per-group clip search lowered error from 0.1349 to 0.1215 on heavy-tailed synthetic weights. A Triton kernel that dequantizes inside the GEMM matched the dequantized reference to about 6e-6, including ragged shapes. A simulated FP4 grid was close to INT4 at equal block size on this synthetic data, which says nothing general. Perplexity, task accuracy, memory, throughput and the calibration recipe must all be measured on a real model to claim anything.</p>
+<h2 id="self-check-questions">Self-Check Questions<a class="headerlink" href="#self-check-questions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Why can weight-only INT4 speed up decode and slow down large-batch prefill?</li>
+<li>Why is the memory ratio 0.28x rather than 0.25x?</li>
+<li>Why does clip search lower the error, given that it clips the largest weights?</li>
+<li>The kernel is compared against <code>x @ dequant(W).T</code> and not against <code>x @ W.T</code>. What does each comparison measure?</li>
+<li>Why is "perplexity went up by only 0.1" an incomplete claim?</li>
+</ol>
+<h2 id="where-we-go-next">Where We Go Next<a class="headerlink" href="#where-we-go-next" title="Permanent link">&para;</a></h2>
+<p>Chapter 26 turns from the weights to the output: forcing a model's sampled tokens to obey a grammar so that the result is always valid JSON.</p>
+<h2 id="worked-solutions">Worked Solutions<a class="headerlink" href="#worked-solutions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Decode is limited by bytes read, so fewer weight bytes help. Prefill is limited by tensor-core compute, and the extra unpack-and-scale work in the inner loop adds cost without removing a bottleneck.</li>
+<li>Each group of 32 weights carries a 16-bit scale in addition to its 32 four-bit values, which adds 0.5 bit per weight on top of 4.</li>
+<li>One large weight forces a large scale for the whole group, rounding the many small weights coarsely. Sacrificing the rare outlier lets the scale shrink and resolves the majority better, and the search keeps the choice only when the group's squared error falls.</li>
+<li>Comparing against <code>x @ dequant(W).T</code> checks that the kernel computes the intended arithmetic. Comparing against <code>x @ W.T</code> measures the error that quantization itself introduces.</li>
+<li>Perplexity can hide failures on reasoning and knowledge tasks, and says nothing about throughput, memory, which calibration method and data were used, or whether the change holds across context lengths.</li>
+</ol>
+<h2 id="additional-exercises">Additional Exercises<a class="headerlink" href="#additional-exercises" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Round-to-nearest never uses code -8. Propose a change that uses all 16 codes and say what it costs.</li>
+<li>The weight-byte mask survives mutation. Explain why no CPU test can kill it, and what tool on a GPU could.</li>
+<li>Experiment E says clip search uses code -8 for 1.7% of weights. At what clip ratio does a weight at the group's most negative extreme first round to -8?</li>
+<li>Compute the byte ratio against fp16 for group 128 with fp16 scales, and for group 16 with 8-bit scales.</li>
+<li>Using experiment A, argue for or against group 16 over group 32 for a model whose memory budget is the binding constraint.</li>
+</ol>
+<h2 id="additional-solutions">Additional Solutions<a class="headerlink" href="#additional-solutions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Choose the scale as <code>amax / 8</code> when the largest-magnitude element of the group is negative and <code>amax / 7</code> otherwise, so a negative extreme lands exactly on -8. This gains resolution in about half the groups, and costs a branch in the quantizer and a changed test 5, since -8 becomes legal for RTN.</li>
+<li>The product is exactly zero for those lanes whatever byte is read, and a byte cannot hold NaN, so the output cannot differ. Only the read itself differs, which is visible to a memory checker such as <code>compute-sanitizer --tool memcheck</code> on a GPU and to nothing in the interpreter.</li>
+<li>With ratio <code>r</code>, the extreme maps to <code>-7/r</code>. It rounds to -8 when <code>7/r &gt;= 7.5</code>, so <code>r &lt;= 0.9333</code>. Below that ratio it keeps going negative and is clamped at -8.</li>
+<li>Group 128 with fp16 scales: <code>0.25 + 1/128 = 0.2578</code>. Group 16 with 8-bit scales: each weight carries <code>1/16</code> byte of scale, which is <code>0.03125</code> of the 2-byte fp16 weight, so <code>0.25 + 0.03125 = 0.28125</code>, the same as group 32 with fp16 scales.</li>
+<li>Group 16 costs 0.3125 of fp16 against 0.2812 for group 32, about 11% more memory, and cuts RTN weight error from 0.144 to 0.112 on this data. If memory is binding, that 11% is exactly what you are short of, so the answer is to prefer group 32 and take clip search, which gives a smaller reduction (0.144 to 0.130) for no extra bytes. If the error budget is binding rather than memory, group 16 wins. The data here is synthetic, so confirm on your model.</li>
+</ol>
+<h2 id="files-and-sources">Files and Sources<a class="headerlink" href="#files-and-sources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>examples/references/part8/ch25_int4_weight_only.py</code>: quantizer, FP4 simulation, kernel, <code>main()</code>, <code>--test</code> (28 self-tests), <code>--extras</code> (experiments A to F), <code>--bench</code> (GPU only, untested, with the gaps noted above).</li>
+<li>Outputs shown were produced with <code>TRITON_INTERPRET=1</code> on CPU, Triton 3.9.0 and torch 2.15.</li>
+<li>The 3.35 TB/s figure is the H100 SXM datasheet number, used only as a ceiling. The 70-billion-parameter count in experiment F is an assumed round number.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../02-paged-decode-attention/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 24. Decode Attention Over a Paged KV Cache">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                24. Decode Attention Over a Paged KV Cache
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../04-grammar-constrained-decoding/" class="md-footer__link md-footer__link--next" aria-label="Next: 26. Grammar-Constrained Decoding">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                26. Grammar-Constrained Decoding
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Oluwaseyi Awoga
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/maximumbeings" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../javascripts/image-viewer.js"></script>
+      
+    
+  </body>
+</html>

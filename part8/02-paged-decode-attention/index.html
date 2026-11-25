@@ -1,0 +1,3241 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Building Production GPU Kernels in OpenAI Triton, One Layer at a Time">
+      
+      
+        <meta name="author" content="Oluwaseyi Awoga">
+      
+      
+        <link rel="canonical" href="https://maximumbeings.github.io/triton-from-first-principles/part8/02-paged-decode-attention/">
+      
+      
+        <link rel="prev" href="../01-fused-residual-rmsnorm/">
+      
+      
+        <link rel="next" href="../03-int4-weight-only-quantization/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>24. Decode Attention Over a Paged KV Cache - Triton From First Principles</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/reader.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-24-decode-attention-over-a-paged-kv-cache" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Triton From First Principles" class="md-header__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Triton From First Principles
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              24. Decode Attention Over a Paged KV Cache
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Triton From First Principles" class="md-nav__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
+
+    </a>
+    Triton From First Principles
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../version-and-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versions & Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../review-and-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Review & Testing Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../final-review-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Final Adversarial Review
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../opus-review-response-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Independent Review Response
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rerun-differences-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interpreter Rerun Differences
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../execution-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    November 21 H100 Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 0 — Triton Foundations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 0 — Triton Foundations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/01-types-and-the-jit-boundary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Types and the JIT Boundary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/02-kernel-parameterization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Kernel Parameterization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/03-strides-pointers-memory-layout/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Strides, Pointers, and Memory Layout
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/04-triton-programming-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. The Triton Programming Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/05-block-vectorization-spmd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Block-Level Vectorization and SPMD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 1 — Kernel–Tensor Interface
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 1 — Kernel–Tensor Interface
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/01-pointer-stride-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. The Pointer+Stride Contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/02-broadcasting-alignment-block-pointers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Broadcasting, Alignment, and Block Pointers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/03-gpu-side-construction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. GPU-Side Construction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/04-mask-and-structure-kernels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Mask and Structure Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/05-targeting-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Targeting Hardware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/06-shared-memory-register-pressure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Shared Memory and the Kernel Cache
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 2 — Core Kernels
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 2 — Core Kernels
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part2/01-elementwise-kernels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Element-wise Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part2/02-blocked-matmul-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. The Blocked Matmul Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part2/03-reduction-kernels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14. Reduction Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 3 — Wiring Into PyTorch's Autograd
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 3 — Wiring Into PyTorch's Autograd
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part3/01-autograd-function-graph-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15. torch.autograd.Function as the Graph Node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 4 — The Backward Kernel
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 4 — The Backward Kernel
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part4/01-writing-the-backward-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16. Writing the Backward Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part4/02-chaining-custom-ops/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17. How PyTorch's Autograd Engine Chains Custom Ops
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 5 — GPU Acceleration and Performance
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 5 — GPU Acceleration and Performance
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part5/01-autotuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18. Autotuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part5/02-benchmarking-correctly/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19. Benchmarking Correctly
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 6 — Neural Network Building Blocks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 6 — Neural Network Building Blocks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part6/01-fused-kernels-for-real-layers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20. Fused Kernels for Real Layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part6/02-flash-attention-moe-advanced-features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    21. Forward Attention and Top-2 MoE Gating
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 7 — Financial Computing Applications
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 7 — Financial Computing Applications
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part7/01-quantitative-finance-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    22. Quantitative Finance Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 8 — Inference Kernels
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 8 — Inference Kernels
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-fused-residual-rmsnorm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    23. Fused Residual + RMSNorm, Profiled Against PyTorch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    24. Decode Attention Over a Paged KV Cache
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    24. Decode Attention Over a Paged KV Cache
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-understand-by-the-end-of-this-chapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will understand by the end of this chapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-need-to-know-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you need to know first
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#241-foundational-the-kv-cache-and-why-decode-is-memory-bound" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.1 [FOUNDATIONAL] The KV Cache and Why Decode Is Memory-Bound
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="24.1 [FOUNDATIONAL] The KV Cache and Why Decode Is Memory-Bound">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#242-foundational-paging-the-block-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.2 [FOUNDATIONAL] Paging: the Block Table
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="24.2 [FOUNDATIONAL] Paging: the Block Table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#243-foundational-split-k-filling-the-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.3 [FOUNDATIONAL] Split-K: Filling the GPU
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="24.3 [FOUNDATIONAL] Split-K: Filling the GPU">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2431-stage-1-partial-results-per-split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 24.3.1: stage 1 (partial results per split)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-ch24_paged_decode_attentionpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: ch24_paged_decode_attention.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#244-choosing-the-split-count-a-procedure-untested-on-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.4 Choosing the Split Count (a procedure, untested on GPU)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#245-foundational-self-tests-proving-the-kernel-is-right" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.5 [FOUNDATIONAL] Self-Tests: Proving the Kernel Is Right
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#246-foundational-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.6 [FOUNDATIONAL] Experiments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#247-foundational-failure-modes-and-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.7 [FOUNDATIONAL] Failure Modes and Edge Cases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#248-foundational-on-real-hardware-untested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.8 [FOUNDATIONAL] On Real Hardware (UNTESTED)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-exercises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Exercises
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files-and-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files and Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-int4-weight-only-quantization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    25. Weight-Only INT4 and Simulated FP4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-grammar-constrained-decoding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    26. Grammar-Constrained Decoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-speculative-decoding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    27. Speculative Decoding: the Verify Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/installation-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A. Installation & Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/practice-quiz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    B. Practice Quiz
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/pytorch-triton-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    C. PyTorch and Triton Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/memory-model-continued/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    D. The Memory Model, Continued
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/inference-projects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E. Twelve Inference-Engineering Projects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-understand-by-the-end-of-this-chapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will understand by the end of this chapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-need-to-know-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you need to know first
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#241-foundational-the-kv-cache-and-why-decode-is-memory-bound" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.1 [FOUNDATIONAL] The KV Cache and Why Decode Is Memory-Bound
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="24.1 [FOUNDATIONAL] The KV Cache and Why Decode Is Memory-Bound">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#242-foundational-paging-the-block-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.2 [FOUNDATIONAL] Paging: the Block Table
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="24.2 [FOUNDATIONAL] Paging: the Block Table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#243-foundational-split-k-filling-the-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.3 [FOUNDATIONAL] Split-K: Filling the GPU
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="24.3 [FOUNDATIONAL] Split-K: Filling the GPU">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2431-stage-1-partial-results-per-split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 24.3.1: stage 1 (partial results per split)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-ch24_paged_decode_attentionpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: ch24_paged_decode_attention.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#244-choosing-the-split-count-a-procedure-untested-on-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.4 Choosing the Split Count (a procedure, untested on GPU)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#245-foundational-self-tests-proving-the-kernel-is-right" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.5 [FOUNDATIONAL] Self-Tests: Proving the Kernel Is Right
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#246-foundational-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.6 [FOUNDATIONAL] Experiments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#247-foundational-failure-modes-and-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.7 [FOUNDATIONAL] Failure Modes and Edge Cases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#248-foundational-on-real-hardware-untested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24.8 [FOUNDATIONAL] On Real Hardware (UNTESTED)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-exercises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Exercises
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files-and-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files and Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="chapter-24-decode-attention-over-a-paged-kv-cache">Chapter 24: Decode Attention Over a Paged KV Cache<a class="headerlink" href="#chapter-24-decode-attention-over-a-paged-kv-cache" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Training attention reads a whole sequence at once. Serving attention reads the entire history to produce a single token. One query, thousands of keys, and a cache stored in scattered fixed-size pages: the kernel is small, and almost everything interesting about it is about memory.</p>
+</blockquote>
+<div class="admonition info">
+<p class="admonition-title">What was and was not validated</p>
+<p>The kernels and outputs below ran in the Triton <strong>interpreter</strong> (<code>TRITON_INTERPRET=1</code>, CPU) against a reference. That validates numerics, masking, paging and the split-K combine. <strong>No H100 timing is claimed.</strong> The split-count tuning guidance is a procedure to run, not a result.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Supports Projects 3 and 7</p>
+<p>Offloading the KV cache (Project 3) and speculative decoding (Project 7) both need a fast decode-attention kernel. This chapter builds the reference one.</p>
+</div>
+<h2 id="what-you-will-understand-by-the-end-of-this-chapter">What you will understand by the end of this chapter<a class="headerlink" href="#what-you-will-understand-by-the-end-of-this-chapter" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Why decode attention is memory-bound and why a single program per head cannot fill a GPU on long contexts</li>
+<li>How a paged KV cache maps logical token positions to physical pages through a block table</li>
+<li>How grouped-query attention (GQA) lets several query heads share one KV head</li>
+<li>How split-K (flash-decoding) divides one sequence across programs and combines partial softmaxes exactly</li>
+<li>Why empty splits need a finite "minus infinity" and a masked probability, not <code>-inf</code></li>
+</ul>
+<h2 id="what-you-need-to-know-first">What you need to know first<a class="headerlink" href="#what-you-need-to-know-first" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Chapter 14: the online-softmax rescaling identity</li>
+<li>Chapter 21: forward attention, which this chapter specializes to one query token</li>
+<li>Chapter 3 and 6: strides, pointers and the pointer-stride contract</li>
+<li>Chapter 23: the bandwidth-bound reasoning style</li>
+</ul>
+<h2 id="241-foundational-the-kv-cache-and-why-decode-is-memory-bound">24.1 [FOUNDATIONAL] The KV Cache and Why Decode Is Memory-Bound<a class="headerlink" href="#241-foundational-the-kv-cache-and-why-decode-is-memory-bound" title="Permanent link">&para;</a></h2>
+<h3 id="intuition">Intuition<a class="headerlink" href="#intuition" title="Permanent link">&para;</a></h3>
+<p>To generate token <code>t+1</code>, attention needs the keys and values of all <code>t</code> earlier tokens. They never change, so serving systems keep them: the KV cache. Each decode step reads the entire cache for every layer but does little arithmetic with it. Per token the cache costs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>bytes/token = 2 (K and V) x layers x kv_heads x head_dim x bytes_per_element
+</code></pre></div>
+<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
+<p>For a Llama-3-70B-shaped model (80 layers, 8 KV heads, head dimension 128, BF16):</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bytes per token</td>
+<td>2 x 80 x 8 x 128 x 2 = 327,680 (320 KiB)</td>
+</tr>
+<tr>
+<td>One 128K-token sequence</td>
+<td>about 40 GiB</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>bytes/token = 327680 (320 KiB); 128K tokens = 40.0 GiB
+</code></pre></div>
+<p>Check these against your own model's config before quoting them; they depend on layers, KV heads and precision.</p>
+<p>Because every step re-reads a cache this large, decode throughput is set by HBM bandwidth. Batching helps because the weights are read once for many sequences, but the KV cache is per sequence: it does not amortize.</p>
+<h2 id="242-foundational-paging-the-block-table">24.2 [FOUNDATIONAL] Paging: the Block Table<a class="headerlink" href="#242-foundational-paging-the-block-table" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_1">Intuition<a class="headerlink" href="#intuition_1" title="Permanent link">&para;</a></h3>
+<p>Allocating a contiguous worst-case buffer per sequence wastes memory, because most sequences end early. A paged cache hands out fixed-size pages on demand, and a <strong>block table</strong> maps each sequence's logical page number to a physical page.</p>
+<h3 id="background_1">Background<a class="headerlink" href="#background_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a> sequence 1, 9 tokens, page size 4:   logical page:   0    1    2
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                                       block table:   [17] [ 3] [22]
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                                                       |    |    |
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a> physical cache  [ page 0 | ... | page 3 | ... | page 17 | ... | page 22 | ... ]
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>                                     ^              ^             ^
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>                                     tokens 4-7     tokens 0-3    tokens 8-11 (only 8 used)
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Tensor</th>
+<th>Shape</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>k_cache</code>, <code>v_cache</code></td>
+<td><code>[num_pages, page_size, kv_heads, head_dim]</code></td>
+<td>Physical storage</td>
+</tr>
+<tr>
+<td><code>block_table</code></td>
+<td><code>[batch, max_pages]</code></td>
+<td>Logical to physical page, per sequence</td>
+</tr>
+<tr>
+<td><code>seq_lens</code></td>
+<td><code>[batch]</code></td>
+<td>Number of valid tokens per sequence</td>
+</tr>
+<tr>
+<td><code>q</code></td>
+<td><code>[batch, heads, head_dim]</code></td>
+<td>One query token per sequence</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">COMMON TRAP</p>
+<p>Pages for one sequence are <strong>not contiguous and not ordered</strong> in physical memory. A kernel that assumes <code>page_id = base + i</code> passes tests where you allocated pages sequentially and fails in a real server. The reference test in this chapter shuffles page assignments on purpose.</p>
+</div>
+<h2 id="243-foundational-split-k-filling-the-gpu">24.3 [FOUNDATIONAL] Split-K: Filling the GPU<a class="headerlink" href="#243-foundational-split-k-filling-the-gpu" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_2">Intuition<a class="headerlink" href="#intuition_2" title="Permanent link">&para;</a></h3>
+<p>A decode step has one query per head. With a batch of 8 and 32 heads that is 256 programs if each handles one <code>(sequence, head)</code> pair, fewer than the 132 SMs times several resident programs can use well, and each program walks a very long cache serially. Split-K divides the sequence into <code>NSPLIT</code> chunks, each handled by its own program, and combines the partial results afterwards.</p>
+<h3 id="background_2">Background<a class="headerlink" href="#background_2" title="Permanent link">&para;</a></h3>
+<p>Each split computes, for its slice of tokens, three things: its running maximum <code>m</code>, its sum of exponentials <code>l</code>, and its unnormalized weighted value sum <code>o</code>. The exact merge is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>m_g   = max over splits of m_s
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>w_s   = exp(m_s - m_g)
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>out   = ( sum_s w_s * o_s ) / ( sum_s w_s * l_s )
+</code></pre></div>
+<p>This is the online-softmax identity from Chapter 14 applied across programs instead of across loop iterations, so the result is exact, not approximate.</p>
+<div class="admonition warning">
+<p class="admonition-title">COMMON TRAP</p>
+<p>Do not use <code>-inf</code> for masked scores. An empty split has <code>m = -inf</code>, and <code>exp(-inf - (-inf))</code> is NaN. Use a large finite negative number (<code>-1e30</code>) and multiply the probabilities by the valid mask, so masked lanes contribute exactly zero. Then <code>exp(m_old - m_new)</code> stays defined for splits that see no tokens.</p>
+</div>
+<h3 id="worked-example-2431-stage-1-partial-results-per-split">Worked Example 24.3.1: stage 1 (partial results per split)<a class="headerlink" href="#worked-example-2431-stage-1-partial-results-per-split" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@triton</span><span class="o">.</span><span class="n">jit</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">decode_stage1</span><span class="p">(</span><span class="n">q_ptr</span><span class="p">,</span> <span class="n">k_ptr</span><span class="p">,</span> <span class="n">v_ptr</span><span class="p">,</span> <span class="n">bt_ptr</span><span class="p">,</span> <span class="n">lens_ptr</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                  <span class="n">part_m_ptr</span><span class="p">,</span> <span class="n">part_l_ptr</span><span class="p">,</span> <span class="n">part_o_ptr</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>                  <span class="n">sm_scale</span><span class="p">,</span> <span class="n">max_pages</span><span class="p">,</span> <span class="n">pages_per_split</span><span class="p">,</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>                  <span class="n">stride_qb</span><span class="p">,</span> <span class="n">stride_qh</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>                  <span class="n">stride_kp</span><span class="p">,</span> <span class="n">stride_kt</span><span class="p">,</span> <span class="n">stride_kh</span><span class="p">,</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>                  <span class="n">stride_btb</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>                  <span class="n">PAGE</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span> <span class="n">D</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span> <span class="n">NSPLIT</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">):</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="n">h</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="n">s</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="n">kvh</span> <span class="o">=</span> <span class="n">h</span> <span class="o">//</span> <span class="n">group</span>                                   <span class="c1"># GQA: several q heads share a kv head</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="n">seq_len</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">lens_ptr</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="n">d</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">D</span><span class="p">);</span> <span class="n">t</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">PAGE</span><span class="p">)</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="n">q</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">q_ptr</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">stride_qb</span> <span class="o">+</span> <span class="n">h</span> <span class="o">*</span> <span class="n">stride_qh</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="n">m</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">full</span><span class="p">((),</span> <span class="n">NEG</span><span class="p">,</span> <span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">);</span> <span class="n">l</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">zeros</span><span class="p">((),</span> <span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    <span class="n">acc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">D</span><span class="p">,),</span> <span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="n">first</span> <span class="o">=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">pages_per_split</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pages_per_split</span><span class="p">):</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>        <span class="n">pg</span> <span class="o">=</span> <span class="n">first</span> <span class="o">+</span> <span class="n">i</span>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>        <span class="n">tok</span> <span class="o">=</span> <span class="n">pg</span> <span class="o">*</span> <span class="n">PAGE</span> <span class="o">+</span> <span class="n">t</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>        <span class="n">valid</span> <span class="o">=</span> <span class="p">(</span><span class="n">tok</span> <span class="o">&lt;</span> <span class="n">seq_len</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tok</span> <span class="o">&lt;</span> <span class="n">max_pages</span> <span class="o">*</span> <span class="n">PAGE</span><span class="p">)</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>        <span class="n">page_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bt_ptr</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">stride_btb</span> <span class="o">+</span> <span class="n">tl</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">pg</span><span class="p">,</span> <span class="n">max_pages</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>        <span class="n">kv_off</span> <span class="o">=</span> <span class="n">page_id</span> <span class="o">*</span> <span class="n">stride_kp</span> <span class="o">+</span> <span class="n">kvh</span> <span class="o">*</span> <span class="n">stride_kh</span> <span class="o">+</span> <span class="n">t</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">stride_kt</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>        <span class="n">k</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">k_ptr</span> <span class="o">+</span> <span class="n">kv_off</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>        <span class="n">v</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">v_ptr</span> <span class="o">+</span> <span class="n">kv_off</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>        <span class="n">sc</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">valid</span><span class="p">,</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">sm_scale</span><span class="p">,</span> <span class="n">NEG</span><span class="p">)</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>        <span class="n">m_new</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">tl</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>        <span class="n">p</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">valid</span><span class="p">,</span> <span class="n">tl</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span> <span class="o">-</span> <span class="n">m_new</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>        <span class="n">alpha</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span> <span class="o">-</span> <span class="n">m_new</span><span class="p">)</span>
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>        <span class="n">l</span> <span class="o">=</span> <span class="n">l</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">+</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>        <span class="n">acc</span> <span class="o">=</span> <span class="n">acc</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">+</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>        <span class="n">m</span> <span class="o">=</span> <span class="n">m_new</span>
+<a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>    <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">tl</span><span class="o">.</span><span class="n">num_programs</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span> <span class="o">*</span> <span class="n">NSPLIT</span> <span class="o">+</span> <span class="n">s</span>
+<a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">part_m_ptr</span> <span class="o">+</span> <span class="n">idx</span><span class="p">,</span> <span class="n">m</span><span class="p">);</span> <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">part_l_ptr</span> <span class="o">+</span> <span class="n">idx</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
+<a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">part_o_ptr</span> <span class="o">+</span> <span class="n">idx</span> <span class="o">*</span> <span class="n">D</span> <span class="o">+</span> <span class="n">d</span><span class="p">,</span> <span class="n">acc</span><span class="p">)</span>
+</code></pre></div>
+<p>Stage 2 loads the <code>NSPLIT</code> partials for each <code>(sequence, head)</code>, applies the merge above, and stores the output. The complete listing is in the downloadable file.</p>
+<h3 id="file-ch24_paged_decode_attentionpy">File: <code>ch24_paged_decode_attention.py</code><a class="headerlink" href="#file-ch24_paged_decode_attentionpy" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part8/ch24_paged_decode_attention.py">Download the complete reference</a> (interpreter mode; GPU performance not established).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">TRITON_INTERPRET</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python3<span class="w"> </span>ch24_paged_decode_attention.py
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>nsplit=1: matches reference? True  max|err|=2.38e-07
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>nsplit=2: matches reference? True  max|err|=2.38e-07
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>nsplit=4: matches reference? True  max|err|=2.38e-07
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>nsplit=8: matches reference? True  max|err|=2.38e-07
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>edge lengths (1, 8, 16) ok? True
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>KV bytes/token = 327680 (320 KiB); 128K tokens = 40.0 GiB
+</code></pre></div>
+<p>The test uses three sequences of lengths 1, 9 and 30 so the pages are partly filled and some splits are empty, four query heads sharing two KV heads, and shuffled physical pages.</p>
+<h2 id="244-choosing-the-split-count-a-procedure-untested-on-gpu">24.4 Choosing the Split Count (a procedure, untested on GPU)<a class="headerlink" href="#244-choosing-the-split-count-a-procedure-untested-on-gpu" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">UNTESTED ON H100</p>
+<p>No timing below was measured.</p>
+</div>
+<p>More splits mean more parallelism but more partial results to write and combine. To choose, sweep <code>NSPLIT</code> in {1, 2, 4, 8, 16, 32} at several context lengths (1K, 8K, 32K, 128K) and batch sizes (1, 8, 32), time with <code>triton.testing.do_bench</code>, and report achieved bandwidth against the KV bytes read. Expect short contexts to prefer few splits and long contexts at small batch to prefer many. A kernel that cannot reach a large fraction of HBM bandwidth at 128K context is the first place to look in Nsight Compute (Chapter 12).</p>
+<h2 id="245-foundational-self-tests-proving-the-kernel-is-right">24.5 [FOUNDATIONAL] Self-Tests: Proving the Kernel Is Right<a class="headerlink" href="#245-foundational-self-tests-proving-the-kernel-is-right" title="Permanent link">&para;</a></h2>
+<p><code>main()</code> shows the kernel matching a reference on a few shapes. The <code>--test</code> flag runs a suite built to fail when the kernel is wrong:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nv">TRITON_INTERPRET</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python3<span class="w"> </span>ch24_paged_decode_attention.py<span class="w"> </span>--test
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>[PASS] 14 lengths (1..33, on and off page boundaries) x nsplit 1/2/4/8 match the fp64 reference (atol 1e-5)
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  [PASS] the split count does not change the answer: nsplit 1 vs 8 agree to 1e-6
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  [PASS] relabelling every physical page (cache permuted, block table remapped) leaves the output bit-identical
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  [PASS] NaN in every slot beyond a sequence&#39;s length (partial last pages and unowned pages) does not leak
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>  [PASS] unused block-table entries holding an out-of-range page id (10^6) are never dereferenced
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>  [PASS] MHA (group 1), GQA (group 4) and MQA (1 kv head), D = 16/32/64, page = 4/8/16 all match
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>  [PASS] one token: softmax of one score is 1, so the output is exactly that token&#39;s V
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>  [PASS] identical keys: every weight is 1/11, so the output is the mean of the 11 V rows (hand computation, not the reference)
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>  [PASS] one key with a score 100 above the rest takes all the weight: output equals that token&#39;s V
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>  [PASS] scores in the hundreds (q x 200) do not overflow exp: finite and equal to the reference
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>  [PASS] every output coordinate lies between the min and max of that sequence&#39;s V (a softmax-weighted average)
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>  [PASS] reversing the page order of full sequences leaves the output unchanged: position lives in K (RoPE), not in the cache layout
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>  [PASS] rewriting sequence 0&#39;s pages leaves sequences 1 and 2 bit-identical (and changes sequence 0)
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>  [PASS] bf16 inputs: output is bf16 and within 2e-2 of the fp32 reference
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>  [PASS] two runs are bit-identical
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>  [PASS] q, K, V, block table and lengths are not modified
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>  [PASS] seq_len 40 with a 3-page table attends to the 12 tokens the table covers (same as seq_len 12): silently clamped, see text
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>  [PASS] seq_len 0 returns NaN (0/0 in stage 2): documented limitation, the scheduler must not launch empty sequences
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>  [PASS] nsplit not a power of two is rejected
+<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>  [PASS] query heads not divisible by kv heads is rejected
+<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>20/20 self-tests pass
+</code></pre></div>
+<p>The interpreter prints a <code>RuntimeWarning: invalid value encountered in divide</code> while this runs. It comes from test 18, which divides zero by zero on purpose (see 24.7).</p>
+<p>The suite checks several properties that do not need the reference at all, because a reference written by the same author can share the same misunderstanding: with identical keys the output is the mean of V (a hand computation); with one token the output is that token's V; one dominant key takes all the weight; every output coordinate lies inside the range of V; relabelling the physical pages leaves the result bit-identical; and rewriting one sequence's pages cannot change another's output.</p>
+<p><strong>Do the tests catch bugs?</strong> Each row is one change to a copy of the kernel. The number is how many of the 20 tests still passed.</p>
+<table>
+<thead>
+<tr>
+<th>Broken copy</th>
+<th>Tests passing</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tokens beyond <code>seq_len</code> not masked</td>
+<td>segfault</td>
+<td>caught (reads the poisoned page id)</td>
+</tr>
+<tr>
+<td>V load unmasked</td>
+<td>segfault</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>split offset ignored (<code>tok = i * PAGE + t</code>)</td>
+<td>segfault</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>block table ignored (page index used as page id)</td>
+<td>9/20</td>
+<td>caught</td>
+</tr>
+<tr>
+<td><code>NEG = -inf</code> instead of <code>-1e30</code></td>
+<td>5/20</td>
+<td>caught: empty splits give <code>exp(-inf - -inf) = NaN</code></td>
+</tr>
+<tr>
+<td><code>kvh = h</code> (no GQA mapping)</td>
+<td>11/20</td>
+<td>caught</td>
+</tr>
+<tr>
+<td><code>sm_scale</code> dropped</td>
+<td>16/20</td>
+<td>caught</td>
+</tr>
+<tr>
+<td><code>l</code> not rescaled by <code>alpha</code></td>
+<td>15/20</td>
+<td>caught</td>
+</tr>
+<tr>
+<td><code>acc</code> not rescaled by <code>alpha</code></td>
+<td>14/20</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>stage 2 weights <code>exp(m)</code> instead of <code>exp(m - m_g)</code></td>
+<td>18/20</td>
+<td>caught (overflow at large scores)</td>
+</tr>
+<tr>
+<td>stage 2 denominator ignores the weights</td>
+<td>14/20</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>splits per program rounded down</td>
+<td>14/20</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>capacity clamp <code>tok &lt; max_pages * PAGE</code> removed</td>
+<td>19/20</td>
+<td>caught by test 17 only</td>
+</tr>
+<tr>
+<td><code>p</code> not masked with <code>valid</code></td>
+<td>19/20</td>
+<td>caught by test 18 only: see below</td>
+</tr>
+<tr>
+<td>scores not masked to <code>NEG</code></td>
+<td>19/20</td>
+<td>caught by test 10 only</td>
+</tr>
+<tr>
+<td><code>tl.minimum(pg, max_pages - 1)</code> clamp removed</td>
+<td>20/20</td>
+<td><strong>survives</strong>: see below</td>
+</tr>
+</tbody>
+</table>
+<p>Three of these deserve a sentence.</p>
+<p><em><code>p</code> not masked.</em> The explicit <code>tl.where(valid, ..., 0.0)</code> is redundant for every non-empty sequence, because masked scores are already <code>-1e30</code> and <code>exp</code> of that is 0. It only matters for an empty sequence. Keep it for clarity, but know that only the empty-sequence test notices it.</p>
+<p><em>Scores not masked.</em> Only the large-score test notices. Masked lanes then score 0, which can pull the running maximum up and lets <code>exp</code> of the real scores underflow. The mask protects the numerical stabiliser, not the sum.</p>
+<p><em>The block-table clamp survives.</em> <code>tl.minimum(pg, max_pages - 1)</code> stops the kernel from reading block-table entries past the end of a row when <code>nsplit</code> does not divide the page count. The value read is masked out either way, so the output is the same. What the clamp prevents is an out-of-bounds read, and the interpreter does not fault on that: it quietly reads the neighbouring row. On a GPU the unclamped read could touch unmapped memory at the end of the buffer. This test suite cannot see that, so it is listed under "not modelled" below and is a reason to run the tests under <code>compute-sanitizer</code> on a real GPU.</p>
+<h2 id="246-foundational-experiments">24.6 [FOUNDATIONAL] Experiments<a class="headerlink" href="#246-foundational-experiments" title="Permanent link">&para;</a></h2>
+<p>Four experiments, run with <code>--extras</code>. None measures speed.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">TRITON_INTERPRET</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python3<span class="w"> </span>ch24_paged_decode_attention.py<span class="w"> </span>--extras
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Experiment A: programs launched by stage 1 = batch x q_heads x nsplit (64 q heads; an H100 SXM has 132 SMs, datasheet)
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>batch  nsplit=1   2    4    8   16   32
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    1     64    128    256    512   1024   2048
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    4    256    512   1024   2048   4096   8192
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>   16   1024   2048   4096   8192  16384  32768
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>   64   4096   8192  16384  32768  65536  131072
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>any entry below ~132 leaves SMs idle; a single sequence (batch 1) with 64 heads already gives 64 programs, so it needs nsplit &gt;= 4 to pass 132
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>Experiment B: error against fp64 vs context length (B=1, H=2, KVH=1, D=16, PAGE=16, fp32 kernel)
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>tokens  nsplit=1     nsplit=8
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>    64   1.34e-07   1.34e-07
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>   256   4.47e-08   4.47e-08
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>  1024   8.94e-08   8.94e-08
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>Experiment C: wasted page iterations in a mixed batch (the grid is sized by the LONGEST sequence), PAGE=16, nsplit=4
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>batch                 live pages  iterations  fully-masked share
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>uniform 2000 x 8            1000        1024              2.3 %
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>long tail                    422        2016             79.1 %
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>one long + 7 short           528        4000             86.8 %
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>masked iterations load nothing (the loads are masked) but still cost loop and issue time; per-sequence split counts or sorting by length reduce it
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a>Experiment D: KV bytes per token and per decode step (bf16; model shapes are ASSUMED round numbers, check your model&#39;s config)
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a>model shape                          B/token   per-step read at 8K   at 128K   floor at 128K (3.35 TB/s)
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a>70B-like: 80 layers, 8 kv heads, D=128   320 KiB         2.50 GiB     40.0 GiB      12.8 ms
+<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a>8B-like: 32 layers, 8 kv heads, D=128    128 KiB         1.00 GiB     16.0 GiB       5.1 ms
+<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a>no GQA: 32 layers, 32 kv heads, D=128    512 KiB         4.00 GiB     64.0 GiB      20.5 ms
+<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a>every decode step of ONE sequence reads its whole cache once, so the floor per generated token is bytes / bandwidth
+</code></pre></div>
+<p><strong>A. Programs launched.</strong> Stage 1 launches <code>batch x q_heads x nsplit</code> programs. With 64 query heads, a single sequence at <code>nsplit = 1</code> gives 64 programs, fewer than the 132 SMs of an H100 SXM (datasheet figure), so most of the chip idles. <code>nsplit = 4</code> is the first value that passes 132. At batch 16 and above the grid is already large and extra splits only add partial-result traffic.</p>
+<p><strong>B. Accuracy against context length.</strong> The <code>float32</code> kernel's worst error against <code>float64</code> is about 1e-7 at 64, 256 and 1024 tokens, and splitting 1 way or 8 ways gives the same figure to the digits shown. That is the <code>float32</code> rounding floor, so at these lengths the split-combine step costs no accuracy. The experiment does not show behaviour at 128K tokens, which is too slow for the interpreter.</p>
+<p><strong>C. Wasted iterations.</strong> The grid is sized by the longest sequence in the batch. A uniform batch wastes 2.3% of page iterations; a long-tail batch wastes 79%; one 8000-token sequence next to seven short ones wastes 87%. Masked iterations load no bytes, but they still cost loop overhead and issue slots, so mixed-length batches are where per-sequence split counts or length-sorted batching would pay off. Whether they do is a question for a profile.</p>
+<p><strong>D. KV bytes per token.</strong> With the chapter's Llama-3-70B-shaped model the cache is 320 KiB per token, 40 GiB at 128K tokens, and a bandwidth floor of about 12.8 ms per generated token at 3.35 TB/s for that one sequence. The 8B-like and no-GQA rows use round-number shapes chosen for contrast, not a specific model's configuration; check your own model's config. The no-GQA row shows what grouped-query attention buys: a 4x smaller cache for the same number of query heads.</p>
+<h2 id="247-foundational-failure-modes-and-edge-cases">24.7 [FOUNDATIONAL] Failure Modes and Edge Cases<a class="headerlink" href="#247-foundational-failure-modes-and-edge-cases" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>What happens</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>seq_len = 1</code></td>
+<td>Output is exactly that token's V</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Length ends mid-page, or exactly on a page boundary</td>
+<td>Correct</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>nsplit</code> larger than the number of pages</td>
+<td>Extra splits are empty and contribute weight 0</td>
+<td>1, 2</td>
+</tr>
+<tr>
+<td>Garbage (NaN) in unused slots of a page</td>
+<td>Not read</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Out-of-range ids in unused block-table entries</td>
+<td>Not dereferenced</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Physical page order arbitrary</td>
+<td>No effect</td>
+<td>3, 12</td>
+</tr>
+<tr>
+<td>Very large attention scores</td>
+<td>Finite and correct</td>
+<td>10</td>
+</tr>
+<tr>
+<td><code>seq_len</code> larger than the block table covers</td>
+<td>Silently clamped to the table's capacity</td>
+<td>17</td>
+</tr>
+<tr>
+<td><code>seq_len = 0</code></td>
+<td><strong>Returns NaN</strong> (0/0 in stage 2)</td>
+<td>18</td>
+</tr>
+<tr>
+<td><code>nsplit</code> not a power of two; query heads not divisible by kv heads</td>
+<td><code>AssertionError</code></td>
+<td>19, 20</td>
+</tr>
+<tr>
+<td><code>seq_len</code> negative, or block-table entries negative inside the live range</td>
+<td>Not checked</td>
+<td>not modelled</td>
+</tr>
+</tbody>
+</table>
+<p>Two of these are decisions you must make. A scheduler must never launch an empty sequence, or must replace NaN with zeros afterwards; exercise 8 asks you to make the kernel handle it. And a length beyond the table is clamped without any error, which hides a scheduler bug: a request that has outgrown its allocated pages will quietly attend to a truncated context. A production kernel should assert on the host that <code>seq_len &lt;= max_pages * PAGE</code>.</p>
+<p><strong>Not modelled.</strong> Out-of-bounds block-table reads (see 24.5), <code>D</code> or <code>PAGE</code> that is not a power of two (<code>tl.arange</code> rejects it), <code>float8</code> caches and dequantisation, per-sequence variable split counts, prefix-sharing between sequences (two block tables pointing at the same physical page, which should work but is not tested), sliding-window or sparse attention, CUDA-graph capture, the wrapper's scratch tensors being created on the CPU, and all timing.</p>
+<h2 id="248-foundational-on-real-hardware-untested">24.8 [FOUNDATIONAL] On Real Hardware (UNTESTED)<a class="headerlink" href="#248-foundational-on-real-hardware-untested" title="Permanent link">&para;</a></h2>
+<p>Everything above ran on CPU. These commands were written without access to a GPU and have <strong>not been run by the author</strong>; verify the flags against your installed versions.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># 1. Correctness on the GPU (no TRITON_INTERPRET)</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>python3<span class="w"> </span>ch24_paged_decode_attention.py<span class="w"> </span>--test
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># 2. Out-of-bounds and race checks, which the interpreter cannot do</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>compute-sanitizer<span class="w"> </span>--tool<span class="w"> </span>memcheck<span class="w"> </span>python3<span class="w"> </span>ch24_paged_decode_attention.py<span class="w"> </span>--test
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="c1"># 3. Split-count sweep</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>python3<span class="w"> </span>ch24_paged_decode_attention.py<span class="w"> </span>--bench
+</code></pre></div>
+<p><code>--bench</code> times the kernel for batch 4, 32 query heads, 8 kv heads, <code>D = 128</code>, page 16 and 8192 tokens, for <code>nsplit</code> from 1 to 32, and prints achieved GB/s against the bytes of K and V read once. <strong>Known gap:</strong> the wrapper allocates its scratch tensors with <code>torch.empty</code> and no <code>device</code>, so on a GPU it fails until you create them on <code>q.device</code>; fix that line first. A reasonable hypothesis to test is that achieved bandwidth rises with <code>nsplit</code> while there are fewer programs than SMs and then flattens or falls as partial-result traffic grows. For a profile, <code>ncu --set full</code> on the stage 1 kernel and read the memory workload section, and compare the result with the datasheet peak.</p>
+<h2 id="chapter-summary">Chapter Summary<a class="headerlink" href="#chapter-summary" title="Permanent link">&para;</a></h2>
+<p>Decode attention reads the whole KV cache to produce one token, so it is bound by HBM bandwidth, and the cache costs about 320 KiB per token for a Llama-3-70B-shaped model, roughly 40 GiB for a 128K-token sequence. A paged cache stores fixed-size pages and a per-sequence block table, and pages must never be assumed contiguous. Split-K gives long sequences enough parallelism by computing a partial maximum, sum and weighted value per split and merging them exactly. Using a finite negative value with a masked probability keeps empty splits from producing NaN. The kernel matched a reference for several split counts, ragged lengths, grouped-query heads and shuffled pages in the interpreter; timing is left for you to measure.</p>
+<h2 id="self-check-questions">Self-Check Questions<a class="headerlink" href="#self-check-questions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Why does batching amortize the weight reads in decode but not the KV-cache reads?</li>
+<li>What goes wrong if a kernel assumes a sequence's pages are consecutive in physical memory?</li>
+<li>Write the merge formula for combining two splits' <code>(m, l, o)</code> results.</li>
+<li>Why is <code>-inf</code> unsafe as the masked score for an empty split, and what replaces it?</li>
+<li>For a model with 32 layers, 8 KV heads, head dimension 128 and FP8 (1 byte) cache entries, how many bytes does one token cost?</li>
+</ol>
+<h2 id="where-we-go-next">Where We Go Next<a class="headerlink" href="#where-we-go-next" title="Permanent link">&para;</a></h2>
+<p>Chapter 25 returns to the weights: storing them in 4 bits to cut the other half of the decode memory traffic, and measuring honestly what that costs in accuracy.</p>
+<h2 id="worked-solutions">Worked Solutions<a class="headerlink" href="#worked-solutions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Every sequence in the batch uses the same weights, so one weight read serves all of them. Each sequence has its own KV cache, so reading it is per-sequence work that grows with the batch.</li>
+<li>Real allocators hand out whichever pages are free. A kernel assuming <code>page_id = base + i</code> reads the wrong memory and returns plausible but wrong attention output, with no error.</li>
+<li>With <code>m_g = max(m_1, m_2)</code>, <code>out = (exp(m_1 - m_g) * o_1 + exp(m_2 - m_g) * o_2) / (exp(m_1 - m_g) * l_1 + exp(m_2 - m_g) * l_2)</code>.</li>
+<li>An empty split has <code>m = -inf</code>, so <code>exp(m_old - m_new)</code> becomes <code>exp(-inf - (-inf))</code>, which is NaN. A finite value such as <code>-1e30</code> keeps the exponent defined, and multiplying probabilities by the valid mask makes masked lanes contribute exactly zero.</li>
+<li><code>2 x 32 x 8 x 128 x 1 = 65,536</code> bytes (64 KiB).</li>
+</ol>
+<h2 id="additional-exercises">Additional Exercises<a class="headerlink" href="#additional-exercises" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Explain why reversing the page order of a full sequence leaves the output unchanged (test 12), and say what would break if the kernel applied rotary embeddings itself using the cache position.</li>
+<li>Experiment C shows 79% masked iterations for a long-tail batch. Sketch two changes that reduce it and say what each costs.</li>
+<li>Change the kernel so that <code>seq_len = 0</code> returns zeros. Which line do you change, and which of the mutation results above does your change interact with?</li>
+<li>Add a host-side assertion that catches a <code>seq_len</code> larger than the block table covers. Why is it better on the host than in the kernel?</li>
+<li>Design a test that detects the missing block-table clamp. What tool or setup would you need?</li>
+</ol>
+<h2 id="additional-solutions">Additional Solutions<a class="headerlink" href="#additional-solutions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Attention without positions is a weighted average over a set, so visiting pages in another order only changes the order of a sum. That works because positions were already folded into K before it was cached. If the kernel rotated K by its position in the cache, a reversed table would assign different positions and change the answer, and relabelling physical pages would also have to be reconsidered.</li>
+<li>Sort or bucket sequences by length so each launch has similar lengths, which costs scheduling complexity and may split a batch into several launches. Or give each sequence its own split count and have programs for an unused split exit early, which costs a more complicated grid and combine step. Both need profiling to know whether they help.</li>
+<li>In stage 2, guard the division: <code>out = tl.sum(...) / tl.maximum(denom, 1e-30)</code>. The numerator is also zero for an empty sequence, so the result is zeros. Test 18 must then expect zeros instead of NaN. A consequence worth noticing: the "<code>p</code> not masked" mutant was caught only by test 18, so after this change no test catches it, and you would need a new test that distinguishes it (for example by inspecting the stage 1 partial sums).</li>
+<li><code>assert int(seq_lens.max()) &lt;= block_table.shape[1] * PAGE</code> before launch. A host check runs once and gives a Python error with the offending value, whereas a check inside the kernel runs in every program, costs time, and can at best write a flag.</li>
+<li>Allocate the block table with a guard region, run under <code>compute-sanitizer --tool memcheck</code> on a GPU, and use a case where <code>nsplit * pps</code> exceeds <code>max_pages</code>. The sanitizer reports the out-of-bounds read of the block table. The interpreter cannot, so no CPU-only test can.</li>
+</ol>
+<h2 id="files-and-sources">Files and Sources<a class="headerlink" href="#files-and-sources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>examples/references/part8/ch24_paged_decode_attention.py</code>: kernels, <code>main()</code>, <code>--test</code> (20 self-tests), <code>--extras</code> (experiments A to D), <code>--bench</code> (GPU only, untested, with the scratch-device gap noted above).</li>
+<li>Outputs shown were produced with <code>TRITON_INTERPRET=1</code> on CPU, Triton 3.9.0 and torch 2.15.</li>
+<li>The 132-SM and 3.35 TB/s figures are the H100 SXM datasheet numbers, used only as ceilings.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../01-fused-residual-rmsnorm/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 23. Fused Residual + RMSNorm, Profiled Against PyTorch">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                23. Fused Residual + RMSNorm, Profiled Against PyTorch
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../03-int4-weight-only-quantization/" class="md-footer__link md-footer__link--next" aria-label="Next: 25. Weight-Only INT4 and Simulated FP4">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                25. Weight-Only INT4 and Simulated FP4
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Oluwaseyi Awoga
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/maximumbeings" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../javascripts/image-viewer.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,3365 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Building Production GPU Kernels in OpenAI Triton, One Layer at a Time">
+      
+      
+        <meta name="author" content="Oluwaseyi Awoga">
+      
+      
+        <link rel="canonical" href="https://maximumbeings.github.io/triton-from-first-principles/part8/05-speculative-decoding/">
+      
+      
+        <link rel="prev" href="../04-grammar-constrained-decoding/">
+      
+      
+        <link rel="next" href="../../appendix/installation-setup/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>27. Speculative Decoding: the Verify Kernel - Triton From First Principles</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/reader.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-27-speculative-decoding-the-verify-kernel" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Triton From First Principles" class="md-header__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Triton From First Principles
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              27. Speculative Decoding: the Verify Kernel
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Triton From First Principles" class="md-nav__button md-logo" aria-label="Triton From First Principles" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 15H6l7-14v8h5l-7 14z"/></svg>
+
+    </a>
+    Triton From First Principles
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaximumBeings/triton-from-first-principles" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../version-and-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versions & Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../review-and-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Review & Testing Status
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../final-review-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Final Adversarial Review
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../opus-review-response-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Independent Review Response
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rerun-differences-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interpreter Rerun Differences
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../execution-2026-11-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    November 21 H100 Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 0 — Triton Foundations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 0 — Triton Foundations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/01-types-and-the-jit-boundary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Types and the JIT Boundary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/02-kernel-parameterization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Kernel Parameterization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/03-strides-pointers-memory-layout/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Strides, Pointers, and Memory Layout
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/04-triton-programming-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. The Triton Programming Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part0/05-block-vectorization-spmd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Block-Level Vectorization and SPMD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 1 — Kernel–Tensor Interface
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 1 — Kernel–Tensor Interface
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/01-pointer-stride-contract/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. The Pointer+Stride Contract
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/02-broadcasting-alignment-block-pointers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Broadcasting, Alignment, and Block Pointers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/03-gpu-side-construction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. GPU-Side Construction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/04-mask-and-structure-kernels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Mask and Structure Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/05-targeting-hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Targeting Hardware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part1/06-shared-memory-register-pressure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Shared Memory and the Kernel Cache
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 2 — Core Kernels
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 2 — Core Kernels
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part2/01-elementwise-kernels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Element-wise Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part2/02-blocked-matmul-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. The Blocked Matmul Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part2/03-reduction-kernels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14. Reduction Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 3 — Wiring Into PyTorch's Autograd
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 3 — Wiring Into PyTorch's Autograd
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part3/01-autograd-function-graph-node/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15. torch.autograd.Function as the Graph Node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 4 — The Backward Kernel
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 4 — The Backward Kernel
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part4/01-writing-the-backward-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16. Writing the Backward Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part4/02-chaining-custom-ops/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17. How PyTorch's Autograd Engine Chains Custom Ops
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 5 — GPU Acceleration and Performance
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 5 — GPU Acceleration and Performance
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part5/01-autotuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18. Autotuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part5/02-benchmarking-correctly/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19. Benchmarking Correctly
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 6 — Neural Network Building Blocks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 6 — Neural Network Building Blocks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part6/01-fused-kernels-for-real-layers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20. Fused Kernels for Real Layers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part6/02-flash-attention-moe-advanced-features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    21. Forward Attention and Top-2 MoE Gating
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 7 — Financial Computing Applications
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 7 — Financial Computing Applications
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part7/01-quantitative-finance-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    22. Quantitative Finance Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 8 — Inference Kernels
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 8 — Inference Kernels
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-fused-residual-rmsnorm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    23. Fused Residual + RMSNorm, Profiled Against PyTorch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-paged-decode-attention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    24. Decode Attention Over a Paged KV Cache
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-int4-weight-only-quantization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    25. Weight-Only INT4 and Simulated FP4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-grammar-constrained-decoding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    26. Grammar-Constrained Decoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    27. Speculative Decoding: the Verify Kernel
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    27. Speculative Decoding: the Verify Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-understand-by-the-end-of-this-chapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will understand by the end of this chapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-need-to-know-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you need to know first
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#271-foundational-why-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.1 [FOUNDATIONAL] Why It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="27.1 [FOUNDATIONAL] Why It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#272-foundational-the-acceptance-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.2 [FOUNDATIONAL] The Acceptance Rule
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="27.2 [FOUNDATIONAL] The Acceptance Rule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#273-foundational-the-verify-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.3 [FOUNDATIONAL] The Verify Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="27.3 [FOUNDATIONAL] The Verify Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2731" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 27.3.1
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-ch27_speculative_decodingpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: ch27_speculative_decoding.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#274-foundational-proving-it-is-lossless-and-checking-the-formula" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.4 [FOUNDATIONAL] Proving It Is Lossless, and Checking the Formula
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="27.4 [FOUNDATIONAL] Proving It Is Lossless, and Checking the Formula">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2741-tokens-per-target-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 27.4.1: tokens per target pass
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#275-requirements-for-a-real-pair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.5 Requirements for a Real Pair
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#276-foundational-self-tests-proving-the-kernel-and-the-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.6 [FOUNDATIONAL] Self-Tests: Proving the Kernel and the Algorithm
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#277-foundational-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.7 [FOUNDATIONAL] Experiments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#278-foundational-failure-modes-and-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.8 [FOUNDATIONAL] Failure Modes and Edge Cases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#279-foundational-on-real-hardware-untested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.9 [FOUNDATIONAL] On Real Hardware (UNTESTED)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-exercises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Exercises
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files-and-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files and Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/installation-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A. Installation & Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/practice-quiz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    B. Practice Quiz
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/pytorch-triton-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    C. PyTorch and Triton Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/memory-model-continued/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    D. The Memory Model, Continued
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/inference-projects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E. Twelve Inference-Engineering Projects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-understand-by-the-end-of-this-chapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will understand by the end of this chapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-need-to-know-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you need to know first
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#271-foundational-why-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.1 [FOUNDATIONAL] Why It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="27.1 [FOUNDATIONAL] Why It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#272-foundational-the-acceptance-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.2 [FOUNDATIONAL] The Acceptance Rule
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="27.2 [FOUNDATIONAL] The Acceptance Rule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#273-foundational-the-verify-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.3 [FOUNDATIONAL] The Verify Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="27.3 [FOUNDATIONAL] The Verify Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2731" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 27.3.1
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-ch27_speculative_decodingpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File: ch27_speculative_decoding.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#274-foundational-proving-it-is-lossless-and-checking-the-formula" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.4 [FOUNDATIONAL] Proving It Is Lossless, and Checking the Formula
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="27.4 [FOUNDATIONAL] Proving It Is Lossless, and Checking the Formula">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intuition_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intuition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2741-tokens-per-target-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 27.4.1: tokens per target pass
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#275-requirements-for-a-real-pair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.5 Requirements for a Real Pair
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#276-foundational-self-tests-proving-the-kernel-and-the-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.6 [FOUNDATIONAL] Self-Tests: Proving the Kernel and the Algorithm
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#277-foundational-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.7 [FOUNDATIONAL] Experiments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#278-foundational-failure-modes-and-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.8 [FOUNDATIONAL] Failure Modes and Edge Cases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#279-foundational-on-real-hardware-untested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        27.9 [FOUNDATIONAL] On Real Hardware (UNTESTED)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chapter-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chapter Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-check-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Check Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-we-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where We Go Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-exercises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Exercises
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files-and-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files and Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="chapter-27-speculative-decoding-the-verify-kernel">Chapter 27: Speculative Decoding: the Verify Kernel<a class="headerlink" href="#chapter-27-speculative-decoding-the-verify-kernel" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>Decoding is memory-bound: reading the weights to produce one token costs nearly as much as reading them to check several. Speculative decoding exploits that. A cheap draft model guesses a few tokens ahead, the large target model checks all of them in one pass, and a careful acceptance rule makes the output follow exactly the target's distribution.</p>
+</blockquote>
+<div class="admonition info">
+<p class="admonition-title">What was and was not validated</p>
+<p>The verify kernel and the acceptance rule were run in the <strong>interpreter</strong> (<code>TRITON_INTERPRET=1</code>, CPU) on <strong>toy tabular models</strong> (a four-token vocabulary). That validates the algorithm and that the kernel equals a reference. It measures <strong>no speedup</strong>, because a real speedup depends on the draft-to-target cost ratio, batch size and hardware. The 70B multi-GPU measurement belongs to the companion book, <a href="https://maximumbeings.github.io/programming-the-h100/">Programming the H100</a>.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Project 7 of the twelve (the kernel half)</p>
+<p>See <a href="../../appendix/inference-projects/">Appendix E</a>.</p>
+</div>
+<h2 id="what-you-will-understand-by-the-end-of-this-chapter">What you will understand by the end of this chapter<a class="headerlink" href="#what-you-will-understand-by-the-end-of-this-chapter" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Why verifying several tokens costs about one weight read</li>
+<li>The acceptance rule, and why it is exactly lossless when done correctly</li>
+<li>Why the replacement token after a rejection must come from a <strong>residual</strong> distribution, and what breaks otherwise</li>
+<li>How to compute the expected number of tokens per target pass</li>
+<li>How to write the verify step as a Triton kernel</li>
+<li>What must be true of a real draft and target pair</li>
+</ul>
+<h2 id="what-you-need-to-know-first">What you need to know first<a class="headerlink" href="#what-you-need-to-know-first" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Chapter 24: decode is memory-bound</li>
+<li>Chapter 26: sampling with Gumbel noise and an argmax</li>
+<li>Chapter 14: reductions (<code>tl.min</code>, <code>tl.max</code>)</li>
+</ul>
+<h2 id="271-foundational-why-it-works">27.1 [FOUNDATIONAL] Why It Works<a class="headerlink" href="#271-foundational-why-it-works" title="Permanent link">&para;</a></h2>
+<h3 id="intuition">Intuition<a class="headerlink" href="#intuition" title="Permanent link">&para;</a></h3>
+<p>Producing one token with a large model reads all its weights. Checking <code>K</code> proposed tokens in a single forward pass reads the same weights, because the <code>K</code> positions are processed together as a small batch. So if the draft model proposes <code>K</code> tokens and the target accepts most of them, you get several tokens for roughly the price of one target pass.</p>
+<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a> draft model (small, fast):   t1 -&gt; t2 -&gt; t3 -&gt; t4         proposes K = 4 tokens
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a> target model (large):        scores positions 1..5 in ONE pass
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a> verify:                      accept t1, accept t2, REJECT t3  -&gt; keep t1, t2, plus one new token
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a> result of this round:        3 tokens for one target pass
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>K</code></td>
+<td>Tokens the draft proposes per round</td>
+</tr>
+<tr>
+<td><code>p</code></td>
+<td>Target model's distribution at a position</td>
+</tr>
+<tr>
+<td><code>q</code></td>
+<td>Draft model's distribution at the same position</td>
+</tr>
+<tr>
+<td><code>alpha</code></td>
+<td>Probability that a proposed token is accepted</td>
+</tr>
+</tbody>
+</table>
+<p>Real speedup depends on <code>alpha</code>, <code>K</code>, and how much cheaper the draft is than the target. It shrinks at large batch sizes, where the target pass stops being memory-bound.</p>
+<h2 id="272-foundational-the-acceptance-rule">27.2 [FOUNDATIONAL] The Acceptance Rule<a class="headerlink" href="#272-foundational-the-acceptance-rule" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_1">Intuition<a class="headerlink" href="#intuition_1" title="Permanent link">&para;</a></h3>
+<p>The draft samples token <code>x</code> from <code>q</code>. Accept it with probability <code>min(1, p(x) / q(x))</code>. If the target likes the token at least as much as the draft did, always accept. If the target likes it less, accept in proportion. On the first rejection, discard the rest and draw a replacement from the <strong>residual</strong> distribution, the part of <code>p</code> that <code>q</code> under-covers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>residual(v) = max(p(v) - q(v), 0), normalized
+</code></pre></div>
+<p>If all <code>K</code> tokens are accepted, draw a bonus token from the target's distribution at position <code>K+1</code>; this is the same formula with <code>q</code> taken as zero.</p>
+<h3 id="background_1">Background<a class="headerlink" href="#background_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Token accepted</td>
+<td>Keep it, check the next</td>
+</tr>
+<tr>
+<td>First rejection at position <code>n</code></td>
+<td>Keep tokens before <code>n</code>; replace position <code>n</code> with a sample from the residual</td>
+</tr>
+<tr>
+<td>All <code>K</code> accepted</td>
+<td>Keep all and add a bonus token sampled from <code>p</code> at position <code>K+1</code></td>
+</tr>
+<tr>
+<td>Every round</td>
+<td>Emits between 1 and <code>K + 1</code> tokens</td>
+</tr>
+</tbody>
+</table>
+<p>The theorem (Leviathan et al.; Chen et al.) is that this procedure emits tokens distributed <strong>exactly</strong> as if sampled from the target alone. With greedy decoding at temperature zero it reduces to exact-match checking.</p>
+<div class="admonition warning">
+<p class="admonition-title">COMMON TRAP</p>
+<p>Resampling the replacement from <code>p</code> instead of from the residual looks natural and is wrong: tokens the draft already had a chance to propose get double counted. The result is a biased distribution, and the error is invisible in any single output. Section 27.4 measures it.</p>
+</div>
+<h2 id="273-foundational-the-verify-kernel">27.3 [FOUNDATIONAL] The Verify Kernel<a class="headerlink" href="#273-foundational-the-verify-kernel" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_2">Intuition<a class="headerlink" href="#intuition_2" title="Permanent link">&para;</a></h3>
+<p>One program handles one sequence. It gathers <code>p(x_i)</code> and <code>q(x_i)</code> for all <code>K</code> positions at once, tests <code>u_i * q(x_i) &lt;= p(x_i)</code>, which is <code>u &lt;= p/q</code> without dividing, finds the first position that fails, then builds the residual at that position and samples it with Gumbel noise.</p>
+<h3 id="worked-example-2731">Worked Example 27.3.1<a class="headerlink" href="#worked-example-2731" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nd">@triton</span><span class="o">.</span><span class="n">jit</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">spec_verify_kernel</span><span class="p">(</span><span class="n">p_ptr</span><span class="p">,</span> <span class="n">q_ptr</span><span class="p">,</span> <span class="n">x_ptr</span><span class="p">,</span> <span class="n">u_ptr</span><span class="p">,</span> <span class="n">g_ptr</span><span class="p">,</span> <span class="n">n_out_ptr</span><span class="p">,</span> <span class="n">tok_out_ptr</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                       <span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">KP2</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span> <span class="n">VP2</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">):</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">s</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">i</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">KP2</span><span class="p">)</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">inb</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">K</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">x_ptr</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="n">K</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">inb</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">u</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">u_ptr</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="n">K</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">inb</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">px</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">p_ptr</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="p">(</span><span class="n">K</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">V</span> <span class="o">+</span> <span class="n">x</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">inb</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">qx</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">q_ptr</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="n">K</span> <span class="o">*</span> <span class="n">V</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">V</span> <span class="o">+</span> <span class="n">x</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">inb</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">accept</span> <span class="o">=</span> <span class="p">(</span><span class="n">u</span> <span class="o">*</span> <span class="n">qx</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">px</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">n</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">inb</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">accept</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="n">i</span><span class="p">,</span> <span class="n">K</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>    <span class="c1"># K means none rejected</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">v</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">VP2</span><span class="p">);</span> <span class="n">vin</span> <span class="o">=</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="n">V</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">pn</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">p_ptr</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="p">(</span><span class="n">K</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span> <span class="o">+</span> <span class="n">n</span> <span class="o">*</span> <span class="n">V</span> <span class="o">+</span> <span class="n">v</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">vin</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">qn</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">q_ptr</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="n">K</span> <span class="o">*</span> <span class="n">V</span> <span class="o">+</span> <span class="n">tl</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">K</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span> <span class="o">+</span> <span class="n">v</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">vin</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="n">qn</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">,</span> <span class="n">qn</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>                              <span class="c1"># bonus token: residual is p itself</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="n">r</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">pn</span> <span class="o">-</span> <span class="n">qn</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="n">g</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g_ptr</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="n">V</span> <span class="o">+</span> <span class="n">v</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">vin</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">score</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">r</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">tl</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mf">1e-30</span><span class="p">))</span> <span class="o">+</span> <span class="n">g</span><span class="p">,</span> <span class="n">NEG</span><span class="p">)</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">n_out_ptr</span> <span class="o">+</span> <span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">tok_out_ptr</span> <span class="o">+</span> <span class="n">s</span><span class="p">,</span> <span class="n">tl</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+</code></pre></div>
+<p>The padded lanes (<code>KP2</code> and <code>VP2</code> round up to powers of two) are given neutral values: <code>px = qx = 1</code> and <code>u = 0</code>, so a padded position is always accepted and never becomes the first rejection.</p>
+<h3 id="file-ch27_speculative_decodingpy">File: <code>ch27_speculative_decoding.py</code><a class="headerlink" href="#file-ch27_speculative_decodingpy" title="Permanent link">&para;</a></h3>
+<p><a href="../../examples/references/part8/ch27_speculative_decoding.py">Download the complete reference</a> (interpreter mode; GPU performance not established).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">TRITON_INTERPRET</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python3<span class="w"> </span>/Users/oluwaseyiawoga/Developer/triton-from-first-principles/docs/examples/references/part8/ch27_speculative_decoding.py
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>kernel == torch reference?  n: True  token: True
+</code></pre></div>
+<h2 id="274-foundational-proving-it-is-lossless-and-checking-the-formula">27.4 [FOUNDATIONAL] Proving It Is Lossless, and Checking the Formula<a class="headerlink" href="#274-foundational-proving-it-is-lossless-and-checking-the-formula" title="Permanent link">&para;</a></h2>
+<h3 id="intuition_3">Intuition<a class="headerlink" href="#intuition_3" title="Permanent link">&para;</a></h3>
+<p>A lossless claim is a statement about distributions, so it needs a statistical test. Use a target model small enough that its exact output distribution can be computed, run speculative decoding thousands of times, and compare.</p>
+<h3 id="background_2">Background<a class="headerlink" href="#background_2" title="Permanent link">&para;</a></h3>
+<p>The test uses a four-token Markov model for the target and a different, imperfect one for the draft. With three output tokens there are 64 possible sequences. The measure is the total variation (TV) distance between the empirical and the exact distribution: zero means identical, and a perfect sampler still shows a small nonzero value from sampling noise. The noise floor is measured by sampling the target directly.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>TV distance to exact target distribution (64 sequences, 6000 trials each):
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  direct sampling from target (noise floor) = 0.0219
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  speculative, correct residual correction  = 0.0193
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  speculative, WRONG correction (from p)    = 0.2093
+</code></pre></div>
+<p>The correct procedure is indistinguishable from the noise floor. The wrong correction is about ten times further from the target, even though every individual output looks plausible.</p>
+<h3 id="worked-example-2741-tokens-per-target-pass">Worked Example 27.4.1: tokens per target pass<a class="headerlink" href="#worked-example-2741-tokens-per-target-pass" title="Permanent link">&para;</a></h3>
+<p>If each proposed token is accepted independently with probability <code>alpha</code>, the expected number of tokens emitted per target pass is</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>E[tokens] = (1 - alpha^(K+1)) / (1 - alpha)
+</code></pre></div>
+<p>For a pair with per-token acceptance <code>alpha = sum over v of min(p(v), q(v))</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>alpha = 0.391, K = 4: tokens per target pass  measured = 1.630  formula (1-a^(K+1))/(1-a) = 1.628
+</code></pre></div>
+<p>The speedup is this number divided by the relative cost of a round: one target pass plus <code>K</code> draft passes. A cheap draft with a high <code>alpha</code> wins; a draft that is slow or often wrong does not.</p>
+<div class="admonition warning">
+<p class="admonition-title">UNTESTED ON GPU</p>
+<p>No speedup was measured. This chapter proves the sampler correct; it does not show it is fast.</p>
+</div>
+<h2 id="275-requirements-for-a-real-pair">27.5 Requirements for a Real Pair<a class="headerlink" href="#275-requirements-for-a-real-pair" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Same tokenizer and vocabulary</td>
+<td><code>p(x)</code> and <code>q(x)</code> must refer to the same token ids</td>
+</tr>
+<tr>
+<td>Rejection sampling at temperature above zero</td>
+<td>Greedy matching is only valid at temperature zero</td>
+</tr>
+<tr>
+<td>KV-cache rollback</td>
+<td>Rejected positions must be removed from both models' caches</td>
+</tr>
+<tr>
+<td>Draft not too slow</td>
+<td>Draft cost counts against the saving</td>
+</tr>
+<tr>
+<td>Measured acceptance by task</td>
+<td>Code and extraction usually accept more than open chat</td>
+</tr>
+<tr>
+<td>Smaller gain at large batch</td>
+<td>Verification stops being nearly free once the target pass is compute-bound</td>
+</tr>
+</tbody>
+</table>
+<p>Related methods change where the draft comes from: n-gram or prompt lookup, extra prediction heads (Medusa), or a feature-level draft (EAGLE). The verify step is the same.</p>
+<h2 id="276-foundational-self-tests-proving-the-kernel-and-the-algorithm">27.6 [FOUNDATIONAL] Self-Tests: Proving the Kernel and the Algorithm<a class="headerlink" href="#276-foundational-self-tests-proving-the-kernel-and-the-algorithm" title="Permanent link">&para;</a></h2>
+<p><code>main()</code> shows the kernel agreeing with a reference and the output distribution matching the target. The <code>--test</code> flag turns that into 20 checks that fail when something is wrong:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">TRITON_INTERPRET</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python3<span class="w"> </span>ch27_speculative_decoding.py<span class="w"> </span>--test
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>[PASS] kernel == torch reference for (K, V) = (1,2) (2,3) (3,6) (4,7) (5,16) (8,50), most of them not powers of two
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  [PASS] the number accepted is always between 0 and K
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  [PASS] the extra token always has positive residual mass: p - q &gt; 0 after a rejection, p_K &gt; 0 after a full accept
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  [PASS] a one-token vocabulary (V = 1) works: everything accepted, token 0
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  [PASS] hand case, boundary: p(x)=0.25, q(x)=0.5; u=0.5 gives u*q = p exactly and is ACCEPTED, u=0.5001 is rejected (kernel and torch agree)
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  [PASS] hand case, first rejection decides: accept pattern [yes yes NO yes] gives n = 2, the 4th token is discarded even though it would have been accepted
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  [PASS] p == q exactly: every one of 200 rows accepts all 3 draft tokens, and the bonus token comes from p_K (here a one-hot on token 1)
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>  [PASS] the target gives the draft token probability 0: every row is rejected (n = 0), token 0 is never returned, and tokens 1 and 2 appear with frequency 0.3 and 0.7 within 0.04
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>  [PASS] documented edge: u = 0 accepts a draft token the target gives probability 0 (0 * q &lt;= 0); a measure-zero event for u drawn from [0, 1)
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>  [PASS] documented edge: a draft token with q = 0 (impossible for a real draft model to sample) is accepted without dividing by zero
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>  [PASS] documented limitation: if the residual is empty (p &lt;= q everywhere, which only happens for unnormalized p) the kernel and torch both return token 0, which p gives probability 0
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>  [PASS] documented limitation: float16 probabilities are rejected (tl.log wants float32); pass float32 p and q
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>  [PASS] exact identity on 200 random (p, q): P(accept x) + P(reject) x normalized residual equals p(x) to 1e-12 (worst error 3.3e-16)
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>  [PASS] the same algebra with the WRONG correction (resample from p) is biased: mean TV to p is 0.135 over the same 200 pairs
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>  [PASS] through the REAL kernel, K = 1: the first emitted token follows p = (.1 .2 .3 .4) within 0.035 over 4000 rows although the draft is q = (.4 .3 .2 .1); max deviation 0.004
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>  [PASS] 3-token sequences from a Markov-chain target (64 outcomes, 6000 trials): correct correction TV 0.027 &lt; 0.04, wrong correction TV 0.236 &gt; 0.10
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>  [PASS] tokens per target pass match (1 - a^(K+1)) / (1 - a) within 0.03 for K = 1, 2, 4, 8
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>  [PASS] disjoint supports (acceptance rate 0): every row is rejected at position 0, so a step yields exactly 1 token
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>  [PASS] the kernel is deterministic and does not modify its inputs
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>  [PASS] rows are independent: rewriting row 0&#39;s target distribution leaves rows 1..15 unchanged
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>20/20 self-tests pass
+</code></pre></div>
+<p>It takes about 50 seconds.</p>
+<p>Speculative decoding is unusual because its correctness is a mathematical claim: the output must have exactly the target's distribution. The suite checks that claim four different ways, because no single one is enough.</p>
+<ol>
+<li><strong>Algebra (test 13).</strong> For 200 random pairs <code>(p, q)</code> it computes, in <code>float64</code>, the probability that token <code>x</code> is emitted: the chance the draft proposes <code>x</code> and it is accepted, plus the chance of any rejection times the normalized residual at <code>x</code>. That equals <code>p(x)</code> to 3e-16. This is the proof, checked numerically, with no sampling noise.</li>
+<li><strong>The real kernel, one step (test 15).</strong> With <code>K = 1</code>, a draft <code>q = (.4 .3 .2 .1)</code> and a target <code>p = (.1 .2 .3 .4)</code> that disagree strongly, the first token emitted by the kernel over 4000 rows is within 0.004 of <code>p</code>. A tolerance of 0.035 is about 4.4 standard deviations of a binomial proportion at that size, so a correct kernel essentially never fails it.</li>
+<li><strong>Multi-step sequences (test 16).</strong> A three-token Markov-chain target with 64 possible outputs: the correct procedure has total-variation distance 0.027 from the exact distribution, the wrong correction 0.236.</li>
+<li><strong>Hand cases (tests 5 to 8).</strong> The accept boundary, the first-rejection rule, the all-accepted bonus token and the all-rejected residual, each with an answer worked out on paper.</li>
+</ol>
+<p><strong>Do the tests catch bugs?</strong> Each row is one change to a copy of the file. The number is how many of the 20 tests then fail.</p>
+<table>
+<thead>
+<tr>
+<th>Broken copy</th>
+<th>Tests failing</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>accept test <code>&lt;</code> instead of <code>&lt;=</code></td>
+<td>2</td>
+<td>caught (hand boundary test)</td>
+</tr>
+<tr>
+<td>accept test <code>u * px &lt;= qx</code> (ratio inverted)</td>
+<td>8</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>last rejection used instead of the first</td>
+<td>8</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>bonus token not stripped of <code>q</code></td>
+<td>1</td>
+<td>caught (test 7 only)</td>
+</tr>
+<tr>
+<td>replacement drawn from <code>p</code>, not the residual</td>
+<td>4</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>noise dropped from the replacement sample</td>
+<td>3</td>
+<td>caught</td>
+</tr>
+<tr>
+<td><code>r + g</code> instead of <code>log r + g</code></td>
+<td>4</td>
+<td>caught</td>
+</tr>
+<tr>
+<td><code>p</code> batch stride <code>K</code> instead of <code>K + 1</code></td>
+<td>4</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>residual guard <code>r &gt; 0</code> removed</td>
+<td>1</td>
+<td>caught (test 11 only)</td>
+</tr>
+<tr>
+<td>torch reference rejects at <code>&gt;=</code></td>
+<td>1</td>
+<td>caught (boundary test)</td>
+</tr>
+<tr>
+<td>Markov chain forgets the previous token</td>
+<td>1</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>torch reference ignores the wrong-correction flag</td>
+<td>1</td>
+<td>caught: the "wrong" run becomes right, so test 16's bound fails</td>
+</tr>
+<tr>
+<td>replacement token <code>argmin</code> instead of <code>argmax</code></td>
+<td>crash</td>
+<td>caught</td>
+</tr>
+<tr>
+<td>residual row index <code>n</code> unclamped (<code>nq = n</code>)</td>
+<td>0</td>
+<td><strong>survives</strong></td>
+</tr>
+<tr>
+<td><code>px</code> padding value 0 instead of 1</td>
+<td>0</td>
+<td><strong>survives</strong></td>
+</tr>
+<tr>
+<td><code>inb</code> mask removed from the first-rejection reduction</td>
+<td>0</td>
+<td><strong>survives</strong></td>
+</tr>
+<tr>
+<td>padded lanes forced to reject, and no <code>inb</code> mask</td>
+<td>0</td>
+<td><strong>survives</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why a statistical test cannot catch the <code>&lt;</code> mutant.</strong> The boundary <code>u * q == p</code> has probability zero for a continuous <code>u</code>, so no amount of sampling will ever see <code>&lt;</code> versus <code>&lt;=</code>. Only the hand case, which sets <code>u * q</code> exactly equal to <code>p</code>, does. That is a general point: tests for exact semantics at a boundary must be constructed, not sampled.</p>
+<p><strong>The four survivors are not test gaps.</strong></p>
+<ul>
+<li><code>nq = n</code>: when everything is accepted, <code>n = K</code> would read a row of <code>q</code> past the end, but the value is zeroed immediately afterwards by <code>n &lt; K</code>. The mask protects an address, and the interpreter does not fault on it.</li>
+<li>The padding rows: rounding <code>K</code> up to a power of two adds padded lanes, and the chapter's explanation was that they get <code>u = 0</code> and <code>px = qx = 1</code> so they can never be the first rejection. The mutants show that is only one of three protections. The <code>inb</code> mask excludes them, and even a padded lane that <em>is</em> rejected gives <code>n = K</code>, because the first padded index is exactly <code>K</code>. Removing the values, the mask, or both together changes no output. The values are harmless to keep, but they are not what makes the kernel correct.</li>
+</ul>
+<h2 id="277-foundational-experiments">27.7 [FOUNDATIONAL] Experiments<a class="headerlink" href="#277-foundational-experiments" title="Permanent link">&para;</a></h2>
+<p>Five experiments, run with <code>--extras</code> (about 2 seconds).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">TRITON_INTERPRET</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python3<span class="w"> </span>ch27_speculative_decoding.py<span class="w"> </span>--extras
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Experiment A: draft quality against acceptance (q = lam p + (1 - lam) r, V = 8, K = 4, 20000 trials)
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>lam    alpha   tokens/pass measured   formula
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>1.00   1.000               5.000      5.000
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>0.75   0.855               3.732      3.745
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>0.50   0.710               2.836      2.826
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>0.25   0.565               2.166      2.166
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>0.00   0.420               1.710      1.702
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>Experiment B: a MODEL of speedup = tokens per pass / (1 + K c), c = draft cost / target cost (assumes one verify pass costs the same for any K: optimistic)
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>alpha    c     best K   tokens/pass   modelled speedup
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a> 0.50  0.05       3          1.88         1.63x
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a> 0.50  0.20       1          1.50         1.25x
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a> 0.70  0.05       6          3.06         2.35x
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a> 0.70  0.20       3          2.53         1.58x
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a> 0.80  0.05       8          4.33         3.09x
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a> 0.80  0.20       4          3.36         1.87x
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a> 0.90  0.05      12          7.46         4.66x
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a> 0.90  0.20       7          5.70         2.37x
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>(K is searched from 1 to 12; alpha = 0.9 with c = 0.05 hits that cap.) A draft costing a fifth of the target with alpha = 0.5 gives a modest 1.25x in this model. None of this is a measurement.
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>Experiment C: how biased is the wrong correction? (random 8-token pairs; TV distance of the first emitted token from p)
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>alpha   TV(correct)   TV(resample from p)
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>0.349       0.0e+00            0.155
+<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>0.412       0.0e+00            0.212
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>0.384       9.0e-17            0.130
+<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>0.343       6.9e-18            0.211
+<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>0.495       4.5e-17            0.121
+<a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>0.144       8.7e-19            0.093
+<a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a>the wrong correction over-represents every token with q &gt;= p (their probability becomes p(1 + 1 - alpha)); the bias shrinks only as alpha approaches 1
+<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a>
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>Experiment D: why the kernel tests u * q &lt;= p and does not divide
+<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>float32 p/q with q = 1e-45: inf   with p = q = 0: nan   (inf and nan)
+<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>float32 u*q &lt;= p with the same values and u = 0.5: True, True   (finite comparisons, no special cases)
+<a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a>
+<a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a>Experiment E: bytes the verify kernel reads per sequence (float32 p and q; it reads K accept scalars plus ONE row of p and ONE row of q)
+<a id="__codelineno-11-36" name="__codelineno-11-36" href="#__codelineno-11-36"></a>V        K    bytes read   full p, q tensors   share
+<a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a>  32000   4      256032             1152000   22.2 %
+<a id="__codelineno-11-38" name="__codelineno-11-38" href="#__codelineno-11-38"></a>  32000   8      256064             2176000   11.8 %
+<a id="__codelineno-11-39" name="__codelineno-11-39" href="#__codelineno-11-39"></a> 128256   4     1026080             4617216   22.2 %
+<a id="__codelineno-11-40" name="__codelineno-11-40" href="#__codelineno-11-40"></a> 128256   8     1026112             8721408   11.8 %
+<a id="__codelineno-11-41" name="__codelineno-11-41" href="#__codelineno-11-41"></a>the target model produces the full tensors regardless; the kernel avoids re-reading most of them
+</code></pre></div>
+<p><strong>A. Draft quality.</strong> The measured tokens per pass track <code>(1 - a^(K+1)) / (1 - a)</code> to within 0.013 across the range from a perfect draft (5.000, all <code>K + 1</code> tokens) to an independently drawn draft (1.71 at <code>alpha = 0.42</code>). Even an unrelated draft never yields fewer than one token per pass, because the replacement token is always produced.</p>
+<p><strong>B. A model of speedup.</strong> Dividing tokens per pass by <code>1 + K c</code> (with <code>c</code> the draft's cost as a fraction of the target's) gives the pattern in the table: the best <code>K</code> rises with <code>alpha</code> and falls as the draft gets more expensive. This is a model, and an optimistic one: it assumes the verify pass costs the same for any <code>K</code>, which stops being true once the target pass is compute-bound at large batch. The search covers <code>K</code> from 1 to 12, and <code>alpha = 0.9</code> with <code>c = 0.05</code> reaches that cap. No speed was measured.</p>
+<p><strong>C. Bias of the wrong correction.</strong> Resampling from <code>p</code> instead of the residual gives a first-token distribution 0.09 to 0.21 away from <code>p</code> in total variation for random pairs with <code>alpha</code> between 0.14 and 0.50. It over-represents every token with <code>q &gt;= p</code>, whose probability becomes <code>p(2 - alpha)</code>. The correct rule is exact to rounding error (1e-17).</p>
+<p><strong>D. Why no division.</strong> In <code>float32</code>, <code>p / q</code> with <code>q = 1e-45</code> is <code>inf</code> and with <code>p = q = 0</code> is <code>nan</code>. The kernel's <code>u * q &lt;= p</code> stays finite for both.</p>
+<p><strong>E. Bytes read.</strong> The kernel reads <code>2K</code> scalars and one row each of <code>p</code> and <code>q</code>, which is 22% of the full tensors at <code>K = 4</code> and 12% at <code>K = 8</code>, for either a 32,000 or a 128,256-token vocabulary. The target model has already produced the full tensors, so this is what the kernel adds, not a speed claim.</p>
+<h2 id="278-foundational-failure-modes-and-edge-cases">27.8 [FOUNDATIONAL] Failure Modes and Edge Cases<a class="headerlink" href="#278-foundational-failure-modes-and-edge-cases" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>What happens</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>u * q == p</code> exactly</td>
+<td>Accepted (the rule is <code>&lt;=</code>)</td>
+<td>5</td>
+</tr>
+<tr>
+<td>First rejection is not the last</td>
+<td>Tokens after it are discarded</td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>p == q</code></td>
+<td>Everything accepted; bonus token from <code>p_K</code></td>
+<td>7</td>
+</tr>
+<tr>
+<td>Target gives the draft token probability 0</td>
+<td>Always rejected; replacement drawn only from <code>p</code>'s support</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>K</code> or <code>V</code> not a power of two; <code>V = 1</code></td>
+<td>Correct</td>
+<td>1, 4</td>
+</tr>
+<tr>
+<td><code>u = 0</code></td>
+<td>Accepts even a token with <code>p = 0</code> (probability zero for random <code>u</code>)</td>
+<td>9</td>
+</tr>
+<tr>
+<td>Draft token with <code>q = 0</code></td>
+<td>Accepted; no division</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Residual empty (<code>p &lt;= q</code> everywhere, i.e. unnormalized <code>p</code>)</td>
+<td>Returns token 0, which <code>p</code> gives probability 0</td>
+<td>11</td>
+</tr>
+<tr>
+<td><code>float16</code> probabilities</td>
+<td>Rejected: <code>tl.log</code> needs <code>float32</code></td>
+<td>12</td>
+</tr>
+<tr>
+<td>Acceptance rate 0</td>
+<td>One token per pass, still correct</td>
+<td>18</td>
+</tr>
+<tr>
+<td>Draft token id outside <code>[0, V)</code></td>
+<td>Not checked</td>
+<td>not modelled</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Not modelled.</strong> Any real model pair: tokenizer agreement, the target's actual <code>p</code> at temperature, top-k and top-p filtering applied to <code>p</code> and <code>q</code> (which must be applied consistently to both for the distribution guarantee to hold); KV-cache rollback of rejected positions; the draft's own cost; batching rows that accepted different numbers of tokens; tree-structured drafts; sampling the draft with different noise than the verify; <code>float16</code> and <code>bfloat16</code> probabilities; and all timing. The Markov-chain target has 4 tokens, so the agreement says the algorithm is exact, not that any real pair gains speed.</p>
+<h2 id="279-foundational-on-real-hardware-untested">27.9 [FOUNDATIONAL] On Real Hardware (UNTESTED)<a class="headerlink" href="#279-foundational-on-real-hardware-untested" title="Permanent link">&para;</a></h2>
+<p>Everything above ran on CPU. These commands were written without access to a GPU and have <strong>not been run by the author</strong>; verify them against your installed versions.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># 1. Correctness on the GPU (no TRITON_INTERPRET)</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>python3<span class="w"> </span>ch27_speculative_decoding.py<span class="w"> </span>--test
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># 2. Verify-kernel time at two vocabulary sizes and three batch sizes</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>python3<span class="w"> </span>ch27_speculative_decoding.py<span class="w"> </span>--bench
+</code></pre></div>
+<p><strong>Known gaps before <code>--bench</code> means anything:</strong> <code>verify_kernel</code> allocates its outputs on the CPU, so it needs <code>device=p.device</code>; and it launches one program per sequence that loads a row of <code>next_power_of_2(V)</code> elements, which for a 128,256-token vocabulary is 131,072 elements and may not fit in one program's registers. First check that it launches, then rewrite the residual step to loop over the vocabulary in tiles. A reasonable hypothesis, not a result: the kernel is small next to the target's forward pass, so the speedup of a real system depends on the acceptance rate and the draft's cost far more than on this kernel. To test that, measure acceptance on your own task and plug it into the model in experiment B.</p>
+<h2 id="chapter-summary">Chapter Summary<a class="headerlink" href="#chapter-summary" title="Permanent link">&para;</a></h2>
+<p>Speculative decoding has a cheap draft propose <code>K</code> tokens and the target verify them in one pass, which costs about one weight read. Each token is accepted with probability <code>min(1, p/q)</code>, and on the first rejection the replacement is drawn from the normalized residual <code>max(p - q, 0)</code>; with all <code>K</code> accepted, a bonus token is drawn from <code>p</code>. A Triton verify kernel matched a reference exactly. A statistical test against an exactly known target distribution showed the correct procedure at the sampling noise floor (0.0193 against 0.0219) and the wrong replacement rule far off (0.2093). The tokens-per-pass formula matched simulation (1.630 against 1.628). Speedup itself was not measured and depends on the draft cost, acceptance and batch size.</p>
+<h2 id="self-check-questions">Self-Check Questions<a class="headerlink" href="#self-check-questions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Why does verifying <code>K</code> tokens cost about the same as generating one?</li>
+<li>Why must the replacement token come from the residual <code>max(p - q, 0)</code> and not from <code>p</code>?</li>
+<li>With <code>alpha = 0.8</code> and <code>K = 4</code>, what is the expected number of tokens per target pass?</li>
+<li>Why does the kernel give padded positions <code>u = 0</code> and <code>px = qx = 1</code>?</li>
+<li>Name three reasons real-world speedup could be lower than the formula suggests.</li>
+</ol>
+<h2 id="where-we-go-next">Where We Go Next<a class="headerlink" href="#where-we-go-next" title="Permanent link">&para;</a></h2>
+<p>This is the last chapter of Part 8. The companion book, <a href="https://maximumbeings.github.io/programming-the-h100/">Programming the H100</a>, picks up the systems side: KV-cache offloading, disaggregated serving, mixture-of-experts, and running a 70B target across several GPUs.</p>
+<h2 id="worked-solutions">Worked Solutions<a class="headerlink" href="#worked-solutions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Decode is limited by reading the weights from memory, and the <code>K</code> positions are processed together as one small batch, so the same weight read serves all of them.</li>
+<li>The draft has already had its chance to propose each token. Resampling from <code>p</code> counts that probability mass twice, which biases the output. The residual <code>max(p - q, 0)</code> is exactly the mass <code>q</code> failed to cover, and the measured TV distance (0.2093 against 0.0193) shows the bias.</li>
+<li><code>(1 - 0.8^5) / (1 - 0.8) = (1 - 0.32768) / 0.2 = 3.3616</code>, about 3.36 tokens per target pass.</li>
+<li>With <code>u = 0</code>, <code>0 * qx &lt;= px</code> always holds, so a padded position is accepted and cannot be the first rejection, and <code>px = qx = 1</code> keeps the test well defined. These values are one of three independent protections, not the one that matters: the <code>inb</code> mask also excludes padded lanes, and even a padded lane that were rejected would give <code>n = K</code> because the first padded index is exactly <code>K</code>. The mutation results in section 27.6 show that removing the values, the mask, or both changes no output.</li>
+<li>The draft model's own cost is not free; acceptance is below the independence assumption on real text and varies by task; large batches make the target pass compute-bound; and rolling back rejected KV entries adds overhead.</li>
+</ol>
+<h2 id="additional-exercises">Additional Exercises<a class="headerlink" href="#additional-exercises" title="Permanent link">&para;</a></h2>
+<ol>
+<li>In experiment B, <code>alpha = 0.8</code> with <code>c = 0.2</code> has its best at <code>K = 4</code>, but <code>c = 0.05</code> pushes it to 8. Explain why, and say why the model overstates the gain at large batch.</li>
+<li>Prove that padded lanes cannot change <code>n</code>, whichever values they hold, using only the fact that the first padded index equals <code>K</code>.</li>
+<li>When the residual is empty the kernel returns token 0. Where would you handle it, and what is a safe replacement?</li>
+<li>Justify the 0.035 tolerance in test 15 and say how far the wrong correction is from <code>p</code> for that example, in standard deviations.</li>
+<li>Explain why a sampling test cannot distinguish <code>&lt;</code> from <code>&lt;=</code> in the accept rule, and what test does.</li>
+</ol>
+<h2 id="additional-solutions">Additional Solutions<a class="headerlink" href="#additional-solutions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>A longer draft block is worth its extra draft cost only if the extra tokens are likely to be accepted. A higher <code>alpha</code> makes each extra token more likely to survive, and a smaller <code>c</code> makes each one cheaper, so both push the best <code>K</code> up. At large batch the target pass becomes compute-bound and its cost grows with the <code>K + 1</code> positions it verifies, which the model assumes it does not, so the real best <code>K</code> and the real gain are smaller.</li>
+<li><code>n</code> is the minimum over lanes of (lane index if rejected, else <code>K</code>). A padded lane has an index of at least <code>K</code>, so whether it is rejected (index at least <code>K</code>) or accepted (value <code>K</code>), it contributes a value of at least <code>K</code>, and <code>n</code> is already at most <code>K</code> from the default. It can therefore never lower <code>n</code>, and the real lanes alone decide.</li>
+<li>In the target-side code that prepares <code>p</code> and <code>q</code>, because the kernel cannot raise an error. If <code>(p_n - q_n).clamp(0)</code> sums to zero, fall back to sampling from <code>p_n</code>, which is the right answer when the residual vanishes numerically (the two distributions are equal up to rounding, so a rejection there was a rounding artifact).</li>
+<li>The first-token frequency over 4000 rows has a standard deviation of at most <code>0.5 / sqrt(4000) = 0.0079</code>, so 0.035 is about 4.4 standard deviations. Under the wrong correction the probabilities become <code>.14, .28, .32, .26</code> against <code>p = .1, .2, .3, .4</code>, so token 3 is off by 0.14, which is about 18 standard deviations. The test separates the two cleanly.</li>
+<li>The boundary <code>u * q == p</code> has probability zero for continuous <code>u</code>, so no sample ever lands on it and <code>&lt;</code> and <code>&lt;=</code> give the same distribution. A hand case that sets <code>u * q</code> exactly equal to <code>p</code>, like test 5, is the only test that sees the difference.</li>
+</ol>
+<h2 id="files-and-sources">Files and Sources<a class="headerlink" href="#files-and-sources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>examples/references/part8/ch27_speculative_decoding.py</code>: verify kernel, torch reference, Markov-chain experiment, <code>main()</code>, <code>--test</code> (20 self-tests, about 50 s), <code>--extras</code> (experiments A to E), <code>--bench</code> (GPU only, untested, with the gaps noted above).</li>
+<li>Outputs shown were produced with <code>TRITON_INTERPRET=1</code> on CPU, Triton 3.9.0 and torch 2.15.</li>
+<li>The speedup model in experiment B is arithmetic on assumed costs, not a measurement. No real model pair was run.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../04-grammar-constrained-decoding/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 26. Grammar-Constrained Decoding">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                26. Grammar-Constrained Decoding
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../appendix/installation-setup/" class="md-footer__link md-footer__link--next" aria-label="Next: A. Installation &amp; Setup">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                A. Installation & Setup
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Oluwaseyi Awoga
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/maximumbeings" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../javascripts/image-viewer.js"></script>
+      
+    
+  </body>
+</html>

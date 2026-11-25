@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -33,10 +33,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -1985,7 +1985,7 @@
   <span class="md-ellipsis">
     
   
-    Appendix
+    Part 8 — Inference Kernels
   
 
     
@@ -1998,6 +1998,207 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 8 — Inference Kernels
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part8/01-fused-residual-rmsnorm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    23. Fused Residual + RMSNorm, Profiled Against PyTorch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part8/02-paged-decode-attention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    24. Decode Attention Over a Paged KV Cache
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part8/03-int4-weight-only-quantization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    25. Weight-Only INT4 and Simulated FP4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part8/04-grammar-constrained-decoding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    26. Grammar-Constrained Decoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part8/05-speculative-decoding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    27. Speculative Decoding: the Verify Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2106,6 +2307,34 @@
     
   
     D. The Memory Model, Continued
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/inference-projects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E. Twelve Inference-Engineering Projects
   
 
     
@@ -2546,12 +2775,12 @@
 </code></pre></div>
 <p><code>57.1%</code> is not a coincidence worth glossing over: it is the identical number Mojo's Chapter 3 computes for the same particle system on a CPU (<code>16,000 / 28,000 ≈ 57.1%</code>), because both numbers reduce to the same ratio — 4 useful fields out of 7 total fields in the record, <code>4/7 ≈ 0.571</code> — even though the <em>mechanism</em> wasting the other 42.9% is different in each case. On the CPU, the waste is unrelated fields riding along in the <em>same</em> fetch for <em>one</em> element. On the GPU, the waste is <em>separate</em> threads' scattered addresses forcing more transactions than a packed layout would need. Different hardware, different physical mechanism, same underlying principle: memory is fetched in fixed-size chunks, and a layout that doesn't pack the wanted bytes together pays for the unwanted ones riding along, one way or another.</p>
 <h3 id="ascii-diagram-4-threads-worth-of-vx-reads-aos-vs-soa">ASCII Diagram — 4 threads' worth of <code>vx</code> reads, AoS vs. SoA<a class="headerlink" href="#ascii-diagram-4-threads-worth-of-vx-reads-aos-vs-soa" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>AoS (row stride 28B, vx at offset+12): thread i's vx address = i*28+12
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>AoS (row stride 28B, vx at offset+12): thread i&#39;s vx address = i*28+12
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a> thread:      0      1      2      3
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a> address:    12     40     68     96
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a> 32B segment: 0      1      2      3     &lt;- every thread lands in a DIFFERENT segment
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>SoA (vx array, 4B stride): thread i's vx address = i*4
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>SoA (vx array, 4B stride): thread i&#39;s vx address = i*4
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a> thread:      0      1      2      3
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a> address:     0      4      8     12
 <a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a> 32B segment: 0      0      0      0     &lt;- all 4 threads land in the SAME segment
@@ -2701,8 +2930,8 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">SEG</span> <span class="o">=</span> <span class="mi">32</span>  <span class="c1"># bytes per memory transaction segment (simplified)</span>
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">WARP</span> <span class="o">=</span> <span class="mi">32</span>  <span class="c1"># threads in a warp</span>
 <a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">FLOAT</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># bytes per float32</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">"vx"</span><span class="p">,</span> <span class="s2">"vy"</span><span class="p">,</span> <span class="s2">"vz"</span><span class="p">,</span> <span class="s2">"mass"</span><span class="p">]</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="n">NEEDED</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"vx"</span><span class="p">,</span> <span class="s2">"vy"</span><span class="p">,</span> <span class="s2">"vz"</span><span class="p">,</span> <span class="s2">"mass"</span><span class="p">]</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;vx&quot;</span><span class="p">,</span> <span class="s2">&quot;vy&quot;</span><span class="p">,</span> <span class="s2">&quot;vz&quot;</span><span class="p">,</span> <span class="s2">&quot;mass&quot;</span><span class="p">]</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="n">NEEDED</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;vx&quot;</span><span class="p">,</span> <span class="s2">&quot;vy&quot;</span><span class="p">,</span> <span class="s2">&quot;vz&quot;</span><span class="p">,</span> <span class="s2">&quot;mass&quot;</span><span class="p">]</span>
 <a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
 <a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>
 <a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">segments_touched</span><span class="p">(</span><span class="n">addresses</span><span class="p">):</span>
@@ -2710,7 +2939,7 @@
 <a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>
 <a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>
 <a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_aos_vs_soa</span><span class="p">():</span>
-<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 3.1: AoS vs. SoA, warp-wide field reads ==="</span><span class="p">)</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 3.1: AoS vs. SoA, warp-wide field reads ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>    <span class="n">row_stride</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">FIELDS</span><span class="p">)</span> <span class="o">*</span> <span class="n">FLOAT</span>
 <a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>    <span class="n">total_segs_aos</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 <a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">NEEDED</span><span class="p">:</span>
@@ -2719,33 +2948,33 @@
 <a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>        <span class="n">total_segs_aos</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">segments_touched</span><span class="p">(</span><span class="n">addrs</span><span class="p">))</span>
 <a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>    <span class="n">needed_bytes</span> <span class="o">=</span> <span class="n">WARP</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">NEEDED</span><span class="p">)</span> <span class="o">*</span> <span class="n">FLOAT</span>
 <a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>    <span class="n">aos_bytes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">total_segs_aos</span><span class="p">)</span> <span class="o">*</span> <span class="n">SEG</span>
-<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"AoS total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">total_segs_aos</span><span class="p">)</span><span class="si">}</span><span class="s2"> distinct 32B segments = </span><span class="si">{</span><span class="n">aos_bytes</span><span class="si">}</span><span class="s2"> bytes fetched"</span><span class="p">)</span>
-<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"needed: </span><span class="si">{</span><span class="n">needed_bytes</span><span class="si">}</span><span class="s2"> bytes -&gt; utilization = </span><span class="si">{</span><span class="n">needed_bytes</span><span class="o">/</span><span class="n">aos_bytes</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AoS total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">total_segs_aos</span><span class="p">)</span><span class="si">}</span><span class="s2"> distinct 32B segments = </span><span class="si">{</span><span class="n">aos_bytes</span><span class="si">}</span><span class="s2"> bytes fetched&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;needed: </span><span class="si">{</span><span class="n">needed_bytes</span><span class="si">}</span><span class="s2"> bytes -&gt; utilization = </span><span class="si">{</span><span class="n">needed_bytes</span><span class="o">/</span><span class="n">aos_bytes</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
 <a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>
 <a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>    <span class="n">total_segs_soa</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 <a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>    <span class="k">for</span> <span class="n">fi</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">NEEDED</span><span class="p">):</span>
 <a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>        <span class="n">addrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">FLOAT</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">WARP</span><span class="p">)]</span>
 <a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>        <span class="n">total_segs_soa</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">fi</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">segments_touched</span><span class="p">(</span><span class="n">addrs</span><span class="p">))</span>
 <a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a>    <span class="n">soa_bytes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">total_segs_soa</span><span class="p">)</span> <span class="o">*</span> <span class="n">SEG</span>
-<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">SoA total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">total_segs_soa</span><span class="p">)</span><span class="si">}</span><span class="s2"> distinct 32B segments = </span><span class="si">{</span><span class="n">soa_bytes</span><span class="si">}</span><span class="s2"> bytes fetched"</span><span class="p">)</span>
-<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"needed: </span><span class="si">{</span><span class="n">needed_bytes</span><span class="si">}</span><span class="s2"> bytes -&gt; utilization = </span><span class="si">{</span><span class="n">needed_bytes</span><span class="o">/</span><span class="n">soa_bytes</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">SoA total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">total_segs_soa</span><span class="p">)</span><span class="si">}</span><span class="s2"> distinct 32B segments = </span><span class="si">{</span><span class="n">soa_bytes</span><span class="si">}</span><span class="s2"> bytes fetched&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;needed: </span><span class="si">{</span><span class="n">needed_bytes</span><span class="si">}</span><span class="s2"> bytes -&gt; utilization = </span><span class="si">{</span><span class="n">needed_bytes</span><span class="o">/</span><span class="n">soa_bytes</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
 <a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>
 <a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>
 <a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_row_vs_column</span><span class="p">():</span>
-<a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Section 3.2: one row vs. one column of a 32x32 row-major matrix ==="</span><span class="p">)</span>
+<a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Section 3.2: one row vs. one column of a 32x32 row-major matrix ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-11-36" name="__codelineno-11-36" href="#__codelineno-11-36"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span>
 <a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a>    <span class="n">row_stride</span><span class="p">,</span> <span class="n">col_stride</span> <span class="o">=</span> <span class="n">N</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span>
 <a id="__codelineno-11-38" name="__codelineno-11-38" href="#__codelineno-11-38"></a>    <span class="n">row_addrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="o">*</span> <span class="n">col_stride</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)]</span>
 <a id="__codelineno-11-39" name="__codelineno-11-39" href="#__codelineno-11-39"></a>    <span class="n">col_addrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="o">*</span> <span class="n">row_stride</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">)]</span>
 <a id="__codelineno-11-40" name="__codelineno-11-40" href="#__codelineno-11-40"></a>    <span class="n">row_segs</span> <span class="o">=</span> <span class="n">segments_touched</span><span class="p">(</span><span class="n">row_addrs</span><span class="p">)</span>
 <a id="__codelineno-11-41" name="__codelineno-11-41" href="#__codelineno-11-41"></a>    <span class="n">col_segs</span> <span class="o">=</span> <span class="n">segments_touched</span><span class="p">(</span><span class="n">col_addrs</span><span class="p">)</span>
-<a id="__codelineno-11-42" name="__codelineno-11-42" href="#__codelineno-11-42"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Reading one row: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">row_segs</span><span class="p">)</span><span class="si">}</span><span class="s2"> segments, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">row_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="si">}</span><span class="s2"> bytes fetched "</span>
-<a id="__codelineno-11-43" name="__codelineno-11-43" href="#__codelineno-11-43"></a>          <span class="sa">f</span><span class="s2">"for </span><span class="si">{</span><span class="n">N</span><span class="o">*</span><span class="mi">4</span><span class="si">}</span><span class="s2"> bytes needed -&gt; </span><span class="si">{</span><span class="n">N</span><span class="o">*</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
-<a id="__codelineno-11-44" name="__codelineno-11-44" href="#__codelineno-11-44"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Reading one column: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">col_segs</span><span class="p">)</span><span class="si">}</span><span class="s2"> segments, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">col_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="si">}</span><span class="s2"> bytes fetched "</span>
-<a id="__codelineno-11-45" name="__codelineno-11-45" href="#__codelineno-11-45"></a>          <span class="sa">f</span><span class="s2">"for </span><span class="si">{</span><span class="n">M</span><span class="o">*</span><span class="mi">4</span><span class="si">}</span><span class="s2"> bytes needed -&gt; </span><span class="si">{</span><span class="n">M</span><span class="o">*</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">col_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+<a id="__codelineno-11-42" name="__codelineno-11-42" href="#__codelineno-11-42"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading one row: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">row_segs</span><span class="p">)</span><span class="si">}</span><span class="s2"> segments, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">row_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="si">}</span><span class="s2"> bytes fetched &quot;</span>
+<a id="__codelineno-11-43" name="__codelineno-11-43" href="#__codelineno-11-43"></a>          <span class="sa">f</span><span class="s2">&quot;for </span><span class="si">{</span><span class="n">N</span><span class="o">*</span><span class="mi">4</span><span class="si">}</span><span class="s2"> bytes needed -&gt; </span><span class="si">{</span><span class="n">N</span><span class="o">*</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-44" name="__codelineno-11-44" href="#__codelineno-11-44"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading one column: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">col_segs</span><span class="p">)</span><span class="si">}</span><span class="s2"> segments, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">col_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="si">}</span><span class="s2"> bytes fetched &quot;</span>
+<a id="__codelineno-11-45" name="__codelineno-11-45" href="#__codelineno-11-45"></a>          <span class="sa">f</span><span class="s2">&quot;for </span><span class="si">{</span><span class="n">M</span><span class="o">*</span><span class="mi">4</span><span class="si">}</span><span class="s2"> bytes needed -&gt; </span><span class="si">{</span><span class="n">M</span><span class="o">*</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">col_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
 <a id="__codelineno-11-46" name="__codelineno-11-46" href="#__codelineno-11-46"></a>
 <a id="__codelineno-11-47" name="__codelineno-11-47" href="#__codelineno-11-47"></a>
-<a id="__codelineno-11-48" name="__codelineno-11-48" href="#__codelineno-11-48"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<a id="__codelineno-11-48" name="__codelineno-11-48" href="#__codelineno-11-48"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 <a id="__codelineno-11-49" name="__codelineno-11-49" href="#__codelineno-11-49"></a>    <span class="n">demo_aos_vs_soa</span><span class="p">()</span>
 <a id="__codelineno-11-50" name="__codelineno-11-50" href="#__codelineno-11-50"></a>    <span class="n">demo_row_vs_column</span><span class="p">()</span>
 </code></pre></div>
@@ -2781,34 +3010,34 @@
 <a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a>
 <a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a>
 <a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_transpose_trap</span><span class="p">():</span>
-<a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 3.3: hardcoded strides vs. real strides ==="</span><span class="p">)</span>
+<a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 3.3: hardcoded strides vs. real strides ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-12-31" name="__codelineno-12-31" href="#__codelineno-12-31"></a>    <span class="n">base</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 <a id="__codelineno-12-32" name="__codelineno-12-32" href="#__codelineno-12-32"></a>
 <a id="__codelineno-12-33" name="__codelineno-12-33" href="#__codelineno-12-33"></a>    <span class="n">out_contig</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 <a id="__codelineno-12-34" name="__codelineno-12-34" href="#__codelineno-12-34"></a>    <span class="n">copy_2d_hardcoded_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">base</span><span class="p">,</span> <span class="n">out_contig</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-12-35" name="__codelineno-12-35" href="#__codelineno-12-35"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"hardcoded kernel on contiguous base, correct?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_contig</span><span class="p">,</span> <span class="n">base</span><span class="p">))</span>
+<a id="__codelineno-12-35" name="__codelineno-12-35" href="#__codelineno-12-35"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hardcoded kernel on contiguous base, correct?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_contig</span><span class="p">,</span> <span class="n">base</span><span class="p">))</span>
 <a id="__codelineno-12-36" name="__codelineno-12-36" href="#__codelineno-12-36"></a>
 <a id="__codelineno-12-37" name="__codelineno-12-37" href="#__codelineno-12-37"></a>    <span class="n">t</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">t</span><span class="p">()</span>
-<a id="__codelineno-12-38" name="__codelineno-12-38" href="#__codelineno-12-38"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"base.t() shape:"</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">"stride:"</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">stride</span><span class="p">(),</span> <span class="s2">"is_contiguous:"</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">is_contiguous</span><span class="p">())</span>
+<a id="__codelineno-12-38" name="__codelineno-12-38" href="#__codelineno-12-38"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;base.t() shape:&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;stride:&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">stride</span><span class="p">(),</span> <span class="s2">&quot;is_contiguous:&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">is_contiguous</span><span class="p">())</span>
 <a id="__codelineno-12-39" name="__codelineno-12-39" href="#__codelineno-12-39"></a>
 <a id="__codelineno-12-40" name="__codelineno-12-40" href="#__codelineno-12-40"></a>    <span class="n">out_hardcoded</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <a id="__codelineno-12-41" name="__codelineno-12-41" href="#__codelineno-12-41"></a>    <span class="n">copy_2d_hardcoded_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">t</span><span class="p">,</span> <span class="n">out_hardcoded</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-12-42" name="__codelineno-12-42" href="#__codelineno-12-42"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"hardcoded kernel on base.t(), correct?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_hardcoded</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+<a id="__codelineno-12-42" name="__codelineno-12-42" href="#__codelineno-12-42"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hardcoded kernel on base.t(), correct?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_hardcoded</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
 <a id="__codelineno-12-43" name="__codelineno-12-43" href="#__codelineno-12-43"></a>
 <a id="__codelineno-12-44" name="__codelineno-12-44" href="#__codelineno-12-44"></a>    <span class="n">out_strided</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <a id="__codelineno-12-45" name="__codelineno-12-45" href="#__codelineno-12-45"></a>    <span class="n">copy_2d_strided_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">t</span><span class="p">,</span> <span class="n">out_strided</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">t</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-12-46" name="__codelineno-12-46" href="#__codelineno-12-46"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"stride-aware kernel on base.t(), correct?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_strided</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+<a id="__codelineno-12-46" name="__codelineno-12-46" href="#__codelineno-12-46"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;stride-aware kernel on base.t(), correct?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_strided</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
 <a id="__codelineno-12-47" name="__codelineno-12-47" href="#__codelineno-12-47"></a>    <span class="k">return</span> <span class="n">base</span><span class="p">,</span> <span class="n">t</span>
 <a id="__codelineno-12-48" name="__codelineno-12-48" href="#__codelineno-12-48"></a>
 <a id="__codelineno-12-49" name="__codelineno-12-49" href="#__codelineno-12-49"></a>
 <a id="__codelineno-12-50" name="__codelineno-12-50" href="#__codelineno-12-50"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_2d_tile</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
-<a id="__codelineno-12-51" name="__codelineno-12-51" href="#__codelineno-12-51"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Section 3.4: a 2x2 tile of base.t(), read via the stride-aware kernel ==="</span><span class="p">)</span>
+<a id="__codelineno-12-51" name="__codelineno-12-51" href="#__codelineno-12-51"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Section 3.4: a 2x2 tile of base.t(), read via the stride-aware kernel ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-12-52" name="__codelineno-12-52" href="#__codelineno-12-52"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <a id="__codelineno-12-53" name="__codelineno-12-53" href="#__codelineno-12-53"></a>    <span class="n">copy_2d_strided_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">t</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">t</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<a id="__codelineno-12-54" name="__codelineno-12-54" href="#__codelineno-12-54"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"top-left 2x2 tile:"</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="s2">"(expected [[0,4],[1,5]])"</span><span class="p">)</span>
+<a id="__codelineno-12-54" name="__codelineno-12-54" href="#__codelineno-12-54"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;top-left 2x2 tile:&quot;</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="s2">&quot;(expected [[0,4],[1,5]])&quot;</span><span class="p">)</span>
 <a id="__codelineno-12-55" name="__codelineno-12-55" href="#__codelineno-12-55"></a>
 <a id="__codelineno-12-56" name="__codelineno-12-56" href="#__codelineno-12-56"></a>
-<a id="__codelineno-12-57" name="__codelineno-12-57" href="#__codelineno-12-57"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<a id="__codelineno-12-57" name="__codelineno-12-57" href="#__codelineno-12-57"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 <a id="__codelineno-12-58" name="__codelineno-12-58" href="#__codelineno-12-58"></a>    <span class="n">_</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">demo_transpose_trap</span><span class="p">()</span>
 <a id="__codelineno-12-59" name="__codelineno-12-59" href="#__codelineno-12-59"></a>    <span class="n">demo_2d_tile</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
 </code></pre></div>
@@ -2822,8 +3051,8 @@
 <a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="n">SEG</span> <span class="o">=</span> <span class="mi">32</span>
 <a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="n">WARP</span> <span class="o">=</span> <span class="mi">32</span>
 <a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="n">FLOAT</span> <span class="o">=</span> <span class="mi">4</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="n">FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">"vx"</span><span class="p">,</span> <span class="s2">"vy"</span><span class="p">,</span> <span class="s2">"vz"</span><span class="p">,</span> <span class="s2">"mass"</span><span class="p">]</span>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="n">NEEDED</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"vx"</span><span class="p">,</span> <span class="s2">"vy"</span><span class="p">,</span> <span class="s2">"vz"</span><span class="p">,</span> <span class="s2">"mass"</span><span class="p">]</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="n">FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;vx&quot;</span><span class="p">,</span> <span class="s2">&quot;vy&quot;</span><span class="p">,</span> <span class="s2">&quot;vz&quot;</span><span class="p">,</span> <span class="s2">&quot;mass&quot;</span><span class="p">]</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="n">NEEDED</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;vx&quot;</span><span class="p">,</span> <span class="s2">&quot;vy&quot;</span><span class="p">,</span> <span class="s2">&quot;vz&quot;</span><span class="p">,</span> <span class="s2">&quot;mass&quot;</span><span class="p">]</span>
 <a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>
 <a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>
 <a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="k">def</span><span class="w"> </span><span class="nf">segments_touched</span><span class="p">(</span><span class="n">addresses</span><span class="p">):</span>
@@ -2854,7 +3083,7 @@
 <a id="__codelineno-13-37" name="__codelineno-13-37" href="#__codelineno-13-37"></a>
 <a id="__codelineno-13-38" name="__codelineno-13-38" href="#__codelineno-13-38"></a>
 <a id="__codelineno-13-39" name="__codelineno-13-39" href="#__codelineno-13-39"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-<a id="__codelineno-13-40" name="__codelineno-13-40" href="#__codelineno-13-40"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 3.1: AoS vs. SoA, warp-wide field reads ==="</span><span class="p">)</span>
+<a id="__codelineno-13-40" name="__codelineno-13-40" href="#__codelineno-13-40"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 3.1: AoS vs. SoA, warp-wide field reads ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-13-41" name="__codelineno-13-41" href="#__codelineno-13-41"></a>    <span class="n">row_stride</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">FIELDS</span><span class="p">)</span> <span class="o">*</span> <span class="n">FLOAT</span>
 <a id="__codelineno-13-42" name="__codelineno-13-42" href="#__codelineno-13-42"></a>    <span class="n">total_segs_aos</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 <a id="__codelineno-13-43" name="__codelineno-13-43" href="#__codelineno-13-43"></a>    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">NEEDED</span><span class="p">:</span>
@@ -2863,49 +3092,49 @@
 <a id="__codelineno-13-46" name="__codelineno-13-46" href="#__codelineno-13-46"></a>        <span class="n">total_segs_aos</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">segments_touched</span><span class="p">(</span><span class="n">addrs</span><span class="p">))</span>
 <a id="__codelineno-13-47" name="__codelineno-13-47" href="#__codelineno-13-47"></a>    <span class="n">needed_bytes</span> <span class="o">=</span> <span class="n">WARP</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">NEEDED</span><span class="p">)</span> <span class="o">*</span> <span class="n">FLOAT</span>
 <a id="__codelineno-13-48" name="__codelineno-13-48" href="#__codelineno-13-48"></a>    <span class="n">aos_bytes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">total_segs_aos</span><span class="p">)</span> <span class="o">*</span> <span class="n">SEG</span>
-<a id="__codelineno-13-49" name="__codelineno-13-49" href="#__codelineno-13-49"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"AoS total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">total_segs_aos</span><span class="p">)</span><span class="si">}</span><span class="s2"> distinct 32B segments = </span><span class="si">{</span><span class="n">aos_bytes</span><span class="si">}</span><span class="s2"> bytes fetched"</span><span class="p">)</span>
-<a id="__codelineno-13-50" name="__codelineno-13-50" href="#__codelineno-13-50"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"needed: </span><span class="si">{</span><span class="n">needed_bytes</span><span class="si">}</span><span class="s2"> bytes -&gt; utilization = </span><span class="si">{</span><span class="n">needed_bytes</span><span class="o">/</span><span class="n">aos_bytes</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+<a id="__codelineno-13-49" name="__codelineno-13-49" href="#__codelineno-13-49"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AoS total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">total_segs_aos</span><span class="p">)</span><span class="si">}</span><span class="s2"> distinct 32B segments = </span><span class="si">{</span><span class="n">aos_bytes</span><span class="si">}</span><span class="s2"> bytes fetched&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-50" name="__codelineno-13-50" href="#__codelineno-13-50"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;needed: </span><span class="si">{</span><span class="n">needed_bytes</span><span class="si">}</span><span class="s2"> bytes -&gt; utilization = </span><span class="si">{</span><span class="n">needed_bytes</span><span class="o">/</span><span class="n">aos_bytes</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
 <a id="__codelineno-13-51" name="__codelineno-13-51" href="#__codelineno-13-51"></a>
 <a id="__codelineno-13-52" name="__codelineno-13-52" href="#__codelineno-13-52"></a>    <span class="n">total_segs_soa</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 <a id="__codelineno-13-53" name="__codelineno-13-53" href="#__codelineno-13-53"></a>    <span class="k">for</span> <span class="n">fi</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">NEEDED</span><span class="p">):</span>
 <a id="__codelineno-13-54" name="__codelineno-13-54" href="#__codelineno-13-54"></a>        <span class="n">addrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">FLOAT</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">WARP</span><span class="p">)]</span>
 <a id="__codelineno-13-55" name="__codelineno-13-55" href="#__codelineno-13-55"></a>        <span class="n">total_segs_soa</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">fi</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">segments_touched</span><span class="p">(</span><span class="n">addrs</span><span class="p">))</span>
 <a id="__codelineno-13-56" name="__codelineno-13-56" href="#__codelineno-13-56"></a>    <span class="n">soa_bytes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">total_segs_soa</span><span class="p">)</span> <span class="o">*</span> <span class="n">SEG</span>
-<a id="__codelineno-13-57" name="__codelineno-13-57" href="#__codelineno-13-57"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SoA total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">total_segs_soa</span><span class="p">)</span><span class="si">}</span><span class="s2"> distinct 32B segments = </span><span class="si">{</span><span class="n">soa_bytes</span><span class="si">}</span><span class="s2"> bytes fetched"</span><span class="p">)</span>
-<a id="__codelineno-13-58" name="__codelineno-13-58" href="#__codelineno-13-58"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"needed: </span><span class="si">{</span><span class="n">needed_bytes</span><span class="si">}</span><span class="s2"> bytes -&gt; utilization = </span><span class="si">{</span><span class="n">needed_bytes</span><span class="o">/</span><span class="n">soa_bytes</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+<a id="__codelineno-13-57" name="__codelineno-13-57" href="#__codelineno-13-57"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SoA total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">total_segs_soa</span><span class="p">)</span><span class="si">}</span><span class="s2"> distinct 32B segments = </span><span class="si">{</span><span class="n">soa_bytes</span><span class="si">}</span><span class="s2"> bytes fetched&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-58" name="__codelineno-13-58" href="#__codelineno-13-58"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;needed: </span><span class="si">{</span><span class="n">needed_bytes</span><span class="si">}</span><span class="s2"> bytes -&gt; utilization = </span><span class="si">{</span><span class="n">needed_bytes</span><span class="o">/</span><span class="n">soa_bytes</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
 <a id="__codelineno-13-59" name="__codelineno-13-59" href="#__codelineno-13-59"></a>
-<a id="__codelineno-13-60" name="__codelineno-13-60" href="#__codelineno-13-60"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Section 3.2: one row vs. one column of a 32x32 row-major matrix ==="</span><span class="p">)</span>
+<a id="__codelineno-13-60" name="__codelineno-13-60" href="#__codelineno-13-60"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Section 3.2: one row vs. one column of a 32x32 row-major matrix ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-13-61" name="__codelineno-13-61" href="#__codelineno-13-61"></a>    <span class="n">M</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span>
 <a id="__codelineno-13-62" name="__codelineno-13-62" href="#__codelineno-13-62"></a>    <span class="n">rs</span><span class="p">,</span> <span class="n">cs</span> <span class="o">=</span> <span class="n">N</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span>
 <a id="__codelineno-13-63" name="__codelineno-13-63" href="#__codelineno-13-63"></a>    <span class="n">row_addrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="o">*</span> <span class="n">cs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)]</span>
 <a id="__codelineno-13-64" name="__codelineno-13-64" href="#__codelineno-13-64"></a>    <span class="n">col_addrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="o">*</span> <span class="n">rs</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">)]</span>
 <a id="__codelineno-13-65" name="__codelineno-13-65" href="#__codelineno-13-65"></a>    <span class="n">row_segs</span> <span class="o">=</span> <span class="n">segments_touched</span><span class="p">(</span><span class="n">row_addrs</span><span class="p">)</span>
 <a id="__codelineno-13-66" name="__codelineno-13-66" href="#__codelineno-13-66"></a>    <span class="n">col_segs</span> <span class="o">=</span> <span class="n">segments_touched</span><span class="p">(</span><span class="n">col_addrs</span><span class="p">)</span>
-<a id="__codelineno-13-67" name="__codelineno-13-67" href="#__codelineno-13-67"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"row: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">row_segs</span><span class="p">)</span><span class="si">}</span><span class="s2"> segments -&gt; </span><span class="si">{</span><span class="n">N</span><span class="o">*</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% utilization"</span><span class="p">)</span>
-<a id="__codelineno-13-68" name="__codelineno-13-68" href="#__codelineno-13-68"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"column: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">col_segs</span><span class="p">)</span><span class="si">}</span><span class="s2"> segments -&gt; </span><span class="si">{</span><span class="n">M</span><span class="o">*</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">col_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% utilization"</span><span class="p">)</span>
+<a id="__codelineno-13-67" name="__codelineno-13-67" href="#__codelineno-13-67"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;row: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">row_segs</span><span class="p">)</span><span class="si">}</span><span class="s2"> segments -&gt; </span><span class="si">{</span><span class="n">N</span><span class="o">*</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% utilization&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-68" name="__codelineno-13-68" href="#__codelineno-13-68"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;column: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">col_segs</span><span class="p">)</span><span class="si">}</span><span class="s2"> segments -&gt; </span><span class="si">{</span><span class="n">M</span><span class="o">*</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">col_segs</span><span class="p">)</span><span class="o">*</span><span class="n">SEG</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% utilization&quot;</span><span class="p">)</span>
 <a id="__codelineno-13-69" name="__codelineno-13-69" href="#__codelineno-13-69"></a>
-<a id="__codelineno-13-70" name="__codelineno-13-70" href="#__codelineno-13-70"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Section 3.3: hardcoded strides vs. real strides ==="</span><span class="p">)</span>
+<a id="__codelineno-13-70" name="__codelineno-13-70" href="#__codelineno-13-70"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Section 3.3: hardcoded strides vs. real strides ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-13-71" name="__codelineno-13-71" href="#__codelineno-13-71"></a>    <span class="n">base</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 <a id="__codelineno-13-72" name="__codelineno-13-72" href="#__codelineno-13-72"></a>    <span class="n">out_contig</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 <a id="__codelineno-13-73" name="__codelineno-13-73" href="#__codelineno-13-73"></a>    <span class="n">copy_2d_hardcoded_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">base</span><span class="p">,</span> <span class="n">out_contig</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-13-74" name="__codelineno-13-74" href="#__codelineno-13-74"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"hardcoded kernel on contiguous base, correct?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_contig</span><span class="p">,</span> <span class="n">base</span><span class="p">))</span>
+<a id="__codelineno-13-74" name="__codelineno-13-74" href="#__codelineno-13-74"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hardcoded kernel on contiguous base, correct?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_contig</span><span class="p">,</span> <span class="n">base</span><span class="p">))</span>
 <a id="__codelineno-13-75" name="__codelineno-13-75" href="#__codelineno-13-75"></a>
 <a id="__codelineno-13-76" name="__codelineno-13-76" href="#__codelineno-13-76"></a>    <span class="n">t</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">t</span><span class="p">()</span>
 <a id="__codelineno-13-77" name="__codelineno-13-77" href="#__codelineno-13-77"></a>    <span class="n">out_hardcoded</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <a id="__codelineno-13-78" name="__codelineno-13-78" href="#__codelineno-13-78"></a>    <span class="n">copy_2d_hardcoded_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">t</span><span class="p">,</span> <span class="n">out_hardcoded</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-13-79" name="__codelineno-13-79" href="#__codelineno-13-79"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"hardcoded kernel on base.t(), correct?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_hardcoded</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+<a id="__codelineno-13-79" name="__codelineno-13-79" href="#__codelineno-13-79"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hardcoded kernel on base.t(), correct?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_hardcoded</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
 <a id="__codelineno-13-80" name="__codelineno-13-80" href="#__codelineno-13-80"></a>
 <a id="__codelineno-13-81" name="__codelineno-13-81" href="#__codelineno-13-81"></a>    <span class="n">out_strided</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <a id="__codelineno-13-82" name="__codelineno-13-82" href="#__codelineno-13-82"></a>    <span class="n">copy_2d_strided_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">t</span><span class="p">,</span> <span class="n">out_strided</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">t</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-13-83" name="__codelineno-13-83" href="#__codelineno-13-83"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"stride-aware kernel on base.t(), correct?"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_strided</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+<a id="__codelineno-13-83" name="__codelineno-13-83" href="#__codelineno-13-83"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;stride-aware kernel on base.t(), correct?&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">out_strided</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
 <a id="__codelineno-13-84" name="__codelineno-13-84" href="#__codelineno-13-84"></a>
-<a id="__codelineno-13-85" name="__codelineno-13-85" href="#__codelineno-13-85"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Section 3.4: a 2x2 tile of base.t() ==="</span><span class="p">)</span>
+<a id="__codelineno-13-85" name="__codelineno-13-85" href="#__codelineno-13-85"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Section 3.4: a 2x2 tile of base.t() ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-13-86" name="__codelineno-13-86" href="#__codelineno-13-86"></a>    <span class="n">out_tile</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <a id="__codelineno-13-87" name="__codelineno-13-87" href="#__codelineno-13-87"></a>    <span class="n">copy_2d_strided_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">t</span><span class="p">,</span> <span class="n">out_tile</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">t</span><span class="o">.</span><span class="n">stride</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">BLOCK_M</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">BLOCK_N</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<a id="__codelineno-13-88" name="__codelineno-13-88" href="#__codelineno-13-88"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"top-left 2x2 tile:"</span><span class="p">,</span> <span class="n">out_tile</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="s2">"(expected [[0,4],[1,5]])"</span><span class="p">)</span>
+<a id="__codelineno-13-88" name="__codelineno-13-88" href="#__codelineno-13-88"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;top-left 2x2 tile:&quot;</span><span class="p">,</span> <span class="n">out_tile</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="s2">&quot;(expected [[0,4],[1,5]])&quot;</span><span class="p">)</span>
 <a id="__codelineno-13-89" name="__codelineno-13-89" href="#__codelineno-13-89"></a>
 <a id="__codelineno-13-90" name="__codelineno-13-90" href="#__codelineno-13-90"></a>
-<a id="__codelineno-13-91" name="__codelineno-13-91" href="#__codelineno-13-91"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<a id="__codelineno-13-91" name="__codelineno-13-91" href="#__codelineno-13-91"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 <a id="__codelineno-13-92" name="__codelineno-13-92" href="#__codelineno-13-92"></a>    <span class="n">main</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="expected-output-for-03_standalone_completepy">Expected Output for <code>03_standalone_complete.py</code><a class="headerlink" href="#expected-output-for-03_standalone_completepy" title="Permanent link">&para;</a></h3>
@@ -3061,10 +3290,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="../../javascripts/image-viewer.js"></script>
       

@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -33,10 +33,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -2068,7 +2068,7 @@
   <span class="md-ellipsis">
     
   
-    Appendix
+    Part 8 — Inference Kernels
   
 
     
@@ -2081,6 +2081,207 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part 8 — Inference Kernels
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part8/01-fused-residual-rmsnorm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    23. Fused Residual + RMSNorm, Profiled Against PyTorch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part8/02-paged-decode-attention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    24. Decode Attention Over a Paged KV Cache
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part8/03-int4-weight-only-quantization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    25. Weight-Only INT4 and Simulated FP4
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part8/04-grammar-constrained-decoding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    26. Grammar-Constrained Decoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../part8/05-speculative-decoding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    27. Speculative Decoding: the Verify Kernel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2189,6 +2390,34 @@
     
   
     D. The Memory Model, Continued
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/inference-projects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    E. Twelve Inference-Engineering Projects
   
 
     
@@ -2844,7 +3073,7 @@
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="o">...</span>
 </code></pre></div>
 <p><code>tl.arange(0, BLOCK)</code> needs to know, before a single instruction is generated, how many elements this block of work covers — that size decides how many registers or how much of a vector instruction to emit. Without the <code>tl.constexpr</code> annotation, <code>BLOCK</code> is just another runtime value as far as Triton's frontend is concerned, and <code>tl.arange</code> rejects it immediately, before any GPU-specific compilation step even begins:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>InterpreterError: ValueError("arange's arguments must be of type tl.constexpr")
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>InterpreterError: ValueError(&quot;arange&#39;s arguments must be of type tl.constexpr&quot;)
 </code></pre></div>
 <p>The outer <code>InterpreterError</code> is this book's interpreter wrapping whatever the underlying check raised; the inner <code>ValueError</code> is the actual frontend-level type check on <code>tl.arange</code>'s own arguments, independent of whether a GPU is actually present to compile for — it fires exactly the same way under this book's interpreter as it would in a real compiled build.</p>
 <h3 id="worked-example-122-the-same-value-annotated-correctly">Worked Example 1.2.2 — the same value, annotated correctly<a class="headerlink" href="#worked-example-122-the-same-value-annotated-correctly" title="Permanent link">&para;</a></h3>
@@ -2981,11 +3210,11 @@
 <a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>                        +--------+--------+--------+--------+
 <a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>      mask:             |  True  |  True  | False  | False  |
 <a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>                        +--------+--------+--------+--------+
-<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>      tl.load (masked): |  x[4]  |  x[5]  |   --   |   --   |   &lt;- "--" never read
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>      tl.load (masked): |  x[4]  |  x[5]  |   --   |   --   |   &lt;- &quot;--&quot; never read
 <a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>                        +--------+--------+--------+--------+
 <a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a>
 <a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>`if mask:` asks Python for ONE answer covering all four boxes above --
-<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a>there isn't one. `tl.where(mask, a, b)` asks for FOUR answers, one per
+<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a>there isn&#39;t one. `tl.where(mask, a, b)` asks for FOUR answers, one per
 <a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a>box, which is the question this hardware is actually built to answer.
 </code></pre></div>
 <h2 id="15-complete-runnable-code">1.5 Complete Runnable Code<a class="headerlink" href="#15-complete-runnable-code" title="Permanent link">&para;</a></h2>
@@ -3010,21 +3239,21 @@
 <a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>
 <a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>
 <a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_two_phase_model</span><span class="p">():</span>
-<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Two-Phase Model: constexpr-selected kernel variants ==="</span><span class="p">)</span>
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Two-Phase Model: constexpr-selected kernel variants ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">])</span>
 <a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a>    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a>
 <a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a>    <span class="n">out_relu</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a>    <span class="n">relu_toggle_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">out_relu</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">USE_RELU</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"USE_RELU=True  -&gt;"</span><span class="p">,</span> <span class="n">out_relu</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;USE_RELU=True  -&gt;&quot;</span><span class="p">,</span> <span class="n">out_relu</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a>
 <a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a>    <span class="n">out_norelu</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a>    <span class="n">relu_toggle_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">out_norelu</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">USE_RELU</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-<a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"USE_RELU=False -&gt;"</span><span class="p">,</span> <span class="n">out_norelu</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;USE_RELU=False -&gt;&quot;</span><span class="p">,</span> <span class="n">out_norelu</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a>
 <a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a>
 <a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_constexpr_requirement</span><span class="p">():</span>
-<a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== tl.arange requires a genuine tl.constexpr bound ==="</span><span class="p">)</span>
+<a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== tl.arange requires a genuine tl.constexpr bound ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a>
 <a id="__codelineno-17-34" name="__codelineno-17-34" href="#__codelineno-17-34"></a>    <span class="nd">@triton</span><span class="o">.</span><span class="n">jit</span>
 <a id="__codelineno-17-35" name="__codelineno-17-35" href="#__codelineno-17-35"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">bad_arange_kernel</span><span class="p">(</span><span class="n">x_ptr</span><span class="p">,</span> <span class="n">out_ptr</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">BLOCK</span><span class="p">):</span>   <span class="c1"># no tl.constexpr annotation</span>
@@ -3037,12 +3266,12 @@
 <a id="__codelineno-17-42" name="__codelineno-17-42" href="#__codelineno-17-42"></a>    <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-17-43" name="__codelineno-17-43" href="#__codelineno-17-43"></a>        <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <a id="__codelineno-17-44" name="__codelineno-17-44" href="#__codelineno-17-44"></a>        <span class="n">bad_arange_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-17-45" name="__codelineno-17-45" href="#__codelineno-17-45"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"unexpectedly succeeded:"</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-17-45" name="__codelineno-17-45" href="#__codelineno-17-45"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;unexpectedly succeeded:&quot;</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-17-46" name="__codelineno-17-46" href="#__codelineno-17-46"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<a id="__codelineno-17-47" name="__codelineno-17-47" href="#__codelineno-17-47"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-17-47" name="__codelineno-17-47" href="#__codelineno-17-47"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <a id="__codelineno-17-48" name="__codelineno-17-48" href="#__codelineno-17-48"></a>
 <a id="__codelineno-17-49" name="__codelineno-17-49" href="#__codelineno-17-49"></a>
-<a id="__codelineno-17-50" name="__codelineno-17-50" href="#__codelineno-17-50"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<a id="__codelineno-17-50" name="__codelineno-17-50" href="#__codelineno-17-50"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 <a id="__codelineno-17-51" name="__codelineno-17-51" href="#__codelineno-17-51"></a>    <span class="n">demo_two_phase_model</span><span class="p">()</span>
 <a id="__codelineno-17-52" name="__codelineno-17-52" href="#__codelineno-17-52"></a>    <span class="n">demo_constexpr_requirement</span><span class="p">()</span>
 </code></pre></div>
@@ -3061,7 +3290,7 @@
 <a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">x_ptr</span> <span class="o">+</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>   <span class="c1"># float32</span>
 <a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>    <span class="n">y</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">y_ptr</span> <span class="o">+</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>   <span class="c1"># float16</span>
 <a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>    <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
-<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">static_print</span><span class="p">(</span><span class="s2">"dtype of x:"</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">" dtype of y:"</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">" dtype of z=x+y:"</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">static_print</span><span class="p">(</span><span class="s2">&quot;dtype of x:&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot; dtype of y:&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot; dtype of z=x+y:&quot;</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 <a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_ptr</span> <span class="o">+</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
 <a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>
 <a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a>
@@ -3075,16 +3304,16 @@
 <a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a>
 <a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a>
 <a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_implicit_promotion</span><span class="p">():</span>
-<a id="__codelineno-18-27" name="__codelineno-18-27" href="#__codelineno-18-27"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Implicit dtype promotion: fp32 + fp16 ==="</span><span class="p">)</span>
+<a id="__codelineno-18-27" name="__codelineno-18-27" href="#__codelineno-18-27"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Implicit dtype promotion: fp32 + fp16 ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-18-28" name="__codelineno-18-28" href="#__codelineno-18-28"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-18-29" name="__codelineno-18-29" href="#__codelineno-18-29"></a>    <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
 <a id="__codelineno-18-30" name="__codelineno-18-30" href="#__codelineno-18-30"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-18-31" name="__codelineno-18-31" href="#__codelineno-18-31"></a>    <span class="n">mixed_dtype_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-18-32" name="__codelineno-18-32" href="#__codelineno-18-32"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"out:"</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-18-32" name="__codelineno-18-32" href="#__codelineno-18-32"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;out:&quot;</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-18-33" name="__codelineno-18-33" href="#__codelineno-18-33"></a>
 <a id="__codelineno-18-34" name="__codelineno-18-34" href="#__codelineno-18-34"></a>
 <a id="__codelineno-18-35" name="__codelineno-18-35" href="#__codelineno-18-35"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_accumulation_dtype_matters</span><span class="p">():</span>
-<a id="__codelineno-18-36" name="__codelineno-18-36" href="#__codelineno-18-36"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Accumulation dtype: naive fp16 vs. fp32-accumulated ==="</span><span class="p">)</span>
+<a id="__codelineno-18-36" name="__codelineno-18-36" href="#__codelineno-18-36"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Accumulation dtype: naive fp16 vs. fp32-accumulated ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-18-37" name="__codelineno-18-37" href="#__codelineno-18-37"></a>    <span class="n">N</span><span class="p">,</span> <span class="n">VAL</span> <span class="o">=</span> <span class="mi">2048</span><span class="p">,</span> <span class="mf">0.0001</span>
 <a id="__codelineno-18-38" name="__codelineno-18-38" href="#__codelineno-18-38"></a>    <span class="n">big</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,),</span> <span class="n">VAL</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
 <a id="__codelineno-18-39" name="__codelineno-18-39" href="#__codelineno-18-39"></a>
@@ -3096,13 +3325,13 @@
 <a id="__codelineno-18-45" name="__codelineno-18-45" href="#__codelineno-18-45"></a>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
 <a id="__codelineno-18-46" name="__codelineno-18-46" href="#__codelineno-18-46"></a>        <span class="n">acc</span> <span class="o">=</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">val</span>
 <a id="__codelineno-18-47" name="__codelineno-18-47" href="#__codelineno-18-47"></a>
-<a id="__codelineno-18-48" name="__codelineno-18-48" href="#__codelineno-18-48"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Summing </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2"> copies of </span><span class="si">{</span><span class="n">VAL</span><span class="si">}</span><span class="s2"> (each stored as fp16):"</span><span class="p">)</span>
-<a id="__codelineno-18-49" name="__codelineno-18-49" href="#__codelineno-18-49"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  naive sequential fp16 accumulation :"</span><span class="p">,</span> <span class="n">acc</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
-<a id="__codelineno-18-50" name="__codelineno-18-50" href="#__codelineno-18-50"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  Triton kernel, fp32 accumulator    :"</span><span class="p">,</span> <span class="n">out_fp32_acc</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
-<a id="__codelineno-18-51" name="__codelineno-18-51" href="#__codelineno-18-51"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  exact answer                       :"</span><span class="p">,</span> <span class="n">N</span> <span class="o">*</span> <span class="n">VAL</span><span class="p">)</span>
+<a id="__codelineno-18-48" name="__codelineno-18-48" href="#__codelineno-18-48"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Summing </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2"> copies of </span><span class="si">{</span><span class="n">VAL</span><span class="si">}</span><span class="s2"> (each stored as fp16):&quot;</span><span class="p">)</span>
+<a id="__codelineno-18-49" name="__codelineno-18-49" href="#__codelineno-18-49"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  naive sequential fp16 accumulation :&quot;</span><span class="p">,</span> <span class="n">acc</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+<a id="__codelineno-18-50" name="__codelineno-18-50" href="#__codelineno-18-50"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Triton kernel, fp32 accumulator    :&quot;</span><span class="p">,</span> <span class="n">out_fp32_acc</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+<a id="__codelineno-18-51" name="__codelineno-18-51" href="#__codelineno-18-51"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  exact answer                       :&quot;</span><span class="p">,</span> <span class="n">N</span> <span class="o">*</span> <span class="n">VAL</span><span class="p">)</span>
 <a id="__codelineno-18-52" name="__codelineno-18-52" href="#__codelineno-18-52"></a>
 <a id="__codelineno-18-53" name="__codelineno-18-53" href="#__codelineno-18-53"></a>
-<a id="__codelineno-18-54" name="__codelineno-18-54" href="#__codelineno-18-54"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<a id="__codelineno-18-54" name="__codelineno-18-54" href="#__codelineno-18-54"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 <a id="__codelineno-18-55" name="__codelineno-18-55" href="#__codelineno-18-55"></a>    <span class="n">demo_implicit_promotion</span><span class="p">()</span>
 <a id="__codelineno-18-56" name="__codelineno-18-56" href="#__codelineno-18-56"></a>    <span class="n">demo_accumulation_dtype_matters</span><span class="p">()</span>
 </code></pre></div>
@@ -3149,29 +3378,29 @@
 <a id="__codelineno-19-38" name="__codelineno-19-38" href="#__codelineno-19-38"></a>
 <a id="__codelineno-19-39" name="__codelineno-19-39" href="#__codelineno-19-39"></a>
 <a id="__codelineno-19-40" name="__codelineno-19-40" href="#__codelineno-19-40"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_scalar_branch</span><span class="p">():</span>
-<a id="__codelineno-19-41" name="__codelineno-19-41" href="#__codelineno-19-41"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Legal: branching on a genuine scalar (tl.program_id) ==="</span><span class="p">)</span>
+<a id="__codelineno-19-41" name="__codelineno-19-41" href="#__codelineno-19-41"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Legal: branching on a genuine scalar (tl.program_id) ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-19-42" name="__codelineno-19-42" href="#__codelineno-19-42"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-19-43" name="__codelineno-19-43" href="#__codelineno-19-43"></a>    <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <a id="__codelineno-19-44" name="__codelineno-19-44" href="#__codelineno-19-44"></a>    <span class="n">pid_branch_kernel</span><span class="p">[(</span><span class="mi">2</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-19-45" name="__codelineno-19-45" href="#__codelineno-19-45"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"result:"</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-19-45" name="__codelineno-19-45" href="#__codelineno-19-45"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;result:&quot;</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-19-46" name="__codelineno-19-46" href="#__codelineno-19-46"></a>
 <a id="__codelineno-19-47" name="__codelineno-19-47" href="#__codelineno-19-47"></a>
 <a id="__codelineno-19-48" name="__codelineno-19-48" href="#__codelineno-19-48"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_block_branch_trap</span><span class="p">():</span>
-<a id="__codelineno-19-49" name="__codelineno-19-49" href="#__codelineno-19-49"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== The trap: branching on a whole block of booleans ==="</span><span class="p">)</span>
+<a id="__codelineno-19-49" name="__codelineno-19-49" href="#__codelineno-19-49"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== The trap: branching on a whole block of booleans ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-19-50" name="__codelineno-19-50" href="#__codelineno-19-50"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-19-51" name="__codelineno-19-51" href="#__codelineno-19-51"></a>    <span class="n">out_bad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <a id="__codelineno-19-52" name="__codelineno-19-52" href="#__codelineno-19-52"></a>    <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-19-53" name="__codelineno-19-53" href="#__codelineno-19-53"></a>        <span class="n">bad_block_branch_kernel</span><span class="p">[(</span><span class="mi">2</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">out_bad</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-19-54" name="__codelineno-19-54" href="#__codelineno-19-54"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"ran without raising, but silently wrong:"</span><span class="p">,</span> <span class="n">out_bad</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-19-54" name="__codelineno-19-54" href="#__codelineno-19-54"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ran without raising, but silently wrong:&quot;</span><span class="p">,</span> <span class="n">out_bad</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-19-55" name="__codelineno-19-55" href="#__codelineno-19-55"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<a id="__codelineno-19-56" name="__codelineno-19-56" href="#__codelineno-19-56"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-19-56" name="__codelineno-19-56" href="#__codelineno-19-56"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <a id="__codelineno-19-57" name="__codelineno-19-57" href="#__codelineno-19-57"></a>
 <a id="__codelineno-19-58" name="__codelineno-19-58" href="#__codelineno-19-58"></a>    <span class="n">out_correct</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <a id="__codelineno-19-59" name="__codelineno-19-59" href="#__codelineno-19-59"></a>    <span class="n">correct_block_conditional_kernel</span><span class="p">[(</span><span class="mi">2</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">out_correct</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-19-60" name="__codelineno-19-60" href="#__codelineno-19-60"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"tl.where fix, correct per-lane result:"</span><span class="p">,</span> <span class="n">out_correct</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-19-60" name="__codelineno-19-60" href="#__codelineno-19-60"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;tl.where fix, correct per-lane result:&quot;</span><span class="p">,</span> <span class="n">out_correct</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-19-61" name="__codelineno-19-61" href="#__codelineno-19-61"></a>
 <a id="__codelineno-19-62" name="__codelineno-19-62" href="#__codelineno-19-62"></a>
-<a id="__codelineno-19-63" name="__codelineno-19-63" href="#__codelineno-19-63"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<a id="__codelineno-19-63" name="__codelineno-19-63" href="#__codelineno-19-63"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 <a id="__codelineno-19-64" name="__codelineno-19-64" href="#__codelineno-19-64"></a>    <span class="n">demo_scalar_branch</span><span class="p">()</span>
 <a id="__codelineno-19-65" name="__codelineno-19-65" href="#__codelineno-19-65"></a>    <span class="n">demo_block_branch_trap</span><span class="p">()</span>
 </code></pre></div>
@@ -3201,7 +3430,7 @@
 <a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">x_ptr</span> <span class="o">+</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
 <a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a>    <span class="n">y</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">y_ptr</span> <span class="o">+</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
 <a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a>    <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
-<a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">static_print</span><span class="p">(</span><span class="s2">"dtype of x:"</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">" dtype of y:"</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">" dtype of z=x+y:"</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+<a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">static_print</span><span class="p">(</span><span class="s2">&quot;dtype of x:&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot; dtype of y:&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot; dtype of z=x+y:&quot;</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 <a id="__codelineno-20-25" name="__codelineno-20-25" href="#__codelineno-20-25"></a>    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_ptr</span> <span class="o">+</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
 <a id="__codelineno-20-26" name="__codelineno-20-26" href="#__codelineno-20-26"></a>
 <a id="__codelineno-20-27" name="__codelineno-20-27" href="#__codelineno-20-27"></a>
@@ -3238,24 +3467,24 @@
 <a id="__codelineno-20-58" name="__codelineno-20-58" href="#__codelineno-20-58"></a>
 <a id="__codelineno-20-59" name="__codelineno-20-59" href="#__codelineno-20-59"></a>
 <a id="__codelineno-20-60" name="__codelineno-20-60" href="#__codelineno-20-60"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-<a id="__codelineno-20-61" name="__codelineno-20-61" href="#__codelineno-20-61"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== Section 1.1/1.2: constexpr-selected kernel variants ==="</span><span class="p">)</span>
+<a id="__codelineno-20-61" name="__codelineno-20-61" href="#__codelineno-20-61"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Section 1.1/1.2: constexpr-selected kernel variants ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-20-62" name="__codelineno-20-62" href="#__codelineno-20-62"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">])</span>
 <a id="__codelineno-20-63" name="__codelineno-20-63" href="#__codelineno-20-63"></a>    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <a id="__codelineno-20-64" name="__codelineno-20-64" href="#__codelineno-20-64"></a>    <span class="n">out_relu</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <a id="__codelineno-20-65" name="__codelineno-20-65" href="#__codelineno-20-65"></a>    <span class="n">relu_toggle_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">out_relu</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">USE_RELU</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-<a id="__codelineno-20-66" name="__codelineno-20-66" href="#__codelineno-20-66"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"USE_RELU=True  -&gt;"</span><span class="p">,</span> <span class="n">out_relu</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-20-66" name="__codelineno-20-66" href="#__codelineno-20-66"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;USE_RELU=True  -&gt;&quot;</span><span class="p">,</span> <span class="n">out_relu</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-20-67" name="__codelineno-20-67" href="#__codelineno-20-67"></a>    <span class="n">out_norelu</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <a id="__codelineno-20-68" name="__codelineno-20-68" href="#__codelineno-20-68"></a>    <span class="n">relu_toggle_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">x</span><span class="p">,</span> <span class="n">out_norelu</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">USE_RELU</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-<a id="__codelineno-20-69" name="__codelineno-20-69" href="#__codelineno-20-69"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"USE_RELU=False -&gt;"</span><span class="p">,</span> <span class="n">out_norelu</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-20-69" name="__codelineno-20-69" href="#__codelineno-20-69"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;USE_RELU=False -&gt;&quot;</span><span class="p">,</span> <span class="n">out_norelu</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-20-70" name="__codelineno-20-70" href="#__codelineno-20-70"></a>
-<a id="__codelineno-20-71" name="__codelineno-20-71" href="#__codelineno-20-71"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Section 1.3: implicit dtype promotion ==="</span><span class="p">)</span>
+<a id="__codelineno-20-71" name="__codelineno-20-71" href="#__codelineno-20-71"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Section 1.3: implicit dtype promotion ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-20-72" name="__codelineno-20-72" href="#__codelineno-20-72"></a>    <span class="n">xa</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-20-73" name="__codelineno-20-73" href="#__codelineno-20-73"></a>    <span class="n">ya</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
 <a id="__codelineno-20-74" name="__codelineno-20-74" href="#__codelineno-20-74"></a>    <span class="n">outa</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-20-75" name="__codelineno-20-75" href="#__codelineno-20-75"></a>    <span class="n">mixed_dtype_kernel</span><span class="p">[(</span><span class="mi">1</span><span class="p">,)](</span><span class="n">xa</span><span class="p">,</span> <span class="n">ya</span><span class="p">,</span> <span class="n">outa</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-20-76" name="__codelineno-20-76" href="#__codelineno-20-76"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"out:"</span><span class="p">,</span> <span class="n">outa</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-20-76" name="__codelineno-20-76" href="#__codelineno-20-76"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;out:&quot;</span><span class="p">,</span> <span class="n">outa</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-20-77" name="__codelineno-20-77" href="#__codelineno-20-77"></a>
-<a id="__codelineno-20-78" name="__codelineno-20-78" href="#__codelineno-20-78"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Section 1.3: accumulation dtype matters ==="</span><span class="p">)</span>
+<a id="__codelineno-20-78" name="__codelineno-20-78" href="#__codelineno-20-78"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Section 1.3: accumulation dtype matters ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-20-79" name="__codelineno-20-79" href="#__codelineno-20-79"></a>    <span class="n">N</span><span class="p">,</span> <span class="n">VAL</span> <span class="o">=</span> <span class="mi">2048</span><span class="p">,</span> <span class="mf">0.0001</span>
 <a id="__codelineno-20-80" name="__codelineno-20-80" href="#__codelineno-20-80"></a>    <span class="n">big</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">N</span><span class="p">,),</span> <span class="n">VAL</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
 <a id="__codelineno-20-81" name="__codelineno-20-81" href="#__codelineno-20-81"></a>    <span class="n">out_fp32_acc</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
@@ -3264,19 +3493,19 @@
 <a id="__codelineno-20-84" name="__codelineno-20-84" href="#__codelineno-20-84"></a>    <span class="n">val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">VAL</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
 <a id="__codelineno-20-85" name="__codelineno-20-85" href="#__codelineno-20-85"></a>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
 <a id="__codelineno-20-86" name="__codelineno-20-86" href="#__codelineno-20-86"></a>        <span class="n">acc</span> <span class="o">=</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">val</span>
-<a id="__codelineno-20-87" name="__codelineno-20-87" href="#__codelineno-20-87"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"naive fp16 accumulation: </span><span class="si">{</span><span class="n">acc</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s2">, fp32-accumulated: </span><span class="si">{</span><span class="n">out_fp32_acc</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s2">, exact: </span><span class="si">{</span><span class="n">N</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">VAL</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-20-87" name="__codelineno-20-87" href="#__codelineno-20-87"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;naive fp16 accumulation: </span><span class="si">{</span><span class="n">acc</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s2">, fp32-accumulated: </span><span class="si">{</span><span class="n">out_fp32_acc</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s2">, exact: </span><span class="si">{</span><span class="n">N</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">VAL</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <a id="__codelineno-20-88" name="__codelineno-20-88" href="#__codelineno-20-88"></a>
-<a id="__codelineno-20-89" name="__codelineno-20-89" href="#__codelineno-20-89"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== Section 1.4: block-shaped values ==="</span><span class="p">)</span>
+<a id="__codelineno-20-89" name="__codelineno-20-89" href="#__codelineno-20-89"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Section 1.4: block-shaped values ===&quot;</span><span class="p">)</span>
 <a id="__codelineno-20-90" name="__codelineno-20-90" href="#__codelineno-20-90"></a>    <span class="n">xb</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <a id="__codelineno-20-91" name="__codelineno-20-91" href="#__codelineno-20-91"></a>    <span class="n">outb</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">xb</span><span class="p">)</span>
 <a id="__codelineno-20-92" name="__codelineno-20-92" href="#__codelineno-20-92"></a>    <span class="n">pid_branch_kernel</span><span class="p">[(</span><span class="mi">2</span><span class="p">,)](</span><span class="n">xb</span><span class="p">,</span> <span class="n">outb</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-20-93" name="__codelineno-20-93" href="#__codelineno-20-93"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"scalar branch on tl.program_id:"</span><span class="p">,</span> <span class="n">outb</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-20-93" name="__codelineno-20-93" href="#__codelineno-20-93"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;scalar branch on tl.program_id:&quot;</span><span class="p">,</span> <span class="n">outb</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-20-94" name="__codelineno-20-94" href="#__codelineno-20-94"></a>    <span class="n">outc</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">xb</span><span class="p">)</span>
 <a id="__codelineno-20-95" name="__codelineno-20-95" href="#__codelineno-20-95"></a>    <span class="n">correct_block_conditional_kernel</span><span class="p">[(</span><span class="mi">2</span><span class="p">,)](</span><span class="n">xb</span><span class="p">,</span> <span class="n">outc</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">BLOCK</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-20-96" name="__codelineno-20-96" href="#__codelineno-20-96"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"tl.where, correct per-lane result:"</span><span class="p">,</span> <span class="n">outc</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<a id="__codelineno-20-96" name="__codelineno-20-96" href="#__codelineno-20-96"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;tl.where, correct per-lane result:&quot;</span><span class="p">,</span> <span class="n">outc</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 <a id="__codelineno-20-97" name="__codelineno-20-97" href="#__codelineno-20-97"></a>
 <a id="__codelineno-20-98" name="__codelineno-20-98" href="#__codelineno-20-98"></a>
-<a id="__codelineno-20-99" name="__codelineno-20-99" href="#__codelineno-20-99"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<a id="__codelineno-20-99" name="__codelineno-20-99" href="#__codelineno-20-99"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 <a id="__codelineno-20-100" name="__codelineno-20-100" href="#__codelineno-20-100"></a>    <span class="n">main</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="expected-output-for-04_standalone_completepy">Expected Output for <code>04_standalone_complete.py</code><a class="headerlink" href="#expected-output-for-04_standalone_completepy" title="Permanent link">&para;</a></h3>
@@ -3431,10 +3660,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="../../javascripts/image-viewer.js"></script>
       
