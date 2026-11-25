@@ -102,6 +102,9 @@ nav:
   - "Part 8 — Inference Kernels":
       - "23. Fused Residual + RMSNorm, Profiled Against PyTorch": part8/01-fused-residual-rmsnorm.md
       - "24. Decode Attention Over a Paged KV Cache": part8/02-paged-decode-attention.md
+      - "25. Weight-Only INT4 and Simulated FP4": part8/03-int4-weight-only-quantization.md
+      - "26. Grammar-Constrained Decoding": part8/04-grammar-constrained-decoding.md
+      - "27. Speculative Decoding: the Verify Kernel": part8/05-speculative-decoding.md
   - Appendix:
       - "A. Installation & Setup": appendix/installation-setup.md
       - "B. Practice Quiz": appendix/practice-quiz.md
